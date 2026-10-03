@@ -1,5 +1,11 @@
-# Build only the production branch. Branch deploys and deploy previews are
-# skipped to save Netlify credits (owner's rule — docs/ROOSUK-MASTER-PLAN.md §2.1).
-# Exit code 0 = skip the build, 1 = build.
+# Netlify build settings (owner's rules: docs/ROOSUK-MASTER-PLAN.md §2.1).
+#
+# - Only `main` is built; branch deploys and deploy previews are skipped.
+# - A push to `main` that changes nothing the app is built from (docs, tests,
+#   e2e, SQL, scripts) is skipped too, to save credits.
+#   `ignore`: exit 0 = skip the build, non-zero = build. If git cannot compare
+#   (e.g. first build, no cached commit) it errors, which means "build".
+# - The build stops early when required environment variables are missing.
 [build]
-  ignore = 'test "$BRANCH" != "main"'
+  command = "node scripts/check-deploy-env.mjs && next build"
+  ignore = 'test "$BRANCH" != "main" || git diff --quiet "$CACHED_COMMIT_REF" "$COMMIT_REF" -- src public package.json package-lock.json next.config.ts tsconfig.json postcss.config.mjs netlify.toml scripts/check-deploy-env.mjs scripts/lib/deploy-env.mjs'

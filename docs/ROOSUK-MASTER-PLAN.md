@@ -31,10 +31,11 @@
 
 1. **ทดสอบบน test environment ของ Claude เสมอ** ได้แก่ `npm run check`, `npm run build`,
    เปิด `next start` ในเครื่อง, Playwright ที่ viewport มือถือ 390×844 และ Supabase โปรเจกต์ของ RooSuk (ใช้ร่วม dev/test/production — ดูข้อ 6)
-2. **⛔ ห้าม deploy หรือทดสอบบน Netlify production เอง** เพื่อประหยัด Netlify credits
-3. ถ้าจำเป็นต้องทดสอบบน production จริง → **ขออนุญาตเจ้าของโครงการก่อนทุกครั้ง** หรือแจ้งให้เจ้าของทดสอบเอง
-4. ห้ามกระทำสิ่งที่ทำให้ Netlify build เองโดยไม่ได้ตั้งใจ (เช่น merge เข้า `main` ถ้า `main` ผูก auto-deploy)
-   — merge เข้า `main` ทำเมื่อเจ้าของสั่งเท่านั้น
+2. **ไม่ใช้ Netlify production เป็นที่ทดสอบ** เพื่อประหยัด credits — ถ้าต้องตรวจบน production จริง Claude จะแจ้งให้เจ้าของทดสอบเอง
+3. **กฎ sync (เจ้าของสั่ง 2026-10-03):** ทุกครั้งที่ปรับงานเสร็จ Claude จะ commit → push branch ทำงาน → fast-forward `main` → push `main`
+   (ไม่ force-push `main`) และเพราะ `main` ผูก auto-deploy (Build status = Active) การ sync เข้า `main` คือการ deploy production
+   จึง sync เฉพาะงานที่ผ่าน `npm run check` · `netlify.toml` ข้าม build เมื่อแก้เฉพาะเอกสาร/ชุดทดสอบ/SQL/สคริปต์
+4. ด่านกันเว็บพัง: build production บน Netlify จะล้มทันที (deploy เดิมยังออนไลน์) ถ้าไม่มีตัวแปร environment ที่จำเป็น — ดู `SETUP-GUIDE.md` B5
 5. การทดสอบที่เรียก AI จริงมีค่าใช้จ่าย → unit test ใช้ mock/fixture เป็นค่าเริ่มต้น
    เรียก API จริงเฉพาะชุดทดสอบเล็ก ๆ ที่จำเป็น และไม่เรียกใน CI
 6. Supabase ใช้ **โปรเจกต์เดียว** ร่วมกันทั้ง dev/test/production (D11) → ข้อมูลที่มีตอนนี้เป็นข้อมูลทดสอบเท่านั้น
@@ -43,7 +44,7 @@
 ✅ มาตรการกัน credit รั่ว (D11):
 
 - เจ้าของปิด **Branch deploys** และ **Deploy Previews** ใน Netlify (ขั้นตอนใน `SETUP-GUIDE.md` ส่วน B) — งานของ Claude อยู่บน branch `claude/*`
-- มี `netlify.toml` ใน repo ที่ใช้ `ignore` command ข้าม build ของทุก branch ที่ไม่ใช่ `main` เป็นด่านสำรองอีกชั้น
+- มี `netlify.toml` ใน repo: build เฉพาะ `main` และข้าม build ที่ไม่แตะโค้ดแอป เป็นด่านสำรองอีกชั้น
 
 ### 2.2 กฎด้าน Git และคุณภาพโค้ด
 
@@ -473,16 +474,27 @@ value, unit, start_at, end_at, source (healthkit / health_connect / oura / ble /
 
 ### 11.1 สถานะ Phase 0 (อัปเดต 2026-10-03)
 
-| งาน                                                  | สถานะ                                                                            | หมายเหตุ                                                                                                                     |
-| ---------------------------------------------------- | -------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
-| Theme + โลโก้ + PWA icon + manifest                  | ✅ เสร็จ                                                                         | โลโก้โปร่งใสสร้างจาก `docs/RooSuk Logo.jpg` ด้วย `npm run assets:brand`                                                      |
-| AppShell + เมนู (K01/02)                             | ✅ เสร็จ                                                                         | sidebar / bottom bar (ปุ่มสแกนกลาง) / sheet "เพิ่มเติม" · ทดสอบ Playwright 390×844 และ 1280×800 · axe ไม่พบ serious/critical |
-| i18n สองภาษา (K12)                                   | ✅ เสร็จ                                                                         | ไทยเป็นต้นฉบับ · อังกฤษ `satisfies` · สลับภาษาด้วย cookie + `profiles.language`                                              |
-| Auth: Email+password / Google / LINE                 | 🟡 โค้ดเสร็จ ยังไม่ได้ทดสอบกับ Supabase จริง                                     | รอ environment variables · Google/LINE ต้องทดสอบด้วยบัญชีจริง (R7)                                                           |
-| schema ฐาน + RLS                                     | ✅ เขียน + ทดสอบ RLS 16 ข้อบน Postgres จำลอง · 🟡 ยังไม่ได้ apply ลงโปรเจกต์จริง | `npm run db:migrate` เมื่อมี `SUPABASE_ACCESS_TOKEN`                                                                         |
-| consent รายข้อ + หน้านโยบาย/ข้อกำหนด (ร่าง)          | ✅ เสร็จ                                                                         | เนื้อหากฎหมายเป็นร่าง ต้องให้ผู้เชี่ยวชาญตรวจก่อนเปิดจริง                                                                    |
-| platform_settings + feature flags (K09) + admin role | ✅ โค้ดเสร็จ · 🟡 รอ apply                                                       | หน้า `/admin/flags` · ตั้ง admin ด้วย `scripts/grant-admin.mjs`                                                              |
-| Playwright มือถือ                                    | ✅ เสร็จ                                                                         | `npm run build && npm run e2e`                                                                                               |
+| งาน                                                  | สถานะ                                                                                                        | หมายเหตุ                                                                                                                     |
+| ---------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------- |
+| Theme + โลโก้ + PWA icon + manifest                  | ✅ เสร็จ                                                                                                     | โลโก้โปร่งใสสร้างจาก `docs/RooSuk Logo.jpg` ด้วย `npm run assets:brand`                                                      |
+| AppShell + เมนู (K01/02)                             | ✅ เสร็จ                                                                                                     | sidebar / bottom bar (ปุ่มสแกนกลาง) / sheet "เพิ่มเติม" · ทดสอบ Playwright 390×844 และ 1280×800 · axe ไม่พบ serious/critical |
+| i18n สองภาษา (K12)                                   | ✅ เสร็จ                                                                                                     | ไทยเป็นต้นฉบับ · อังกฤษ `satisfies` · สลับภาษาด้วย cookie + `profiles.language`                                              |
+| Auth: Email+password / Google / LINE                 | ✅ Email ทดสอบกับ Supabase จริงผ่าน · 🟡 Google และ LINE รอเจ้าของทดสอบด้วยบัญชีจริง                         | ดู 11.2                                                                                                                      |
+| schema ฐาน + RLS                                     | ✅ apply ลง Supabase จริงแล้ว (6 ตาราง เปิด RLS ครบ) · ทดสอบ RLS ทั้งบน Postgres จำลอง (16 ข้อ) และ JWT จริง | `npm run db:status`                                                                                                          |
+| consent รายข้อ + หน้านโยบาย/ข้อกำหนด (ร่าง)          | ✅ เสร็จ                                                                                                     | เนื้อหากฎหมายเป็นร่าง ต้องให้ผู้เชี่ยวชาญตรวจก่อนเปิดจริง                                                                    |
+| platform_settings + feature flags (K09) + admin role | ✅ ทดสอบกับของจริงผ่าน (เปิด/ปิด flag, non-admin ได้ 404) · รอตั้งบัญชีเจ้าของเป็น admin                     | `scripts/grant-admin.mjs <อีเมล>`                                                                                            |
+| Playwright มือถือ                                    | ✅ เสร็จ                                                                                                     | `npm run build && npm run e2e`                                                                                               |
+
+### 11.2 ผลการทดสอบกับ Supabase จริง (2026-10-03) และสิ่งที่พบ
+
+ชุดทดสอบ `e2e/live` (รัน `E2E_LIVE=1 npx playwright test e2e/live --project=mobile`) สร้างผู้ใช้ทดสอบเอง แล้วลบทิ้งทุกครั้ง ผ่านทั้ง 4 ข้อ:
+ล็อกอิน → ถูกบังคับยินยอม → เข้าแอป → ออกจากระบบ · สมัครสมาชิก + โปรไฟล์ถูกสร้างโดย trigger · RLS ด้วย JWT จริง · แอดมินเปิด/ปิด flag
+
+- **R2 ยืนยันแล้ว:** Supabase ยอมรับอีเมลสังเคราะห์ `…@line-users.roosuk.invalid` (ใช้สร้างผู้ใช้ LINE ได้)
+- **พบและแก้:** หลังล็อกอินด้วย server action การ redirect ซ้อนสองชั้น (→ `/today` → `/consent`) ทำให้ URL ค้างผิด — ตอนนี้ action เลือกปลายทางเองตั้งแต่แรก (`resolvePostLoginPath`)
+- **ค่า Auth ของโปรเจกต์ที่ตรวจพบ (อ่านอย่างเดียว):** Site URL = `https://roosuk.netlify.app` · ยืนยันอีเมลปิดอยู่ (`mailer_autoconfirm`) · Google เปิดและตั้ง client แล้ว · ความยาวรหัสผ่านขั้นต่ำฝั่ง Supabase = 6 (แอปบังคับ 8)
+- **⚠ ต้องแก้ใน Supabase dashboard:** Redirect URLs มี `https://roosuk.netlify.app` แต่ไม่มี `/**` จึงไม่ตรงกับ `/auth/callback` → Google login จะกลับมาที่หน้าแรกโดยไม่เข้าสู่ระบบ ให้เพิ่ม `https://roosuk.netlify.app/**`
+- **ก่อนเปิดใช้จริง:** เปิดยืนยันอีเมล + ตั้ง SMTP ของตัวเอง · ตั้งความยาวรหัสผ่านขั้นต่ำเป็น 8 · เพิ่ม `NEXT_PUBLIC_SITE_URL`
 
 ---
 
@@ -546,6 +558,7 @@ value, unit, start_at, end_at, source (healthkit / health_connect / oura / ble /
 | 2026-10-03 | v0.1     | ร่างแรก: บันทึกข้อกำหนดทั้ง 7 ข้อของเจ้าของโครงการ + แผน + ประเด็นรอตัดสินใจ                                                                                                                    |
 | 2026-10-03 | v0.2     | บันทึกการตัดสินใจ D1–D13 · ปรับ roadmap (LINE → Phase 1, wearables → Phase 3, Omise + การจอง → Phase 4) · เพิ่มหัวข้อ 10.1 Auth และ 13.1 ความเสี่ยง · เพิ่ม `SETUP-GUIDE.md` และ `netlify.toml` |
 | 2026-10-03 | v0.3     | เริ่ม Phase 0: theme, AppShell, i18n, auth (Email/Google/LINE), consent, feature flags, admin, schema + RLS + test, Playwright · เพิ่มหัวข้อ 11.1 สถานะ Phase 0                                 |
+| 2026-10-03 | v0.4     | apply migration ลง Supabase จริง · ชุดทดสอบ live ผ่าน · แก้ redirect หลังล็อกอิน · ด่านตรวจ env ตอน build production · กฎ sync เข้า `main` ทุกครั้ง · หัวข้อ 11.2                               |
 
 ---
 

@@ -55,8 +55,8 @@ async function markTransparent(size) {
   }).png({ compressionLevel: 9 });
 }
 
-await sharp(SRC)
-  .resize(640)
+// The owner-supplied PNG has a real transparent background, so use it as-is for the full logo.
+await sharp("docs/RooSuk Logo.png")
   .png({ compressionLevel: 9 })
   .toFile("public/brand/logo-full.png");
 await (await markTransparent(512)).toFile("public/brand/logo-mark.png");

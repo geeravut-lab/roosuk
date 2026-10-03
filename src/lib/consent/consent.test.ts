@@ -5,7 +5,7 @@ import {
   REQUIRED_CONSENT_KEYS,
 } from "@/config/legal";
 import { dict } from "@/lib/i18n/dict";
-import { isConsentCurrent, parseConsentForm } from "./consent";
+import { consentPath, isConsentCurrent, parseConsentForm } from "./consent";
 
 function form(checked: string[]): FormData {
   const f = new FormData();
@@ -74,5 +74,14 @@ describe("consent copy", () => {
       expect(dict.th[k], k).toBeTruthy();
       expect(dict.en[k], k).toBeTruthy();
     }
+  });
+});
+
+describe("consentPath", () => {
+  it("carries the destination through the consent page, encoded", () => {
+    expect(consentPath("/today")).toBe("/consent?next=%2Ftoday");
+    expect(consentPath("/admin/flags?x=1&y=2")).toBe(
+      "/consent?next=%2Fadmin%2Fflags%3Fx%3D1%26y%3D2",
+    );
   });
 });

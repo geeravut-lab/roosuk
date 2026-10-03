@@ -189,14 +189,24 @@ LINE Official Account + Messaging API channel (สำหรับแจ้งเ
 2. หลังตั้งค่า ผม push ครั้งถัดไป คุณควรเห็น **ไม่มี deploy ใหม่** (หรือเห็นสถานะ "Skipped/Canceled by ignore command")
    ถ้ายังมี build ใหม่ แจ้งผมได้เลย
 
-### B5. Environment variables บน Netlify (ทำเมื่อพร้อม deploy ครั้งแรกเท่านั้น)
+### B5. Environment variables บน Netlify (จำเป็นก่อน deploy production)
 
-**Site configuration → Environment variables** — ใส่ตัวแปรชุดเดียวกับในตาราง A6
-(`NEXT_PUBLIC_*` ถูกฝังตอน build จึงต้องมีก่อน build) ตัวแปรลับให้ติ๊ก **Contains secret values**
+**Site configuration → Environment variables** — `NEXT_PUBLIC_*` ถูกฝังตอน build จึงต้องมีก่อน build ตัวแปรลับให้ติ๊ก **Contains secret values**
 
-- ผมไม่มีสิทธิ์/ช่องทางเรียก Netlify API (container ถูกบล็อก) → **ผมไม่สามารถ deploy เองได้** ตัวที่ทำให้ Netlify build คือการ push/merge เข้า `main` เท่านั้น
-  และผมจะ merge เข้า `main` เมื่อคุณสั่งเท่านั้น
-- Next.js บน Netlify ตรวจจับอัตโนมัติ ไม่ต้องตั้ง build command เอง
+| ตัวแปร                                                                | จำเป็น                | ลับ              |
+| --------------------------------------------------------------------- | --------------------- | ---------------- |
+| `NEXT_PUBLIC_SUPABASE_URL`                                            | ✅                    | ไม่              |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` (publishable key)                     | ✅                    | ไม่              |
+| `SUPABASE_SERVICE_ROLE_KEY` (secret key)                              | ✅                    | **ใช่**          |
+| `NEXT_PUBLIC_SITE_URL` = `https://roosuk.netlify.app` (หรือโดเมนจริง) | แนะนำ                 | ไม่              |
+| `LINE_LOGIN_CHANNEL_ID`, `LINE_LOGIN_CHANNEL_SECRET`                  | ถ้าต้องการ LINE login | secret = **ใช่** |
+| `GOOGLE_AI_API_KEY`, `ANTHROPIC_API_KEY`                              | Phase 1               | **ใช่**          |
+
+ไม่ต้องตั้ง `SUPABASE_ACCESS_TOKEN` และ `SUPABASE_PROJECT_REF` บน Netlify (ใช้เฉพาะสคริปต์ migration)
+
+- build production จะ **ล้มทันทีพร้อมบอกชื่อตัวแปรที่ขาด** ถ้า 3 ตัวแรกไม่ครบ (`scripts/check-deploy-env.mjs`) — deploy เดิมยังออนไลน์ ตั้งค่าแล้ว Trigger deploy ใหม่
+- `main` ผูก auto-deploy: ทุกครั้งที่ Claude sync งานเข้า `main` ที่แตะโค้ดแอป Netlify จะ build production (เอกสาร/ชุดทดสอบ/SQL ไม่ build)
+- Claude ไม่มีช่องทางสั่ง deploy โดยตรง ตัวที่ทำให้ Netlify build คือการ push เข้า `main` เท่านั้น
 
 ---
 

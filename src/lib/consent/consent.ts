@@ -33,3 +33,8 @@ export function isConsentCurrent(
   if (!record || record.policy_version !== POLICY_VERSION) return false;
   return REQUIRED_CONSENT_KEYS.every((key) => record.items[key] === true);
 }
+
+/** URL of the consent page that continues to `next` once the user has agreed. */
+export function consentPath(next: string): string {
+  return `/consent?next=${encodeURIComponent(next)}`;
+}

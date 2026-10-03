@@ -10,5 +10,8 @@
         ]
       }
     ]
+  },
+  "env": {
+    "NODE_USE_ENV_PROXY": "1"
   }
 }

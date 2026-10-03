@@ -10,6 +10,7 @@ import {
   signupSchema,
 } from "@/lib/auth/utils";
 import type { ErrorKey } from "@/lib/i18n/dict";
+import { resolvePostLoginPath } from "@/lib/consent/server";
 import { createClient } from "@/lib/supabase/server";
 
 export interface AuthState {
@@ -34,10 +35,17 @@ export async function loginAction(
   if (!parsed.success) return { error: "err_invalid_input" };
 
   const supabase = await createClient();
-  const { error } = await supabase.auth.signInWithPassword(parsed.data);
-  if (error) return { error: mapAuthError(error) };
+  const { data, error } = await supabase.auth.signInWithPassword(parsed.data);
+  if (error || !data.user)
+    return { error: error ? mapAuthError(error) : "err_unknown" };
 
-  redirect(safeNextPath(formData.get("next")));
+  redirect(
+    await resolvePostLoginPath(
+      supabase,
+      data.user.id,
+      safeNextPath(formData.get("next")),
+    ),
+  );
 }
 
 export async function signupAction(
@@ -74,9 +82,15 @@ export async function signupAction(
   // (to avoid leaking which emails exist) but a user with no identities.
   if (data.user && data.user.identities?.length === 0)
     return { error: "err_email_taken" };
-  if (!data.session) return { needsEmailConfirmation: true };
+  if (!data.session || !data.user) return { needsEmailConfirmation: true };
 
-  redirect(safeNextPath(formData.get("next")));
+  redirect(
+    await resolvePostLoginPath(
+      supabase,
+      data.user.id,
+      safeNextPath(formData.get("next")),
+    ),
+  );
 }
 
 export async function googleSignInAction(formData: FormData): Promise<void> {

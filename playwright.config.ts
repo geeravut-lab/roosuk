@@ -9,6 +9,10 @@ const executablePath =
 
 const PORT = 3100;
 
+// Node's built-in fetch ignores HTTPS_PROXY unless asked; the sandbox needs it to reach Supabase.
+// (Harmless elsewhere. Workers and the web server inherit it.)
+process.env.NODE_USE_ENV_PROXY ??= "1";
+
 export default defineConfig({
   testDir: "e2e",
   fullyParallel: true,
@@ -18,7 +22,7 @@ export default defineConfig({
   webServer: {
     command: `npx next start -p ${PORT}`,
     url: `http://localhost:${PORT}/api/health`,
-    env: { ENABLE_UI_PREVIEW: "1" },
+    env: { ENABLE_UI_PREVIEW: "1", NODE_USE_ENV_PROXY: "1" },
     reuseExistingServer: false,
     timeout: 60_000,
   },
