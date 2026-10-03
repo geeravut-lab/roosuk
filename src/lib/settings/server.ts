@@ -1,6 +1,7 @@
 import "server-only";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { normalizeFlags, type FlagMap } from "@/lib/flags/flags";
+import { isValidPromptpayId } from "@/lib/billing/promptpay";
 import {
   DEFAULT_BILLING_SETTINGS,
   parseBillingSettings,
@@ -10,12 +11,15 @@ import {
 export interface PlatformSettings {
   featureFlags: FlagMap;
   manualUrl: string;
+  /** PromptPay account the subscription QR pays into; null = payments not set up. */
+  promptpayId: string | null;
   billing: BillingSettings;
 }
 
 const DEFAULTS: PlatformSettings = {
   featureFlags: {},
   manualUrl: "",
+  promptpayId: null,
   billing: DEFAULT_BILLING_SETTINGS,
 };
 
@@ -47,6 +51,9 @@ export async function loadPlatformSettings(): Promise<PlatformSettings> {
       value: {
         featureFlags: normalizeFlags(data?.feature_flags),
         manualUrl: String(data?.manual_url ?? "").trim(),
+        promptpayId: isValidPromptpayId(String(data?.promptpay_id ?? ""))
+          ? String(data?.promptpay_id)
+          : null,
         billing: parseBillingSettings(data),
       },
       at: now,

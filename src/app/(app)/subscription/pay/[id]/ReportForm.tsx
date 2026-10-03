@@ -1,0 +1,52 @@
+"use client";
+
+import { useActionState } from "react";
+import { reportPaymentAction, type FormState } from "@/app/actions/payments";
+import { errorText } from "@/lib/i18n/dict";
+import { useI18n } from "@/lib/i18n/provider";
+
+const initial: FormState = {};
+
+/** "I have transferred" — the reference is mandatory (the reviewer searches the statement for it). */
+export function ReportForm({ paymentId }: { paymentId: string }) {
+  const { t } = useI18n();
+  const [state, action, pending] = useActionState(reportPaymentAction, initial);
+
+  return (
+    <form action={action} className="space-y-3">
+      <input type="hidden" name="paymentId" value={paymentId} />
+      <div>
+        <label htmlFor="payerRef" className="label">
+          {t.payRefLabel}
+        </label>
+        <input
+          id="payerRef"
+          name="payerRef"
+          className="field"
+          required
+          maxLength={80}
+          autoComplete="off"
+          aria-describedby="payerRef-hint"
+        />
+        <p id="payerRef-hint" className="text-muted mt-1 text-sm">
+          {t.payRefHint}
+        </p>
+      </div>
+      {state.error ? (
+        <p
+          role="alert"
+          className="bg-tint-primary rounded-xl px-3 py-2 text-sm font-medium"
+        >
+          {errorText(state.error, t)}
+        </p>
+      ) : null}
+      <button
+        type="submit"
+        disabled={pending}
+        className="btn btn-primary w-full"
+      >
+        {t.payReportBtn}
+      </button>
+    </form>
+  );
+}

@@ -7,6 +7,7 @@ import {
   type PlanId,
   type QuotaOverrides,
 } from "@/config/plans";
+import { startPaymentAction } from "@/app/actions/payments";
 import { quotaText } from "@/lib/billing/format";
 import type { BillingSettings } from "@/lib/billing/settings";
 import { fmt, type Dict } from "@/lib/i18n/dict";
@@ -37,7 +38,8 @@ function Row({
 /**
  * Plan cards, stacked on mobile. Every number comes from the same config +
  * settings the quota gate uses, so what is advertised is what is enforced.
- * Payment itself is not built yet (Phase 1, next slice): the button is inert.
+ * The pay buttons start a PromptPay order (startPaymentAction); the amount is
+ * read again from settings on the server, so these numbers are display only.
  */
 export function PlanComparison({
   t,
@@ -49,16 +51,18 @@ export function PlanComparison({
   billing: BillingSettings;
 }) {
   const overrides: QuotaOverrides = billing.planOverrides;
-  const price = (id: PlanId) => {
-    if (id === "free") return [t.subPriceFree];
+  const price = (id: "gold" | "premium") => {
     const p = billing.pricing;
-    const [m, y] =
-      id === "gold"
-        ? [p.goldMonthly, p.goldYearly]
-        : [p.premiumMonthly, p.premiumYearly];
+    return id === "gold"
+      ? { monthly: p.goldMonthly, yearly: p.goldYearly }
+      : { monthly: p.premiumMonthly, yearly: p.premiumYearly };
+  };
+  const priceLines = (id: PlanId) => {
+    if (id === "free") return [t.subPriceFree];
+    const { monthly, yearly } = price(id);
     return [
-      fmt(t.subPricePerMonth, { price: m }),
-      fmt(t.subPricePerYear, { price: y }),
+      fmt(t.subPricePerMonth, { price: monthly }),
+      fmt(t.subPricePerYear, { price: yearly }),
     ];
   };
 
@@ -77,7 +81,7 @@ export function PlanComparison({
                 <h3 className="text-primary-strong text-lg font-bold">
                   {t[`planName_${id}` as const]}
                 </h3>
-                {price(id).map((line) => (
+                {priceLines(id).map((line) => (
                   <p key={line} className="text-sm">
                     {line}
                   </p>
@@ -121,10 +125,26 @@ export function PlanComparison({
               </Row>
             </ul>
 
-            {id !== "free" && !isCurrent ? (
-              <button type="button" disabled className="btn btn-primary w-full">
-                {t.subPayCta}
-              </button>
+            {id !== "free" ? (
+              <form action={startPaymentAction} className="grid gap-2">
+                <input type="hidden" name="tier" value={id} />
+                <button
+                  type="submit"
+                  name="period"
+                  value="monthly"
+                  className="btn btn-primary w-full"
+                >
+                  {fmt(t.subPayMonthly, { price: price(id).monthly })}
+                </button>
+                <button
+                  type="submit"
+                  name="period"
+                  value="yearly"
+                  className="btn btn-secondary w-full"
+                >
+                  {fmt(t.subPayYearly, { price: price(id).yearly })}
+                </button>
+              </form>
             ) : null}
           </li>
         );

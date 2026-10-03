@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { Clock } from "lucide-react";
 import { METERED_FEATURES } from "@/config/plans";
 import { requireUser } from "@/lib/auth/server";
+import { PAYMENT_COLUMNS, type PaymentRow } from "@/lib/billing/payments";
 import { getBillingProfile, getUsageRows } from "@/lib/billing/profile.server";
 import { bangkokMonthStart, windowStart } from "@/lib/billing/period";
 import {
@@ -9,10 +11,11 @@ import {
   summarizeUsage,
   type BillingProfile,
 } from "@/lib/billing/plan";
-import { fmt } from "@/lib/i18n/dict";
+import { errorText, fmt } from "@/lib/i18n/dict";
 import { formatDate } from "@/lib/i18n/format";
 import { getLang, getT } from "@/lib/i18n/server";
 import { loadPlatformSettings } from "@/lib/settings/server";
+import { createClient } from "@/lib/supabase/server";
 import { PlanComparison } from "./PlanComparison";
 import { UsageMeter } from "./UsageMeter";
 
@@ -28,17 +31,30 @@ const NO_BILLING: BillingProfile = {
   ai_suspended: false,
 };
 
-export default async function SubscriptionPage() {
+export default async function SubscriptionPage({
+  searchParams,
+}: PageProps<"/subscription">) {
   const user = await requireUser();
+  const { error } = await searchParams;
   const now = new Date();
   const monthStart = bangkokMonthStart(now);
-  const [t, lang, { billing }, profile, rows] = await Promise.all([
-    getT(),
-    getLang(),
-    loadPlatformSettings(),
-    getBillingProfile(user.id),
-    getUsageRows(user.id, monthStart),
-  ]);
+  const supabase = await createClient();
+  const [t, lang, { billing }, profile, rows, { data: payments }] =
+    await Promise.all([
+      getT(),
+      getLang(),
+      loadPlatformSettings(),
+      getBillingProfile(user.id),
+      getUsageRows(user.id, monthStart),
+      supabase
+        .from("payments")
+        .select(PAYMENT_COLUMNS)
+        .eq("user_id", user.id)
+        .neq("status", "cancelled")
+        .order("created_at", { ascending: false })
+        .limit(10)
+        .returns<PaymentRow[]>(),
+    ]);
 
   const plan = resolvePlan(profile ?? NO_BILLING, now);
   const usage = summarizeUsage(
@@ -53,6 +69,15 @@ export default async function SubscriptionPage() {
   return (
     <div className="space-y-6">
       <h1 className="text-primary-strong text-2xl font-bold">{t.subTitle}</h1>
+
+      {typeof error === "string" ? (
+        <p
+          role="alert"
+          className="border-field-border bg-surface rounded-xl border px-3 py-2 text-sm font-medium"
+        >
+          {errorText(error, t)}
+        </p>
+      ) : null}
 
       <section className="card space-y-2" aria-labelledby="current-h">
         <h2 id="current-h" className="text-muted text-sm font-semibold">
@@ -111,6 +136,40 @@ export default async function SubscriptionPage() {
         <PlanComparison t={t} current={plan.tier} billing={billing} />
         <p className="text-muted text-sm">{t.subPayNote}</p>
       </section>
+
+      {payments && payments.length > 0 ? (
+        <section className="space-y-3" aria-labelledby="payments-h">
+          <h2 id="payments-h" className="font-semibold">
+            {t.subPaymentsTitle}
+          </h2>
+          <ul className="space-y-2">
+            {payments.map((p) => (
+              <li
+                key={p.id}
+                className="card flex items-center justify-between gap-3"
+              >
+                <div className="min-w-0">
+                  <p className="font-semibold">
+                    {t[`planName_${p.plan_tier}` as const]} ·{" "}
+                    {t[`payPeriod_${p.period}` as const]} · ฿
+                    {p.amount.toLocaleString("en-US")}
+                  </p>
+                  <p className="text-muted text-sm">
+                    {formatDate(lang, p.created_at)} ·{" "}
+                    {t[`payStatus_${p.status}` as const]}
+                  </p>
+                </div>
+                <Link
+                  href={`/subscription/pay/${p.id}`}
+                  className="btn btn-secondary shrink-0"
+                >
+                  {t.subPaymentOpen}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
     </div>
   );
 }
