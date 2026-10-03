@@ -37,18 +37,6 @@ export function getSupabaseAdminEnv() {
   return { url: getPublicEnv().NEXT_PUBLIC_SUPABASE_URL, serviceRoleKey };
 }
 
-export function getAiEnv() {
-  return z
-    .object({
-      ANTHROPIC_API_KEY: z.string().min(1),
-      GOOGLE_AI_API_KEY: z.string().min(1).optional(),
-    })
-    .parse({
-      ANTHROPIC_API_KEY: process.env.ANTHROPIC_API_KEY,
-      GOOGLE_AI_API_KEY: process.env.GOOGLE_AI_API_KEY || undefined,
-    });
-}
-
 export function getLineLoginEnv() {
   const parsed = z
     .object({
