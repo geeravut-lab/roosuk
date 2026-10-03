@@ -1,9 +1,9 @@
 # RooSuk (รู้สุข) — Master Plan
 
 > เอกสารอ้างอิงหลักสำหรับการสร้างระบบ RooSuk จนเสร็จสมบูรณ์
-> รวมข้อกำหนดทั้งหมดจากเจ้าของโครงการ + แผนการสร้าง + ข้อเสนอที่รอการตัดสินใจ
+> รวมข้อกำหนดทั้งหมดจากเจ้าของโครงการ + แผนการสร้าง + การตัดสินใจที่ตกลงแล้ว
 >
-> **สถานะ:** v0.1 — ร่างแผน **รอเจ้าของโครงการตัดสินใจ** (ดูหัวข้อ 13) ยังไม่เริ่มสร้างฟีเจอร์
+> **สถานะ:** v0.2 — เจ้าของโครงการตัดสินใจ D1–D13 แล้ว (หัวข้อ 13) · พร้อมเริ่ม Phase 0 · คู่มือตั้งค่า Supabase/Netlify: [`SETUP-GUIDE.md`](SETUP-GUIDE.md)
 > **อัปเดตล่าสุด:** 2026-10-03
 >
 > สัญลักษณ์: ✅ ตกลงแล้ว · 🟡 ข้อเสนอ รอตัดสินใจ · ⛔ ห้ามทำ
@@ -30,18 +30,20 @@
 ### 2.1 การทดสอบและการ deploy ✅ (คำสั่งเจ้าของโครงการ ข้อ 5)
 
 1. **ทดสอบบน test environment ของ Claude เสมอ** ได้แก่ `npm run check`, `npm run build`,
-   เปิด `next start` ในเครื่อง, Playwright ที่ viewport มือถือ 390×844 และ Supabase โปรเจกต์สำหรับ dev
+   เปิด `next start` ในเครื่อง, Playwright ที่ viewport มือถือ 390×844 และ Supabase โปรเจกต์ของ RooSuk (ใช้ร่วม dev/test/production — ดูข้อ 6)
 2. **⛔ ห้าม deploy หรือทดสอบบน Netlify production เอง** เพื่อประหยัด Netlify credits
 3. ถ้าจำเป็นต้องทดสอบบน production จริง → **ขออนุญาตเจ้าของโครงการก่อนทุกครั้ง** หรือแจ้งให้เจ้าของทดสอบเอง
 4. ห้ามกระทำสิ่งที่ทำให้ Netlify build เองโดยไม่ได้ตั้งใจ (เช่น merge เข้า `main` ถ้า `main` ผูก auto-deploy)
    — merge เข้า `main` ทำเมื่อเจ้าของสั่งเท่านั้น
 5. การทดสอบที่เรียก AI จริงมีค่าใช้จ่าย → unit test ใช้ mock/fixture เป็นค่าเริ่มต้น
    เรียก API จริงเฉพาะชุดทดสอบเล็ก ๆ ที่จำเป็น และไม่เรียกใน CI
+6. Supabase ใช้ **โปรเจกต์เดียว** ร่วมกันทั้ง dev/test/production (D11) → ข้อมูลที่มีตอนนี้เป็นข้อมูลทดสอบเท่านั้น
+   **ห้ามให้ผู้ใช้จริงสมัครก่อนทำ checklist ล้างข้อมูลและหมุนคีย์** (`SETUP-GUIDE.md` ส่วน C)
 
-🟡 ข้อเสนอเพื่อกัน credit รั่ว (ให้เจ้าของตั้งใน Netlify):
+✅ มาตรการกัน credit รั่ว (D11):
 
-- ปิด **Branch deploys** และ **Deploy Previews** (หรือตั้งเป็น manual) — งานของ Claude อยู่บน branch `claude/*`
-- หรือใส่ `ignore` command ใน `netlify.toml` ให้ build เฉพาะ commit บน `main`
+- เจ้าของปิด **Branch deploys** และ **Deploy Previews** ใน Netlify (ขั้นตอนใน `SETUP-GUIDE.md` ส่วน B) — งานของ Claude อยู่บน branch `claude/*`
+- มี `netlify.toml` ใน repo ที่ใช้ `ignore` command ข้าม build ของทุก branch ที่ไม่ใช่ `main` เป็นด่านสำรองอีกชั้น
 
 ### 2.2 กฎด้าน Git และคุณภาพโค้ด
 
@@ -76,9 +78,9 @@
 | สีปุ่ม/ยิ้ม (accent) | Coral      | `#FF7A6B`    | ปุ่มสำคัญ (CTA) และช่วงให้กำลังใจ เช่น Streak, คะแนนดี                |
 | พื้นหลัง             | ขาวนวล     | `#F7FBFA`    | พื้นหลังแอป                                                           |
 | ตัวหนังสือ           | เทาเข้ม    | `#1F2A30`    | ข้อความทั้งหมด — **ไม่ใช้ดำสนิท**                                     |
-| แจ้งเตือนผิดปกติ     | แดงสด      | 🟡 `#E5484D` | **เฉพาะค่าผิดปกติจริงเท่านั้น** ไม่งั้นผู้ใช้จะตกใจ                   |
+| แจ้งเตือนผิดปกติ     | แดงสด      | ✅ `#E5484D` | **เฉพาะค่าผิดปกติจริงเท่านั้น** ไม่งั้นผู้ใช้จะตกใจ                   |
 
-### 3.1 กฎการใช้สีเพื่อให้อ่านง่าย (คำนวณ contrast แล้ว) 🟡
+### 3.1 กฎการใช้สีเพื่อให้อ่านง่าย (คำนวณ contrast แล้ว) ✅
 
 ค่าสีของแบรนด์บางสีคอนทราสต์ไม่พอสำหรับตัวอักษรเล็ก (มาตรฐาน WCAG AA ต้อง ≥ 4.5:1) จึงเสนอกฎดังนี้
 โดยไม่เปลี่ยนสีแบรนด์:
@@ -92,13 +94,13 @@
 | แดง `#E5484D` บนพื้นขาวนวล               | ≈ 3.75 : 1                 | ใช้เป็นป้าย/ไอคอน/ตัวเลขใหญ่ · ข้อความอธิบายข้างป้ายใช้เทาเข้ม                      |
 | เทาเข้ม `#1F2A30` บนพื้นขาวนวล           | ≈ 14 : 1 ✓                 | ข้อความหลักทั้งหมด                                                                  |
 
-### 3.2 ระดับสถานะของค่าสุขภาพ 🟡
+### 3.2 ระดับสถานะของค่าสุขภาพ ✅ (D13)
 
-| สถานะ          | สี                                   | ตัวอย่างข้อความ                      |
-| -------------- | ------------------------------------ | ------------------------------------ |
-| อยู่ในเกณฑ์    | Mint                                 | "อยู่ในช่วงปกติ"                     |
-| ควรติดตาม      | 🟡 เหลืองอำพัน `#F2A93B` (เสนอเพิ่ม) | "ค่านี้มีแนวโน้มเพิ่มขึ้น ควรติดตาม" |
-| ผิดปกติ (จริง) | แดงสด                                | "อยู่นอกช่วงอ้างอิง ควรปรึกษาแพทย์"  |
+| สถานะ          | สี                       | ตัวอย่างข้อความ                      |
+| -------------- | ------------------------ | ------------------------------------ |
+| อยู่ในเกณฑ์    | Mint                     | "อยู่ในช่วงปกติ"                     |
+| ควรติดตาม      | ✅ เหลืองอำพัน `#F2A93B` | "ค่านี้มีแนวโน้มเพิ่มขึ้น ควรติดตาม" |
+| ผิดปกติ (จริง) | แดงสด                    | "อยู่นอกช่วงอ้างอิง ควรปรึกษาแพทย์"  |
 
 ไม่ใช้โคราลกับสถานะเตือน เพราะโคราลคือสีของ "กำลังใจ" — ใช้ปนกันผู้ใช้จะสับสน
 
@@ -123,7 +125,7 @@
 
 ---
 
-## 5. Packages และ Trial ✅/🟡 (คำสั่งเจ้าของโครงการ ข้อ 1)
+## 5. Packages และ Trial ✅ (คำสั่งเจ้าของโครงการ ข้อ 1 · D1–D5)
 
 ### 5.1 สิ่งที่ตกลงแล้ว ✅
 
@@ -132,7 +134,7 @@
 - Feature และโควตาของ Gold / Premium ตามตารางใน Subscription Tiers PDF
 - การจำกัดเน้นที่ AI usage (ต้นทุนผันแปรหลัก) · ทุก package จอง Lab / Home Service / Referral ได้เหมือนกัน
 
-### 5.2 คำแนะนำ: ควรมี Free package ไหม → **แนะนำให้มี แบบ "Free-lite"** 🟡
+### 5.2 Free package → ✅ ตัดสินใจแล้ว: มี "Free-lite" หลัง trial หมด (D1)
 
 **เหตุผลที่แนะนำ**
 
@@ -146,54 +148,57 @@
 **ทางเลือกที่ไม่แนะนำ:** Hard paywall (หมด trial = ใช้ไม่ได้เลยนอกจากดู/ดาวน์โหลดข้อมูล)
 — แปลงเป็นเงินเร็วกว่าในระยะสั้น แต่เสียผู้ใช้และข้อมูลที่ยังไม่พร้อมจ่าย
 
-### 5.3 ตารางเปรียบเทียบที่เสนอ 🟡 (Gold/Premium ตาม PDF · Free เป็นข้อเสนอ)
+### 5.3 ตารางเปรียบเทียบ ✅ (Gold/Premium ตาม PDF · Free-lite ตาม D2)
 
-| Feature                            | Free-lite (หลัง trial) 🟡 | Gold 49 ฿         | Premium 89 ฿ (= สิทธิ์ช่วง trial) |
-| ---------------------------------- | ------------------------- | ----------------- | --------------------------------- |
-| AI Health Quiz / Biological Age    | 1 ครั้ง / 3 เดือน         | 1 ครั้ง/เดือน     | ไม่จำกัด                          |
-| AI Chat / Ask My Health            | 5 ข้อความ/เดือน           | 30 ข้อความ/เดือน  | ไม่จำกัด*                         |
-| AI Food Snap                       | 3 ครั้ง/เดือน             | 15 ครั้ง/เดือน    | ไม่จำกัด*                         |
-| Lab Result OCR / Import            | 1 ครั้ง/เดือน             | 3 ครั้ง/เดือน     | ไม่จำกัด*                         |
-| Daily Check-in + Health Score      | ✓ (คำนวณด้วยโค้ด)         | ✓                 | ✓ + Advanced Insights             |
-| Today's 3 Actions                  | ✓ แบบ template            | ✓                 | ✓ ปรับเฉพาะตัวด้วย AI             |
-| Bio-Streaks & Achievement          | ✓                         | ✓                 | ✓ + Badge พิเศษ                   |
-| Health Timeline                    | ย้อนหลัง 30 วัน           | ย้อนหลัง 3 เดือน  | ไม่จำกัด + Predictive             |
-| Health Vault                       | 5 ไฟล์                    | 20 ไฟล์           | ไม่จำกัด                          |
-| Monthly Health Report              | สรุปย่อ (ไม่ใช้ AI)       | พื้นฐาน           | ละเอียด + Shareable สวย           |
-| Shareable Cards                    | ✓ template พื้นฐาน        | ✓                 | ✓ + Template พิเศษ                |
-| Health Passport / Pre-Doctor Brief | —                         | —                 | ✓                                 |
-| AI Health Agent                    | —                         | —                 | ✓                                 |
-| Wearable Integration               | —                         | อ่านข้อมูลพื้นฐาน | อ่าน + AI วิเคราะห์เต็ม           |
-| Family Sharing                     | —                         | —                 | เพิ่มสมาชิกได้ 1 คน               |
-| Supplement Recommendation          | —                         | พื้นฐาน           | Personalized + Auto-Ship แนะนำ    |
-| Priority Booking / Support         | ปกติ                      | ปกติ              | Priority                          |
-| จอง Lab / Home Service / Referral  | ✓                         | ✓                 | ✓                                 |
-| ดาวน์โหลด/ลบข้อมูลของฉัน (PDPA)    | ✓ เสมอ                    | ✓ เสมอ            | ✓ เสมอ                            |
+| Feature                            | Free-lite (หลัง trial) | Gold 49 ฿         | Premium 89 ฿ (= สิทธิ์ช่วง trial) |
+| ---------------------------------- | ---------------------- | ----------------- | --------------------------------- |
+| AI Health Quiz / Biological Age    | 1 ครั้ง / 3 เดือน      | 1 ครั้ง/เดือน     | ไม่จำกัด                          |
+| AI Chat / Ask My Health            | 5 ข้อความ/เดือน        | 30 ข้อความ/เดือน  | ไม่จำกัด*                         |
+| AI Food Snap                       | 3 ครั้ง/เดือน          | 15 ครั้ง/เดือน    | ไม่จำกัด*                         |
+| Lab Result OCR / Import            | 1 ครั้ง/เดือน          | 3 ครั้ง/เดือน     | ไม่จำกัด*                         |
+| Daily Check-in + Health Score      | ✓ (คำนวณด้วยโค้ด)      | ✓                 | ✓ + Advanced Insights             |
+| Today's 3 Actions                  | ✓ แบบ template         | ✓                 | ✓ ปรับเฉพาะตัวด้วย AI             |
+| Bio-Streaks & Achievement          | ✓                      | ✓                 | ✓ + Badge พิเศษ                   |
+| Health Timeline                    | ย้อนหลัง 30 วัน        | ย้อนหลัง 3 เดือน  | ไม่จำกัด + Predictive             |
+| Health Vault                       | 5 ไฟล์                 | 20 ไฟล์           | ไม่จำกัด                          |
+| Monthly Health Report              | สรุปย่อ (ไม่ใช้ AI)    | พื้นฐาน           | ละเอียด + Shareable สวย           |
+| Shareable Cards                    | ✓ template พื้นฐาน     | ✓                 | ✓ + Template พิเศษ                |
+| Health Passport / Pre-Doctor Brief | —                      | —                 | ✓                                 |
+| AI Health Agent                    | —                      | —                 | ✓                                 |
+| Wearable Integration               | —                      | อ่านข้อมูลพื้นฐาน | อ่าน + AI วิเคราะห์เต็ม           |
+| Family Sharing                     | —                      | —                 | เพิ่มสมาชิกได้ 1 คน               |
+| Supplement Recommendation          | —                      | พื้นฐาน           | Personalized + Auto-Ship แนะนำ    |
+| Priority Booking / Support         | ปกติ                   | ปกติ              | Priority                          |
+| จอง Lab / Home Service / Referral  | ✓                      | ✓                 | ✓                                 |
+| ดาวน์โหลด/ลบข้อมูลของฉัน (PDPA)    | ✓ เสมอ                 | ✓ เสมอ            | ✓ เสมอ                            |
 
 \* "ไม่จำกัด" = **นับทุกครั้ง แต่ไม่จำกัดด้วยโควตา** และมีเพดาน fair-use ที่ admin ตั้งได้ (0 = ปิด) — ตาม knowledge 10
 เพื่อไม่ให้ผู้ใช้คนเดียวทำบิล AI พัง ต้นทุน AI ของ Free-lite ประมาณ ≤ 2–3 บาท/คน/เดือน (ประมาณการ ต้องวัดจริง)
 
-### 5.4 กฎของ trial และการเปลี่ยน package 🟡
+### 5.4 กฎของ trial และการเปลี่ยน package ✅
 
-| เรื่อง             | ข้อเสนอ                                                                                                                                |
-| ------------------ | -------------------------------------------------------------------------------------------------------------------------------------- |
-| เริ่ม trial        | อัตโนมัติเมื่อสมัครและยินยอม PDPA ครบ · ไม่ต้องผูกบัตร                                                                                 |
-| สิทธิ์ trial       | 1 ครั้งต่อบัญชี (กันสมัครซ้ำด้วยอีเมล/บัญชี LINE ที่ยืนยันแล้ว)                                                                        |
-| ต้นทุน trial       | ผู้สมัครทุกคนได้ Premium 14 วัน = ต้นทุน AI ~9–13 บาท/คน (ครึ่งเดือนของ Premium) → **ตั้ง fair-use cap ของ trial** แยก (admin ปรับได้) |
-| ความยาว trial      | เก็บใน settings (`trial_days = 14`) admin ปรับได้ ไม่ hard-code                                                                        |
-| แจ้งเตือน          | ก่อนหมด 3 วัน และ 1 วัน (กฎอัตโนมัติ, knowledge 06) + หน้า paywall ตอนหมดที่สรุป "สิ่งที่คุณสร้างไว้" (จำนวนผลแล็บ, streak, timeline)  |
-| หมด trial ไม่เลือก | ตกเป็น Free-lite อัตโนมัติ (ถ้าเลือก 5.2) หรือ read-only (ถ้าเลือก hard paywall)                                                       |
-| Downgrade          | **ไม่ลบข้อมูล** · ข้อมูลเกินสิทธิ์ถูกซ่อนจากหน้าจอ/AI แต่ยังดาวน์โหลดผ่าน "ข้อมูลของฉัน" ได้เสมอ · Vault เกินโควตา = ดูได้ เพิ่มไม่ได้ |
-| ราคา/โควตา         | อยู่ในตาราง settings ที่เดียว ใช้ทั้งหน้า landing, หน้า package, ตอนเก็บเงิน (knowledge 04, 10)                                        |
-| รายปี 🟡           | เสนอเพิ่ม Gold 490 ฿/ปี · Premium 890 ฿/ปี (ประมาณจ่าย 10 เดือนได้ 12)                                                                 |
+| เรื่อง             | ข้อเสนอ                                                                                                                                                                                     |
+| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| เริ่ม trial        | อัตโนมัติเมื่อสมัครและยินยอม PDPA ครบ · ไม่ต้องผูกบัตร                                                                                                                                      |
+| สิทธิ์ trial       | 1 ครั้งต่อบัญชี (กันสมัครซ้ำด้วยอีเมล/บัญชี LINE ที่ยืนยันแล้ว)                                                                                                                             |
+| ต้นทุน trial       | ผู้สมัครทุกคนได้ Premium 14 วัน = ต้นทุน AI ~9–13 บาท/คน (ครึ่งเดือนของ Premium) → **มี fair-use cap แยกของ trial และของ Premium ให้ admin ตั้งได้ (D4)** ค่าเริ่มต้นกำหนดหลังวัดต้นทุนจริง |
+| ความยาว trial      | เก็บใน settings (`trial_days = 14`) admin ปรับได้ ไม่ hard-code                                                                                                                             |
+| แจ้งเตือน          | ก่อนหมด 3 วัน และ 1 วัน (กฎอัตโนมัติ, knowledge 06) + หน้า paywall ตอนหมดที่สรุป "สิ่งที่คุณสร้างไว้" (จำนวนผลแล็บ, streak, timeline)                                                       |
+| หมด trial ไม่เลือก | ตกเป็น Free-lite อัตโนมัติ (D1)                                                                                                                                                             |
+| Downgrade          | **ไม่ลบข้อมูล** · ข้อมูลเกินสิทธิ์ถูกซ่อนจากหน้าจอ/AI แต่ยังดาวน์โหลดผ่าน "ข้อมูลของฉัน" ได้เสมอ · Vault เกินโควตา = ดูได้ เพิ่มไม่ได้                                                      |
+| ราคา/โควตา         | อยู่ในตาราง settings ที่เดียว ใช้ทั้งหน้า landing, หน้า package, ตอนเก็บเงิน (knowledge 04, 10)                                                                                             |
+| รายปี ✅ (D3)      | Gold 490 ฿/ปี · Premium 890 ฿/ปี (เท่ากับจ่าย 10 เดือน ได้ใช้ 12 เดือน)                                                                                                                     |
 
-### 5.5 การชำระเงิน 🟡
+### 5.5 การชำระเงิน ✅ (D5)
 
-| ระยะ     | วิธี                                                                                  | หมายเหตุ                                                                           |
-| -------- | ------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
-| Phase 1  | **QR PromptPay + admin ตรวจสลิป** (knowledge 03, 04) — draft → review → paid/rejected | ไม่มีค่าธรรมเนียม gateway เริ่มได้ทันที แต่ต้องมีคนตรวจ และผู้ใช้ต้องจ่ายเองทุกรอบ |
-| Phase 3  | **Omise recurring** (บัตร / PromptPay ตัดอัตโนมัติ) ตามเอกสาร Business Model          | ลดงานตรวจสลิป เพิ่ม retention ของรายได้                                            |
-| ทางเลือก | ใช้ API ตรวจสลิปอัตโนมัติ (บริการภายนอก) ระหว่างรอ Omise                              | ต้องประเมินค่าบริการ                                                               |
+| ระยะ              | วิธี                                                                                  | หมายเหตุ                                                                              |
+| ----------------- | ------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
+| Phase 1–3         | **QR PromptPay + admin ตรวจสลิป** (knowledge 03, 04) — draft → review → paid/rejected | ไม่มีค่าธรรมเนียม gateway เริ่มได้ทันที แต่ผู้ใช้ต้องโอนเองทุกรอบ และต้องมีคนตรวจสลิป |
+| Phase 4 (สุดท้าย) | **Omise recurring** (บัตร / PromptPay ตัดอัตโนมัติ) ตามเอกสาร Business Model          | ลดงานตรวจสลิป เพิ่ม retention ของรายได้                                               |
+| ทางเลือก          | ใช้ API ตรวจสลิปอัตโนมัติ (บริการภายนอก) ระหว่างรอ Omise                              | ต้องประเมินค่าบริการ                                                                  |
+
+> ⚠️ ผลของการเลื่อน Omise ไปท้ายสุด: ตลอด Phase 1–3 ผู้ใช้ต้องโอนเองทุกเดือนและ admin ต้องตรวจทุกสลิป
+> (ตัวอย่าง: สมาชิกรายเดือน 500 คน ≈ 17 สลิป/วัน) → แนะนำเน้นขายแผนรายปี (ลดจำนวนสลิป) + ส่งเตือนต่ออายุล่วงหน้า (กฎอัตโนมัติ K06)
 
 ---
 
@@ -205,7 +210,9 @@
 | ----------------- | -------------------------------------------------------------------------------------------------------------------- | -------------------------- | ---------------------- |
 | **Funnel**        | Health/Longevity Quiz 3–5 นาที (ทำได้ **ก่อนสมัคร**) → Health Score + อายุสุขภาพโดยประมาณ                            | PDF 3.1 · TXT Gemini §1    | 1                      |
 |                   | Instant 7-day plan · Dynamic upsell gate ไป Lab package / Home Service                                               | PDF 3.1                    | 1                      |
-| **Onboarding**    | สมัคร + consent รายข้อ + Health Profile 5–10 คำถาม + เริ่ม trial                                                     | TXT §20 ① ②                | 1                      |
+| **Auth**          | สมัคร/ล็อกอินด้วย Email+password (ไม่มี OTP) · Google · LINE Login (D7)                                              | —                          | 0                      |
+| **Onboarding**    | สมัคร + consent รายข้อ (Phase 0) · Health Profile 5–10 คำถาม + เริ่ม trial (Phase 1)                                 | TXT §20 ① ②                | 0–1                    |
+|                   | ผูก LINE OA เพื่อรับแจ้งเตือน + คิวแจ้งเตือน LINE (K07)                                                              | —                          | 1                      |
 | **Scan (Killer)** | ปุ่มใหญ่ "📸 Scan My Health"                                                                                         | TXT §3A                    | 1                      |
 |                   | Food Snap → อาหาร, portion, สารอาหาร + เชื่อมกับผลแล็บล่าสุด                                                         | PDF 3.2 · TXT §3A.1        | 1                      |
 |                   | Lab Scan (PDF/รูป) → ดึงค่า → **หน้าให้ผู้ใช้ตรวจทาน** → เข้า Timeline + trend                                       | PDF 3.2 · TXT §3A.2        | 1                      |
@@ -225,17 +232,19 @@
 |                   | My Health Agent (tool calling: สรุปเดือน, ตั้งเตือน, เตรียมคำถามหมอ)                                                 | TXT §6                     | 3                      |
 |                   | AI Anomaly + Next Action                                                                                             | PDF 3.5                    | 2                      |
 |                   | Voice-first Thai AI Concierge                                                                                        | PDF 3.5                    | 4                      |
-| **Integration**   | Wearables / IoT (ดูหัวข้อ 9)                                                                                         | TXT §8 · PDF 3.6           | 2–4                    |
-| **Monetization**  | Trial + Paywall + Packages + PromptPay                                                                               | PDF 3.7 · Subscription PDF | 1                      |
+| **Integration**   | Wearables / IoT (ดูหัวข้อ 9) — นำเข้าไฟล์ + ingestion API + companion app (D10)                                      | TXT §8 · PDF 3.6           | 3–4                    |
+| **Monetization**  | Trial + Paywall + Packages (รายเดือน/รายปี) + PromptPay                                                              | PDF 3.7 · Subscription PDF | 1                      |
+|                   | Omise recurring (D5)                                                                                                 | Subscription PDF           | 4                      |
 |                   | Paywall A/B experiments                                                                                              | PDF 3.7                    | 2                      |
-|                   | Health check booking / upsell Lab package                                                                            | TXT §14 · PDF 3.9          | 1 (พื้นฐาน)            |
+|                   | ปุ่ม "สนใจตรวจสุขภาพ" (เก็บ lead + ติดต่อกลับทาง LINE OA) แทนการจองจริงจนถึง Phase 4                                 | TXT §14 · PDF 3.9          | 1                      |
+|                   | จองแพ็กเกจตรวจ / Home Service จริง (D6)                                                                              | TXT §14 · PDF 3.9          | 4                      |
 |                   | Supplement recommendation / Auto-Ship + Marketplace                                                                  | PDF 3.7 · TXT §14          | 3                      |
 |                   | Family Health (Premium +1) · Corporate plan                                                                          | TXT §15–16                 | 3                      |
 | **Viral**         | Shareable Health Cards (ไม่เปิดเผยค่าสุขภาพละเอียด)                                                                  | TXT §21 · PDF 3.8          | 1                      |
 |                   | Referral (เช่น ชวน 3 คน = Premium 1 เดือน)                                                                           | TXT §21                    | 2                      |
 |                   | Health Challenges (7-Day Better Sleep ฯลฯ)                                                                           | TXT §21                    | 2                      |
 |                   | Influencer / Creator toolkit                                                                                         | PDF 3.8                    | 3                      |
-| **Ops & Scale**   | Staff portal อัปโหลดผลตรวจ → เข้า Timeline ลูกค้าอัตโนมัติ                                                           | PDF 3.9                    | 1–2 🟡                 |
+| **Ops & Scale**   | Staff portal อัปโหลดผลตรวจ → เข้า Timeline ลูกค้าอัตโนมัติ (D6)                                                      | PDF 3.9                    | 4                      |
 |                   | Multi-branch, Franchise, P&L, Unit Economics, AI Business Copilot                                                    | PDF 3.9                    | 4                      |
 
 **หน้าจอหลัก (mobile-first)**
@@ -259,11 +268,11 @@
 | ---- | -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | 01   | Responsive layout    | AppShell ทุกหน้า, หน้าแชท, กราฟ Timeline/Score                                                                                                                           | breakpoint เดียว `md`, `dvh`, safe-area, `min-w-0` · ทดสอบ Playwright 390×844 แบบวัดค่า                                                                                                        |
 | 02   | Navigation           | เมนูผู้ใช้ + admin, จุดแดงแจ้งเตือน                                                                                                                                      | ลิสต์เมนูแบนที่เดียว · bottom bar 4 + เพิ่มเติม · `kindToNav` สำหรับผลแล็บใหม่/นัดตรวจ/โควตา                                                                                                   |
-| 03   | PromptPay QR         | จ่ายค่า package, จองแพ็กเกจตรวจ, Home Service                                                                                                                            | สถานะ `review` มีจริงใน DB · บังคับเลขอ้างอิง · ฝังยอดใน QR                                                                                                                                    |
+| 03   | PromptPay QR         | จ่ายค่า package (Phase 1) · จองแพ็กเกจตรวจ/Home Service (Phase 4)                                                                                                        | สถานะ `review` มีจริงใน DB · บังคับเลขอ้างอิง · ฝังยอดใน QR                                                                                                                                    |
 | 04   | Subscriptions        | Trial 14 วัน, Gold/Premium, Family (+1)                                                                                                                                  | `profiles.plan_tier/plan_expires_at` + payments ledger + `user_subscriptions` (trial = แถว source `trial`) · `isPlanActive()` ฟังก์ชันเดียวที่รู้เรื่องสิทธิ์ครอบครัว · PAYG ยังไม่ใช้ 🟡      |
 | 05   | Usage analytics      | Dashboard admin: DAU/WAU/MAU, เมนูยอดนิยม, retention                                                                                                                     | เพิ่มตาราง `product_events` (รายชื่อ event กำหนดฝั่ง server) สำหรับ funnel: quiz → signup → trial → paywall → subscribe · ต้นทุน AI ต่อ task/package                                           |
 | 06   | Automation rules     | เตือน trial/package ใกล้หมด, เตือน check-in, streak ใกล้ขาด, สร้าง Monthly Report, เตือนตรวจประจำปี/ตรวจซ้ำ, แจ้ง admin เมื่อ AI cost > 20 ฿/คน/สัปดาห์, ลบข้อมูลตามอายุ | ตัวเลขอยู่ใน DB เงื่อนไขอยู่ในโค้ด · seed `ON CONFLICT DO NOTHING` · บันทึก `last_count`                                                                                                       |
-| 07   | LINE notifications   | Daily mission ตอนเช้า, ผลแล็บพร้อม, นัดตรวจ, trial ใกล้หมด, ผลตรวจสลิป                                                                                                   | คิว + งานเบื้องหลัง · **⛔ ไม่ใส่ค่าสุขภาพในการ์ด LINE/altText** (โผล่บน lock screen) — บอกแค่ "มีผลแล็บใหม่พร้อมดู"                                                                           |
+| 07   | LINE notifications   | Daily mission ตอนเช้า, ผลแล็บพร้อม, นัดตรวจ, trial ใกล้หมด, ผลตรวจสลิป (เริ่ม Phase 1 — D7)                                                                              | คิว + งานเบื้องหลัง · **⛔ ไม่ใส่ค่าสุขภาพในการ์ด LINE/altText** (โผล่บน lock screen) — บอกแค่ "มีผลแล็บใหม่พร้อมดู"                                                                           |
 | 08   | Manual URL           | ลิงก์คู่มือ + ลิงก์ติดต่อ/LINE OA ที่ admin ตั้งได้                                                                                                                      | https เท่านั้น · ค่าว่าง = ซ่อนเมนู                                                                                                                                                            |
 | 09   | Feature flags        | Kill switch ต่อฟีเจอร์: food_scan, lab_scan, health_agent, wearables, family, marketplace, booking, voice                                                                | ด่านที่ server (`assertFeature`) ทุกฟีเจอร์ · ไม่มีค่า = เปิด · ปิดได้ทันทีเมื่อค่า AI พุ่ง                                                                                                    |
 | 10   | Billing & quota      | ด่านโควตา AI ด่านเดียว (Free/Gold/Premium/trial)                                                                                                                         | "ไม่จำกัด" ยังนับ · fair-use cap · เดือนตามเวลาไทย · ส่งรหัสข้อความไม่ส่งประโยค · `src/config/plans.ts` กลายเป็นค่า DEFAULTS ส่วนค่าจริงมาจาก DB                                               |
@@ -350,7 +359,7 @@
 
 ---
 
-## 9. การเชื่อมต่อ Wearables และ IoT 🟡 (คำสั่งเจ้าของโครงการ ข้อ 6 — เฟสท้าย)
+## 9. การเชื่อมต่อ Wearables และ IoT ✅ (คำสั่งเจ้าของโครงการ ข้อ 6 · D10 — เฟสท้าย)
 
 ### 9.1 ข้อจำกัดที่ต้องรู้
 
@@ -386,18 +395,18 @@
 
 | ตัวเลือก                                                                                                                                                            | ครอบคลุม                                       | ค่าใช้จ่าย                                                            | เฟส                      |
 | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------- | --------------------------------------------------------------------- | ------------------------ |
-| **A. กรอกเอง + นำเข้าไฟล์ export** (Apple Health `export.zip`, Google Takeout, CSV)                                                                                 | ทุกแบรนด์ (ไม่ real-time)                      | ต่ำมาก ทำบนเว็บได้ทันที                                               | 2                        |
-| **B. Ingestion API + data model กลาง** (`health_observations`)                                                                                                      | รองรับทุกตัวเลือกข้างล่าง                      | ต่ำ                                                                   | 2                        |
+| **A. กรอกเอง + นำเข้าไฟล์ export** (Apple Health `export.zip`, Google Takeout, CSV)                                                                                 | ทุกแบรนด์ (ไม่ real-time)                      | ต่ำมาก ทำบนเว็บได้ทันที                                               | 3                        |
+| **B. Ingestion API + data model กลาง** (`health_observations`)                                                                                                      | รองรับทุกตัวเลือกข้างล่าง                      | ต่ำ                                                                   | 3                        |
 | **C. Companion app ด้วย Capacitor** (iOS + Android) อ่าน HealthKit + Health Connect แบบ background sync · ได้ push notification และอยู่บน App Store/Play Store ด้วย | กว้างที่สุดผ่านศูนย์กลาง                       | Apple Developer ~$99/ปี + Google Play $25 ครั้งเดียว + งานพัฒนา       | 3                        |
 | **D. Cloud API รายแบรนด์** (OAuth บนเว็บ เช่น Oura, Withings, Fitbit/Google, Polar, Garmin*)                                                                        | แบรนด์ที่เปิด API                              | ฟรีเป็นส่วนใหญ่ แต่ต้องทำทีละเจ้า (*Garmin ต้องสมัครโปรแกรม business) | 3–4 ตามความต้องการผู้ใช้ |
 | **E. บริการ aggregator** (เชื่อมครั้งเดียวได้หลายแบรนด์)                                                                                                            | กว้าง เร็ว                                     | คิดเงินต่อผู้ใช้ต่อเดือนเป็น USD — ต้องเทียบกับราคา 49/89 ฿           | ทางเลือกแทน C/D          |
 | **F. BLE อุปกรณ์การแพทย์มาตรฐาน** (GATT: Blood Pressure, Glucose, Weight Scale, Thermometer, Pulse Oximeter, Heart Rate)                                            | อุปกรณ์ที่ใช้มาตรฐาน                           | ต่ำ · Android ผ่าน Web Bluetooth, iOS ผ่าน companion app              | 4                        |
 | **G. CGM** (เครื่องวัดน้ำตาลต่อเนื่อง)                                                                                                                              | ผ่าน Health Connect/HealthKit หรือ partner API | ขึ้นกับผู้ผลิต                                                        | 4                        |
 
-**ข้อแนะนำ:** Phase 2 ทำ A + B ก่อน (เตรียมโครงให้พร้อม) → Phase 3 ทำ C (ได้อุปกรณ์มากที่สุดต่อแรงที่ลง)
-→ เพิ่ม D/F ตามที่ผู้ใช้ขอจริง · E ใช้เมื่ออยากออกตลาดเร็วและงบรองรับ
+**แผนที่ตัดสินใจแล้ว (D10):** Phase 3 ทำ A + B + C ไปด้วยกัน (นำเข้าไฟล์ + ingestion API + companion app ได้อุปกรณ์มากที่สุดต่อแรงที่ลง)
+→ Phase 4 เพิ่ม D/F ตามที่ผู้ใช้ขอจริง · E ใช้เมื่ออยากออกตลาดเร็วและงบรองรับ
 
-**รูปแบบข้อมูลกลาง (ออกแบบตั้งแต่ Phase 2):** `user_id, type (steps, heart_rate, sleep_session, weight, bp_systolic, ...),
+**รูปแบบข้อมูลกลาง (ออกแบบ schema ตอนเริ่ม Phase 3):** `user_id, type (steps, heart_rate, sleep_session, weight, bp_systolic, ...),
 value, unit, start_at, end_at, source (healthkit / health_connect / oura / ble / manual / lab), device, external_id (กันซ้ำ)`
 · อ้างอิงแนวคิด FHIR Observation / LOINC เพื่อต่อกับโรงพยาบาล/แล็บในอนาคต · ถอนความยินยอมราย source = หยุด sync + เลือกลบข้อมูลของ source นั้นได้
 
@@ -412,7 +421,7 @@ value, unit, start_at, end_at, source (healthkit / health_connect / oura / ble /
  Next.js 16 บน Netlify ─ Server Actions / Route Handlers (requireUser / requireAdmin / assertFeature)
    ├─ Personal Health OS: Profile · Score · Timeline · Daily Actions · Vault · Passport
    ├─ AI layer: router ต่อ TaskKind → quota gate → provider adapter (Claude / Gemini) → fallback → ai_events
-   ├─ Billing: packages · trial · PromptPay review · (Omise Phase 3)
+   ├─ Billing: packages · trial · PromptPay review · (Omise Phase 4)
    └─ Admin: settings · flags · rules · AI · cost · usage · payments
                  │
                  ▼
@@ -441,64 +450,88 @@ value, unit, start_at, end_at, source (healthkit / health_connect / oura / ble /
 
 ---
 
-## 11. Roadmap การสร้าง 🟡
+### 10.1 Authentication (D7)
 
-| Phase                             | ระยะเวลา (ประมาณ) | ขอบเขต                                                                                                                                                                                                                                                                                                                                                                                           | เกณฑ์ว่าเสร็จ                                                                  |
-| --------------------------------- | ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------ |
-| **0 Foundation**                  | 1–2 สัปดาห์       | Theme + โลโก้ + PWA icon · AppShell + เมนู (K01/02) · i18n (K12) · Auth · schema ฐาน + RLS · consent รายข้อ · platform_settings + feature flags (K09) · admin role · Playwright มือถือ                                                                                                                                                                                                           | สมัคร/ล็อกอิน/ยินยอมได้ · `npm run check` + Playwright ผ่าน                    |
-| **1 MVP+ (AI Health Check loop)** | 5–7 สัปดาห์       | Quiz ก่อนสมัคร + Score + แผน 7 วัน + Shareable card · Trial 14 วัน + paywall + packages + PromptPay (K03/04) · ด่านโควตา (K10) + AI router + `/admin/ai` (K11) · Food Scan · Lab Scan + หน้าตรวจทาน · Today (check-in, score, 3 actions, streak) · Timeline พื้นฐาน · Ask My Health · Health Profile · หน้า PDPA 3 การ์ด (K13 + PDPA) · usage analytics + funnel (K05) · จอง Lab package พื้นฐาน | ผู้ใช้เดินครบ loop: Quiz → สมัคร → Scan → Insight → Today → จ่ายเงิน ได้บน dev |
-| **2 Habit + Data moat**           | 4–6 สัปดาห์       | Monthly Report · Timeline เต็ม + กราฟ · Health Vault · LINE (K07) + กฎอัตโนมัติ (K06) · Achievements · Referral + Challenges · Barcode/Voice · Wearable A+B · Paywall A/B · AI Anomaly + Next Action · manual URL (K08)                                                                                                                                                                          | retention dashboard มีข้อมูล · แจ้งเตือน LINE ทำงานพร้อมด่านโควตา              |
-| **3 Intelligence + ARR**          | 4–6 สัปดาห์       | Health Agent · Passport + Pre-Doctor Brief · Family (+1) · Omise recurring · Companion app + HealthKit/Health Connect · Supplement + Marketplace · Corporate plan พื้นฐาน · Creator toolkit                                                                                                                                                                                                      | Premium มีฟีเจอร์ครบตามตาราง                                                   |
-| **4 Scale**                       | ต่อเนื่อง         | Multi-branch / Franchise · BLE / CGM · อายุสุขภาพจากผลเลือด · Genomic insights · Voice Thai · B2B dashboard · AI Business Copilot · P&L / Unit Economics                                                                                                                                                                                                                                         |                                                                                |
+| วิธี                            | Phase | หมายเหตุ                                                                                  |
+| ------------------------------- | ----- | ----------------------------------------------------------------------------------------- |
+| Email + password (ยังไม่มี OTP) | 0     | ต้องยืนยันอีเมลหรือไม่ ดู 13.1 ข้อ R1                                                     |
+| Google                          | 0     | Supabase OAuth provider · ต้องสร้าง OAuth client ใน Google Cloud (`SETUP-GUIDE.md` A4)    |
+| LINE Login                      | 0     | ทำ flow เองฝั่ง server (ดู 13.1 ข้อ R2) · ต้องมี LINE Login channel (`SETUP-GUIDE.md` A5) |
+| ผูก LINE OA เพื่อรับแจ้งเตือน   | 1     | ต้องเป็นเพื่อนกับ OA (knowledge 07)                                                       |
+
+---
+
+## 11. Roadmap การสร้าง ✅ (ปรับตามการตัดสินใจ D1–D13)
+
+| Phase                             | ระยะเวลา (ประมาณ) | ขอบเขต                                                                                                                                                                                                                                                                                                                                                                                                                                                             | เกณฑ์ว่าเสร็จ                                                                  |
+| --------------------------------- | ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------ |
+| **0 Foundation**                  | 1–2 สัปดาห์       | Theme + โลโก้ + PWA icon · AppShell + เมนู (K01/02) · i18n โครงสองภาษา เปิดไทยก่อน (K12) · Auth: Email+password / Google / LINE Login (D7) · schema ฐาน + RLS · consent รายข้อ · platform_settings + feature flags (K09) · admin role · Playwright มือถือ                                                                                                                                                                                                          | สมัคร/ล็อกอินได้ทั้ง 3 วิธี + ยินยอมรายข้อ · `npm run check` + Playwright ผ่าน |
+| **1 MVP+ (AI Health Check loop)** | 5–7 สัปดาห์       | Quiz ก่อนสมัคร + Score + แผน 7 วัน + Shareable card · Trial 14 วัน + paywall + packages รายเดือน/รายปี + Free-lite + PromptPay (K03/04) · ด่านโควตา (K10) + AI router + `/admin/ai` (K11) · Food Scan · Lab Scan + หน้าตรวจทาน · Today (check-in, score, 3 actions, streak) · Timeline พื้นฐาน · Ask My Health · Health Profile · หน้า PDPA 3 การ์ด (K13 + PDPA) · usage analytics + funnel (K05) · ผูก LINE + แจ้งเตือน LINE (K07) · ปุ่ม "สนใจตรวจสุขภาพ" (lead) | ผู้ใช้เดินครบ loop: Quiz → สมัคร → Scan → Insight → Today → จ่ายเงิน ได้       |
+| **2 Habit + Data moat**           | 4–6 สัปดาห์       | Monthly Report · Timeline เต็ม + กราฟ · Health Vault · กฎอัตโนมัติ (K06) · Achievements · Referral + Challenges · Barcode/Voice · Paywall A/B · AI Anomaly + Next Action · manual URL (K08) · Dark mode (D12)                                                                                                                                                                                                                                                      | retention dashboard มีข้อมูล · กฎอัตโนมัติทำงานพร้อมด่านโควตา                  |
+| **3 Intelligence + Wearables**    | 4–6 สัปดาห์       | Health Agent · Passport + Pre-Doctor Brief · Family (+1) · Wearables: นำเข้าไฟล์ + ingestion API + Companion app (Capacitor) HealthKit/Health Connect (D10) · Supplement + Marketplace · Corporate plan พื้นฐาน · Creator toolkit                                                                                                                                                                                                                                  | Premium มีฟีเจอร์ครบตามตาราง                                                   |
+| **4 Scale (สุดท้าย)**             | ต่อเนื่อง         | **Omise recurring (D5)** · **จองแพ็กเกจตรวจ + Home Service + Staff portal อัปโหลดผล (D6)** · Multi-branch / Franchise · BLE / CGM · อายุสุขภาพจากผลเลือด · Genomic insights · Voice Thai · B2B dashboard · AI Business Copilot · P&L / Unit Economics                                                                                                                                                                                                              |                                                                                |
 
 ---
 
 ## 12. สิ่งที่ต้องได้จากเจ้าของโครงการก่อน/ระหว่างสร้าง
 
-| สิ่งที่ต้องใช้                                                          | ใช้เมื่อ              | หมายเหตุ                                                                                 |
-| ----------------------------------------------------------------------- | --------------------- | ---------------------------------------------------------------------------------------- |
-| **Supabase โปรเจกต์สำหรับ dev/test** (แยกจาก production)                | Phase 0               | container ของ Claude ไม่มี Docker จึงรัน Supabase ในเครื่องไม่ได้ · แนะนำภูมิภาคสิงคโปร์ |
-| Supabase โปรเจกต์ production                                            | ก่อนเปิดใช้จริง       | ตั้งภูมิภาคให้ถูกตั้งแต่สร้าง (เปลี่ยนทีหลังไม่ได้)                                      |
-| Netlify site ที่ผูก repo + ตั้งค่ากัน auto-deploy ของ branch `claude/*` | Phase 0               | ดูหัวข้อ 2.1                                                                             |
-| Anthropic API key และ Google AI (Gemini) API key แบบเปิด billing        | Phase 1               | ใส่เป็น environment variable — **ห้ามส่ง key ในแชท**                                     |
-| PromptPay ID สำหรับรับเงิน                                              | Phase 1               |                                                                                          |
-| LINE Official Account + Messaging API channel + LINE Login channel      | Phase 2               |                                                                                          |
-| รายการแพ็กเกจตรวจ + ราคา (เช่น 1,890 / 3,990 / 8,990 / 24,900+)         | Phase 1 (ถ้าทำการจอง) |                                                                                          |
-| แพทย์ที่ปรึกษา (ตรวจ prompt, ช่วงค่าอ้างอิง, ถ้อยคำอายุสุขภาพ)          | ก่อนเปิดใช้จริง       | ไม่ใช่งานโค้ด แต่สำคัญมาก                                                                |
-| โลโก้ SVG/PNG พื้นโปร่งใส                                               | ไม่บังคับ             |                                                                                          |
-| Apple Developer + Google Play account                                   | Phase 3               | สำหรับ companion app                                                                     |
+| สิ่งที่ต้องใช้                                                                         | ใช้เมื่อ              | หมายเหตุ                                                                            |
+| -------------------------------------------------------------------------------------- | --------------------- | ----------------------------------------------------------------------------------- |
+| **Supabase โปรเจกต์ 1 โปรเจกต์** (ใช้ร่วม dev/test/production — D11)                   | Phase 0 (ตอนนี้)      | ภูมิภาคสิงคโปร์ · ขั้นตอนและข้อมูลที่ต้องส่งอยู่ใน `SETUP-GUIDE.md` ส่วน A          |
+| ล้างข้อมูลทดสอบ + หมุน/เพิกถอนคีย์ + อัปเกรด Pro                                       | ก่อนเปิดใช้จริง       | checklist ใน `SETUP-GUIDE.md` ส่วน C                                                |
+| Netlify: ปิด Branch deploys และ Deploy Previews                                        | Phase 0 (ตอนนี้)      | ขั้นตอนใน `SETUP-GUIDE.md` ส่วน B (ผูก repo แล้ว)                                   |
+| Network access ของ environment: เพิ่ม `*.supabase.co`, `api.supabase.com`              | ตอนนี้                | ตอนนี้ Supabase ถูกบล็อก ผมต่อไม่ได้ · ภายหลังเพิ่ม `api.line.me`, `access.line.me` |
+| Google OAuth client (สำหรับ Google login)                                              | Phase 0               | `SETUP-GUIDE.md` A4                                                                 |
+| SMTP สำหรับส่งอีเมลยืนยัน (เช่น Resend / AWS SES)                                      | ก่อนเปิดใช้จริง       | ดู 13.1 ข้อ R1                                                                      |
+| Anthropic API key และ Google AI (Gemini) API key แบบเปิด billing                       | Phase 1               | ใส่เป็น environment variable — **ห้ามส่ง key ในแชท**                                |
+| PromptPay ID สำหรับรับเงิน                                                             | Phase 1               |                                                                                     |
+| LINE Login channel (Phase 0) · LINE Official Account + Messaging API channel (Phase 1) | Phase 0 / 1           | `SETUP-GUIDE.md` A5                                                                 |
+| รายการแพ็กเกจตรวจ + ราคา (เช่น 1,890 / 3,990 / 8,990 / 24,900+)                        | Phase 4 (ตอนทำการจอง) |                                                                                     |
+| แพทย์ที่ปรึกษา (ตรวจ prompt, ช่วงค่าอ้างอิง, ถ้อยคำอายุสุขภาพ)                         | ก่อนเปิดใช้จริง       | ไม่ใช่งานโค้ด แต่สำคัญมาก                                                           |
+| โลโก้ SVG/PNG พื้นโปร่งใส                                                              | ไม่บังคับ             |                                                                                     |
+| Apple Developer + Google Play account                                                  | Phase 3               | สำหรับ companion app                                                                |
 
-ค่า key สำหรับ test environment ของ Claude: เจ้าของใส่ที่ environment settings ของ Claude Code (เมนู cloud environment
-บนแถบชื่อ session → Edit → environment variables) ใช้ชื่อตาม `.env.example` เช่น `NEXT_PUBLIC_SUPABASE_URL`,
-`NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, `ANTHROPIC_API_KEY`, `GOOGLE_AI_API_KEY`
+วิธีใส่ค่า key / network access ของ Claude: ดู `SETUP-GUIDE.md` ส่วน A6 — **ห้ามส่ง key ลับในแชท**
 
 ---
 
-## 13. ประเด็นที่รอเจ้าของโครงการตัดสินใจ
+## 13. การตัดสินใจของเจ้าของโครงการ (D1–D13) ✅
 
-| #   | ประเด็น                                                                                     | ข้อเสนอของ Claude                                                                                           |
-| --- | ------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
-| D1  | หลัง trial หมด: Free-lite หรือ hard paywall                                                 | **Free-lite** (หัวข้อ 5.2)                                                                                  |
-| D2  | โควตาของ Free-lite                                                                          | ตามตาราง 5.3 (Chat 5 · Food 3 · Lab 1 · Quiz 1/3 เดือน · Timeline 30 วัน · Vault 5 ไฟล์)                    |
-| D3  | ราคารายปี                                                                                   | เพิ่ม Gold 490 ฿ · Premium 890 ฿                                                                            |
-| D4  | fair-use cap ของ Premium และของ trial                                                       | มี และให้ admin ตั้ง (ค่าเริ่มต้นกำหนดหลังวัดต้นทุนจริงบน dev)                                              |
-| D5  | การชำระเงิน Phase 1                                                                         | PromptPay QR + ตรวจสลิป → Omise recurring ใน Phase 3                                                        |
-| D6  | การจองแพ็กเกจตรวจ/อัปโหลดผลโดยเจ้าหน้าที่ อยู่ใน Phase 1 หรือไม่ (มีศูนย์ตรวจเปิดเมื่อไหร่) | ทำแบบพื้นฐานใน Phase 1 ถ้าศูนย์ตรวจเปิดภายใน ~2–3 เดือน                                                     |
-| D7  | วิธีล็อกอิน                                                                                 | Email OTP + Google ใน Phase 0 · ผูก LINE เพื่อแจ้งเตือนใน Phase 2 · LINE Login เป็นวิธีล็อกอินภายหลัง       |
-| D8  | ภาษา                                                                                        | โครงสองภาษาตั้งแต่ต้น (K12) เปิดภาษาไทยก่อน แปลอังกฤษตามมา                                                  |
-| D9  | คู่ AI                                                                                      | Claude Sonnet 5.5 + Gemini Flash (billing เปิด) + Claude Haiku 4.5 งานเบา · ใช้ SDK ทางการ + adapter ของเรา |
-| D10 | แนวทาง wearable ระยะยาว                                                                     | Phase 2 นำเข้าไฟล์ + ingestion API → Phase 3 companion app (Capacitor)                                      |
-| D11 | Test environment                                                                            | Supabase dev แยก + ปิด branch deploy/deploy preview บน Netlify                                              |
-| D12 | Dark mode                                                                                   | ไว้ทีหลัง (Phase 2+) เริ่มจากธีมสว่างตามพาเลตต์                                                             |
-| D13 | สีเตือนระดับ "ควรติดตาม"                                                                    | เพิ่มเหลืองอำพัน `#F2A93B` และกำหนดแดง `#E5484D` สำหรับผิดปกติจริง                                          |
+| #     | ประเด็น                        | การตัดสินใจ                                                                                                                   | ผลต่อแผน                                                                  |
+| ----- | ------------------------------ | ----------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------- |
+| D1–D2 | หลัง trial หมด + โควตา         | **Free-lite** ตามตาราง 5.3                                                                                                    | Chat 5 · Food 3 · Lab 1 · Quiz 1/3 เดือน · Timeline 30 วัน · Vault 5 ไฟล์ |
+| D3    | ราคารายปี                      | **Gold 490 ฿ · Premium 890 ฿**                                                                                                | เพิ่มแผนรายปีใน Phase 1                                                   |
+| D4    | fair-use cap                   | มีของ **Premium และ trial** · admin ตั้งได้                                                                                   | ด่านโควตา K10 · ค่าเริ่มต้นกำหนดหลังวัดต้นทุนจริง                         |
+| D5    | การชำระเงิน                    | Phase 1–3 **PromptPay QR + ตรวจสลิป** → **Omise recurring ใน Phase สุดท้าย (4)**                                              | ดู 5.5 · ความเสี่ยง R4                                                    |
+| D6    | การจอง/อัปโหลดผลโดยเจ้าหน้าที่ | **Phase สุดท้าย (4)**                                                                                                         | Phase 1 ใช้ปุ่ม "สนใจ" เก็บ lead แทน · ความเสี่ยง R3                      |
+| D7    | วิธีล็อกอิน                    | **Email+password (ไม่มี OTP) + Google + LINE Login ใน Phase 0** · ผูก LINE เพื่อแจ้งเตือนใน Phase 1                           | ดู 10.1 · R1, R2                                                          |
+| D8    | ภาษา                           | โครงสองภาษาตั้งแต่ต้น (K12) เปิดไทยก่อน แปลอังกฤษตามมา                                                                        |                                                                           |
+| D9    | คู่ AI                         | Claude Sonnet 5.5 + Gemini Flash (billing เปิด) + Claude Haiku 4.5 งานเบา · SDK ทางการ + adapter ของเรา                       | ดูหัวข้อ 8                                                                |
+| D10   | wearable                       | นำเข้าไฟล์ + ingestion API + companion app (Capacitor) ทั้งหมดใน **Phase 3**                                                  | ดูหัวข้อ 9                                                                |
+| D11   | test environment               | **Supabase โปรเจกต์เดียวใช้ร่วม dev/test/prod** (ล้างข้อมูลก่อนขึ้น production) · ปิด branch deploy/deploy preview บน Netlify | ดู 2.1 ข้อ 6 · R5 · `SETUP-GUIDE.md`                                      |
+| D12   | dark mode                      | ไว้ทีหลัง (Phase 2+)                                                                                                          | ธีมสว่างก่อน                                                              |
+| D13   | สีสถานะ                        | เหลืองอำพัน `#F2A93B` (ควรติดตาม) · แดง `#E5484D` (ผิดปกติจริง)                                                               | ดู 3.2                                                                    |
+
+### 13.1 ความเสี่ยง/ประเด็นที่เกิดจากการตัดสินใจ (ขอให้รับทราบ — ไม่ต้องตอบถ้าโอเค)
+
+| #   | เรื่อง                             | รายละเอียดและแนวทางที่ใช้                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| --- | ---------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| R1  | อีเมลยืนยันตัวตน (D7)              | อีเมล+รหัสผ่านโดยทั่วไปต้องส่งอีเมลยืนยัน แต่ SMTP เริ่มต้นของ Supabase ถูกจำกัดมาก (ตามที่ผมทราบ ส่งได้เฉพาะอีเมลของสมาชิกทีม Supabase และมีเพดานต่ำ — จะตรวจกับ dashboard จริงตอนตั้งค่า) → ช่วงพัฒนาเลือกปิด "Confirm email" ได้ · **ก่อนเปิดใช้จริงต้องตั้ง SMTP ของตัวเอง** แล้วเปิดการยืนยันอีเมล                                                                                                                                                   |
+| R2  | LINE Login (D7)                    | ตามที่ผมทราบ Supabase ไม่มี LINE เป็น provider สำเร็จรูป → ทำ flow เองฝั่ง server (OAuth code → ตรวจ ID token → สร้าง/ล็อกอินผู้ใช้) ทำได้ · LINE ไม่ส่งอีเมลมาเสมอ (ต้องขอสิทธิ์ email และผู้ใช้อาจไม่ให้) → **ไม่รวมบัญชีอัตโนมัติด้วยอีเมล** (เสี่ยงถูกยึดบัญชี) ผู้ใช้เชื่อม Google/LINE เองจากหน้าตั้งค่าหลังล็อกอิน · ผลข้างเคียง: สมัครหลายวิธี = หลายบัญชี = ได้ trial หลายครั้ง → คุมด้วย fair-use cap ของ trial (ต้นทุนส่วนเกิน ≈ 10 บาท/บัญชี) |
+| R3  | ไม่มีการจองจริงใน Phase 1 (D6)     | Dynamic upsell gate ของ Quiz/Insight จะพาไปปุ่ม "สนใจตรวจสุขภาพ" (เก็บ lead + ติดต่อกลับทาง LINE OA) ต้องมีช่องทางติดต่อที่มีคนตอบ                                                                                                                                                                                                                                                                                                                        |
+| R4  | PromptPay นานถึง Phase 3 (D5)      | ทุกรอบต้องโอนเองและ admin ตรวจทุกสลิป — ดูตัวอย่างตัวเลขใน 5.5 · ลด churn ด้วยแผนรายปี + เตือนต่ออายุ                                                                                                                                                                                                                                                                                                                                                     |
+| R5  | Supabase เดียวทั้ง dev/prod (D11)  | (1) ห้ามผู้ใช้จริงสมัครก่อน cleanup (2) service-role key และ access token ที่ใส่ใน environment ของ Claude ต้อง **หมุน/เพิกถอนก่อนเปิดใช้จริง** (3) แพ็กเกจ Free ของ Supabase ถูกพักโปรเจกต์เมื่อไม่มีการใช้งานราว 1 สัปดาห์และไม่มี backup → **อัปเกรด Pro ก่อนมีผู้ใช้จริง** (4) migration ที่ผมรันระหว่างพัฒนาลงฐานข้อมูลนี้จริงทันที                                                                                                                   |
+| R6  | Quiz ของ Free-lite เป็นรอบ 3 เดือน | โควตาอื่นเป็นรายเดือน → ด่านโควตาต้องรองรับ "ช่วงเวลา" ของแต่ละโควตา (ทำใน Phase 1 พร้อมด่านโควตา)                                                                                                                                                                                                                                                                                                                                                        |
+| R7  | ทดสอบ Google/LINE login            | ในสภาพแวดล้อมของผม ทำได้เฉพาะ Email · การล็อกอินด้วย Google และ LINE ต้องใช้บัญชีจริง ผมจะเตรียมขั้นตอนทดสอบให้คุณทำเอง                                                                                                                                                                                                                                                                                                                                   |
 
 ---
 
 ## 14. Change log
 
-| วันที่     | เวอร์ชัน | รายละเอียด                                                                   |
-| ---------- | -------- | ---------------------------------------------------------------------------- |
-| 2026-10-03 | v0.1     | ร่างแรก: บันทึกข้อกำหนดทั้ง 7 ข้อของเจ้าของโครงการ + แผน + ประเด็นรอตัดสินใจ |
+| วันที่     | เวอร์ชัน | รายละเอียด                                                                                                                                                                                      |
+| ---------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-10-03 | v0.1     | ร่างแรก: บันทึกข้อกำหนดทั้ง 7 ข้อของเจ้าของโครงการ + แผน + ประเด็นรอตัดสินใจ                                                                                                                    |
+| 2026-10-03 | v0.2     | บันทึกการตัดสินใจ D1–D13 · ปรับ roadmap (LINE → Phase 1, wearables → Phase 3, Omise + การจอง → Phase 4) · เพิ่มหัวข้อ 10.1 Auth และ 13.1 ความเสี่ยง · เพิ่ม `SETUP-GUIDE.md` และ `netlify.toml` |
 
 ---
 

@@ -2,9 +2,10 @@
  * Subscription tiers — source of truth:
  * docs/Precision Health Subscription Tiers Business Model.pdf (v1.1, Oct 2026).
  *
- * Gold and Premium mirror the doc's feature table. Free is not specified in
- * that doc beyond "limited AI chat + manual tracking", so its numbers are
- * placeholders until product decides.
+ * Gold and Premium mirror the doc's feature table. Free ("Free-lite", shown
+ * after the 14-day Premium trial) follows the owner-approved quotas in
+ * docs/ROOSUK-MASTER-PLAN.md §5.3 (D1–D2). The Free quiz limit is really
+ * 1 per 3 months; quota periods arrive with the billing gate in Phase 1.
  */
 
 export type PlanId = "free" | "gold" | "premium";
@@ -29,8 +30,7 @@ export const PLANS: Record<PlanId, Plan> = {
   free: {
     id: "free",
     priceThbPerMonth: 0,
-    // Placeholder limits — not defined in the business model doc.
-    monthlyQuota: { healthQuiz: 1, aiChat: 10, foodSnap: 3, labImport: 1 },
+    monthlyQuota: { healthQuiz: 1, aiChat: 5, foodSnap: 3, labImport: 1 },
     timelineHistoryMonths: 1,
     vaultMaxFiles: 5,
     healthPassport: false,

@@ -9,6 +9,7 @@ RooSuk (รู้สุข) — AI Personal Health OS ("AI ที่รู้จ
 ## Working rules (owner's instructions)
 
 - Test only in Claude's own environment (`npm run check`, `npm run build`, local `next start`, Playwright at 390×844, the Supabase dev project). **Never deploy to or test on Netlify production** without asking the owner first — Netlify credits are limited. Merging to `main` only when the owner says so.
+- Supabase is ONE project shared by dev/test/prod until launch (D11): treat all data as test data and follow the pre-launch checklist in `docs/SETUP-GUIDE.md` §C (wipe data, rotate/revoke keys, upgrade to Pro) before real users sign up. Without the `*.supabase.co` / `api.supabase.com` network allowlist the sandbox cannot reach Supabase; Postgres port 5432 is unreachable, so apply migrations through the Management API.
 - Unit tests mock AI providers; real AI calls cost money and never run in CI.
 - Deploy: Netlify · Auth/DB/Storage: Supabase · Repo: github.com/geeravut-lab/roosuk.
 
