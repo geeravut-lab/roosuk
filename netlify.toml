@@ -7,5 +7,13 @@
 #   (e.g. first build, no cached commit) it errors, which means "build".
 # - The build stops early when required environment variables are missing.
 [build]
+  # Explicit, so a stale publish directory set in the Netlify UI (from when this
+  # was a docs-only repo) cannot bypass the Next.js runtime.
+  publish = ".next"
   command = "node scripts/check-deploy-env.mjs && next build"
   ignore = 'test "$BRANCH" != "main" || git diff --quiet "$CACHED_COMMIT_REF" "$COMMIT_REF" -- src public package.json package-lock.json next.config.ts tsconfig.json postcss.config.mjs netlify.toml scripts/check-deploy-env.mjs scripts/lib/deploy-env.mjs'
+
+# The Next.js runtime turns the build into Netlify functions. A deploy that
+# reports "No functions deployed" serves 404 for every route.
+[[plugins]]
+  package = "@netlify/plugin-nextjs"

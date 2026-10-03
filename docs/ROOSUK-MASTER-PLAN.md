@@ -553,12 +553,13 @@ value, unit, start_at, end_at, source (healthkit / health_connect / oura / ble /
 
 ## 14. Change log
 
-| วันที่     | เวอร์ชัน | รายละเอียด                                                                                                                                                                                      |
-| ---------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 2026-10-03 | v0.1     | ร่างแรก: บันทึกข้อกำหนดทั้ง 7 ข้อของเจ้าของโครงการ + แผน + ประเด็นรอตัดสินใจ                                                                                                                    |
-| 2026-10-03 | v0.2     | บันทึกการตัดสินใจ D1–D13 · ปรับ roadmap (LINE → Phase 1, wearables → Phase 3, Omise + การจอง → Phase 4) · เพิ่มหัวข้อ 10.1 Auth และ 13.1 ความเสี่ยง · เพิ่ม `SETUP-GUIDE.md` และ `netlify.toml` |
-| 2026-10-03 | v0.3     | เริ่ม Phase 0: theme, AppShell, i18n, auth (Email/Google/LINE), consent, feature flags, admin, schema + RLS + test, Playwright · เพิ่มหัวข้อ 11.1 สถานะ Phase 0                                 |
-| 2026-10-03 | v0.4     | apply migration ลง Supabase จริง · ชุดทดสอบ live ผ่าน · แก้ redirect หลังล็อกอิน · ด่านตรวจ env ตอน build production · กฎ sync เข้า `main` ทุกครั้ง · หัวข้อ 11.2                               |
+| วันที่     | เวอร์ชัน | รายละเอียด                                                                                                                                                                                                                            |
+| ---------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-10-03 | v0.1     | ร่างแรก: บันทึกข้อกำหนดทั้ง 7 ข้อของเจ้าของโครงการ + แผน + ประเด็นรอตัดสินใจ                                                                                                                                                          |
+| 2026-10-03 | v0.2     | บันทึกการตัดสินใจ D1–D13 · ปรับ roadmap (LINE → Phase 1, wearables → Phase 3, Omise + การจอง → Phase 4) · เพิ่มหัวข้อ 10.1 Auth และ 13.1 ความเสี่ยง · เพิ่ม `SETUP-GUIDE.md` และ `netlify.toml`                                       |
+| 2026-10-03 | v0.3     | เริ่ม Phase 0: theme, AppShell, i18n, auth (Email/Google/LINE), consent, feature flags, admin, schema + RLS + test, Playwright · เพิ่มหัวข้อ 11.1 สถานะ Phase 0                                                                       |
+| 2026-10-03 | v0.4     | apply migration ลง Supabase จริง · ชุดทดสอบ live ผ่าน · แก้ redirect หลังล็อกอิน · ด่านตรวจ env ตอน build production · กฎ sync เข้า `main` ทุกครั้ง · หัวข้อ 11.2                                                                     |
+| 2026-10-03 | v0.5     | แก้ production 404: deploy แรกของแอปรายงาน "No functions deployed" (Next runtime ไม่ทำงาน) → ระบุ `@netlify/plugin-nextjs` และ `publish = ".next"` ใน `netlify.toml` · จำลอง build ด้วย netlify-cli ได้ server handler + edge handler |
 
 ---
 

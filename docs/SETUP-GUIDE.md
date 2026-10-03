@@ -189,6 +189,11 @@ LINE Official Account + Messaging API channel (สำหรับแจ้งเ
 2. หลังตั้งค่า ผม push ครั้งถัดไป คุณควรเห็น **ไม่มี deploy ใหม่** (หรือเห็นสถานะ "Skipped/Canceled by ignore command")
    ถ้ายังมี build ใหม่ แจ้งผมได้เลย
 
+### B4.1 ถ้าเว็บขึ้น "Page not found" ของ Netlify ทุกหน้า
+
+เปิด Deploys → deploy ล่าสุด → ดูสรุปท้าย log ถ้าเขียนว่า **"No functions deployed"** แปลว่า Next.js runtime ไม่ทำงาน (เว็บถูกเผยแพร่เป็นไฟล์สถิต)
+`netlify.toml` ระบุ `@netlify/plugin-nextjs` และ `publish = ".next"` ไว้แล้วเพื่อกันกรณีนี้ — ที่หน้า Build settings ไม่ต้องตั้ง Publish directory เอง (ปล่อยว่างหรือ `.next`)
+
 ### B5. Environment variables บน Netlify (จำเป็นก่อน deploy production)
 
 **Site configuration → Environment variables** — `NEXT_PUBLIC_*` ถูกฝังตอน build จึงต้องมีก่อน build ตัวแปรลับให้ติ๊ก **Contains secret values**
