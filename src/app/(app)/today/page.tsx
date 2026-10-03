@@ -1,12 +1,21 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Clock } from "lucide-react";
-import { ComingSoon } from "@/components/ComingSoon";
 import { requireUser } from "@/lib/auth/server";
 import { getBillingProfile } from "@/lib/billing/profile.server";
 import { resolvePlan } from "@/lib/billing/plan";
 import { fmt } from "@/lib/i18n/dict";
-import { getT } from "@/lib/i18n/server";
+import { bangkokDate } from "@/lib/health/dates";
+import { loadCheckins, loadDoneActions } from "@/lib/health/server";
+import { buildHabitView } from "@/lib/health/view";
+import { getLang, getT } from "@/lib/i18n/server";
+import {
+  ActionsCard,
+  CheckinCard,
+  LowMoodCard,
+  ScoreCard,
+  StreakCard,
+} from "./HabitCards";
 
 export async function generateMetadata(): Promise<Metadata> {
   return { title: (await getT()).navToday };
@@ -14,8 +23,16 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default async function TodayPage() {
   const user = await requireUser();
-  const [t, billing] = await Promise.all([getT(), getBillingProfile(user.id)]);
+  const today = bangkokDate(new Date());
+  const [t, lang, billing, rows, doneKeys] = await Promise.all([
+    getT(),
+    getLang(),
+    getBillingProfile(user.id),
+    loadCheckins(today),
+    loadDoneActions(today),
+  ]);
   const plan = billing ? resolvePlan(billing) : null;
+  const view = buildHabitView(rows, doneKeys, today);
 
   return (
     <div className="space-y-4">
@@ -36,7 +53,11 @@ export default async function TodayPage() {
         </Link>
       ) : null}
 
-      <ComingSoon />
+      {view.lowMood ? <LowMoodCard t={t} /> : null}
+      <CheckinCard t={t} view={view} />
+      <ScoreCard t={t} score={view.score} />
+      <ActionsCard t={t} view={view} />
+      <StreakCard t={t} lang={lang} view={view} />
     </div>
   );
 }
