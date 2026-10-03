@@ -1,0 +1,9 @@
+.next
+node_modules
+package-lock.json
+docs/*.pdf
+docs/*.txt
+docs/[0-9][0-9]-*.md
+docs/README.md
+docs/PDPA-*.md
+docs/*.jpg
