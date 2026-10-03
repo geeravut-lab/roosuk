@@ -1,0 +1,134 @@
+import { Check, Minus } from "lucide-react";
+import {
+  METERED_FEATURES,
+  PLAN_IDS,
+  PLANS,
+  quotaFor,
+  type PlanId,
+  type QuotaOverrides,
+} from "@/config/plans";
+import { quotaText } from "@/lib/billing/format";
+import type { BillingSettings } from "@/lib/billing/settings";
+import { fmt, type Dict } from "@/lib/i18n/dict";
+
+function Yes({ t, on }: { t: Dict; on: boolean }) {
+  return on ? (
+    <Check className="text-primary-strong size-5" aria-label={t.subIncluded} />
+  ) : (
+    <Minus className="text-muted size-5" aria-label={t.subNotIncluded} />
+  );
+}
+
+function Row({
+  label,
+  children,
+}: {
+  label: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <li className="flex items-center justify-between gap-3 py-1.5 text-sm">
+      <span>{label}</span>
+      <span className="text-right font-medium">{children}</span>
+    </li>
+  );
+}
+
+/**
+ * Plan cards, stacked on mobile. Every number comes from the same config +
+ * settings the quota gate uses, so what is advertised is what is enforced.
+ * Payment itself is not built yet (Phase 1, next slice): the button is inert.
+ */
+export function PlanComparison({
+  t,
+  current,
+  billing,
+}: {
+  t: Dict;
+  current: PlanId;
+  billing: BillingSettings;
+}) {
+  const overrides: QuotaOverrides = billing.planOverrides;
+  const price = (id: PlanId) => {
+    if (id === "free") return [t.subPriceFree];
+    const p = billing.pricing;
+    const [m, y] =
+      id === "gold"
+        ? [p.goldMonthly, p.goldYearly]
+        : [p.premiumMonthly, p.premiumYearly];
+    return [
+      fmt(t.subPricePerMonth, { price: m }),
+      fmt(t.subPricePerYear, { price: y }),
+    ];
+  };
+
+  return (
+    <ul className="space-y-4">
+      {PLAN_IDS.map((id) => {
+        const plan = PLANS[id];
+        const isCurrent = id === current;
+        return (
+          <li
+            key={id}
+            className={`card space-y-3 ${isCurrent ? "border-primary-strong border-2" : ""}`}
+          >
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <h3 className="text-primary-strong text-lg font-bold">
+                  {t[`planName_${id}` as const]}
+                </h3>
+                {price(id).map((line) => (
+                  <p key={line} className="text-sm">
+                    {line}
+                  </p>
+                ))}
+              </div>
+              {isCurrent ? (
+                <span className="bg-tint-secondary text-primary-strong rounded-full px-2.5 py-1 text-xs font-semibold">
+                  {t.subYourPlanTag}
+                </span>
+              ) : null}
+            </div>
+
+            <ul className="divide-line divide-y">
+              {METERED_FEATURES.map((f) => (
+                <Row key={f} label={t[`feature_${f}` as const]}>
+                  {quotaText(t, quotaFor(id, f, overrides))}
+                </Row>
+              ))}
+              <Row label={t.subTimeline}>
+                {plan.timelineHistoryMonths === "unlimited"
+                  ? t.subUnlimited
+                  : fmt(t.subTimelineMonths, { n: plan.timelineHistoryMonths })}
+              </Row>
+              <Row label={t.subVault}>
+                {plan.vaultMaxFiles === "unlimited"
+                  ? t.subUnlimited
+                  : fmt(t.subVaultFiles, { n: plan.vaultMaxFiles })}
+              </Row>
+              <Row label={t.subPassport}>
+                <Yes t={t} on={plan.healthPassport} />
+              </Row>
+              <Row label={t.subAgent}>
+                <Yes t={t} on={plan.healthAgent} />
+              </Row>
+              <Row label={t.subFamily}>
+                {plan.familyMembers > 0 ? (
+                  fmt(t.subFamilyMembers, { n: plan.familyMembers })
+                ) : (
+                  <Yes t={t} on={false} />
+                )}
+              </Row>
+            </ul>
+
+            {id !== "free" && !isCurrent ? (
+              <button type="button" disabled className="btn btn-primary w-full">
+                {t.subPayCta}
+              </button>
+            ) : null}
+          </li>
+        );
+      })}
+    </ul>
+  );
+}

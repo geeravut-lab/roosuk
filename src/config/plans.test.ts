@@ -1,32 +1,68 @@
 import { describe, expect, it } from "vitest";
-import { canUse, PLANS, remainingQuota } from "./plans";
+import { DEFAULT_PRICING, METERED_FEATURES, PLANS, quotaFor } from "./plans";
 
 describe("subscription plans", () => {
-  it("prices Gold and Premium per the business model doc", () => {
-    expect(PLANS.gold.priceThbPerMonth).toBe(49);
-    expect(PLANS.premium.priceThbPerMonth).toBe(89);
+  it("defaults to the owner's prices (Gold 49/490, Premium 89/890)", () => {
+    expect(DEFAULT_PRICING).toEqual({
+      goldMonthly: 49,
+      goldYearly: 490,
+      premiumMonthly: 89,
+      premiumYearly: 890,
+    });
   });
 
-  it("meters Gold AI usage", () => {
-    expect(remainingQuota("gold", "aiChat", 0)).toBe(30);
-    expect(remainingQuota("gold", "aiChat", 29)).toBe(1);
-    expect(canUse("gold", "aiChat", 29)).toBe(true);
-    expect(canUse("gold", "aiChat", 30)).toBe(false);
+  it("meters Gold per the business model doc", () => {
+    expect(quotaFor("gold", "aiChat")).toEqual({ limit: 30, periodMonths: 1 });
+    expect(quotaFor("gold", "foodSnap")).toEqual({
+      limit: 15,
+      periodMonths: 1,
+    });
+    expect(quotaFor("gold", "labImport")).toEqual({
+      limit: 3,
+      periodMonths: 1,
+    });
+    expect(quotaFor("gold", "healthQuiz")).toEqual({
+      limit: 1,
+      periodMonths: 1,
+    });
   });
 
-  it("never reports negative remaining quota", () => {
-    expect(remainingQuota("gold", "foodSnap", 99)).toBe(0);
+  it("gives Free-lite the approved quotas, with the quiz once per 3 months", () => {
+    expect(quotaFor("free", "aiChat").limit).toBe(5);
+    expect(quotaFor("free", "foodSnap").limit).toBe(3);
+    expect(quotaFor("free", "labImport").limit).toBe(1);
+    expect(quotaFor("free", "healthQuiz")).toEqual({
+      limit: 1,
+      periodMonths: 3,
+    });
+    expect(PLANS.free.timelineHistoryMonths).toBe(1);
+    expect(PLANS.free.vaultMaxFiles).toBe(5);
   });
 
-  it("does not meter Premium", () => {
-    expect(remainingQuota("premium", "foodSnap", 10_000)).toBe("unlimited");
-    expect(canUse("premium", "labImport", 10_000)).toBe(true);
+  it("leaves Premium unlimited (usage is still counted by the gate)", () => {
+    for (const f of METERED_FEATURES)
+      expect(quotaFor("premium", f).limit).toBe("unlimited");
   });
 
-  it("keeps Passport and Agent Premium-only", () => {
-    expect(PLANS.gold.healthPassport).toBe(false);
-    expect(PLANS.gold.healthAgent).toBe(false);
-    expect(PLANS.premium.healthPassport).toBe(true);
-    expect(PLANS.premium.healthAgent).toBe(true);
+  it("keeps Passport and Agent Premium-only, Family at +1 on Premium", () => {
+    expect(
+      PLANS.gold.healthPassport ||
+        PLANS.gold.healthAgent ||
+        PLANS.free.healthAgent,
+    ).toBe(false);
+    expect(PLANS.premium.healthPassport && PLANS.premium.healthAgent).toBe(
+      true,
+    );
+    expect(PLANS.premium.familyMembers).toBe(1);
+  });
+
+  it("applies admin overrides to the limit only, keeping the plan's window", () => {
+    expect(quotaFor("free", "healthQuiz", { free: { healthQuiz: 2 } })).toEqual(
+      { limit: 2, periodMonths: 3 },
+    );
+    expect(
+      quotaFor("gold", "aiChat", { gold: { aiChat: "unlimited" } }).limit,
+    ).toBe("unlimited");
+    expect(quotaFor("gold", "aiChat", { free: { aiChat: 99 } }).limit).toBe(30);
   });
 });

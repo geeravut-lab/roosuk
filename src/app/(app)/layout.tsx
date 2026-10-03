@@ -1,6 +1,8 @@
 import { redirect } from "next/navigation";
 import { AppShell } from "@/components/shell/AppShell";
 import { isAdminUser, requireUser } from "@/lib/auth/server";
+import { getBillingProfile } from "@/lib/billing/profile.server";
+import { startTrialIfEligible } from "@/lib/billing/trial.server";
 import { isConsentCurrent } from "@/lib/consent/consent";
 import { getLatestConsent } from "@/lib/consent/server";
 import { loadPlatformSettings } from "@/lib/settings/server";
@@ -16,6 +18,18 @@ export default async function AppLayout({
 }) {
   const user = await requireUser();
   if (!isConsentCurrent(await getLatestConsent(user.id))) redirect("/consent");
+
+  // Self-heal: consent is done but the trial never started (e.g. the consent
+  // request failed to start it, or the account predates trials). Idempotent.
+  // Pages rendered in this same request may still show the old state once.
+  const billing = await getBillingProfile(user.id);
+  if (billing && !billing.trial_started_at) {
+    try {
+      await startTrialIfEligible(user.id);
+    } catch (err) {
+      console.error("[trial] self-heal failed:", err);
+    }
+  }
 
   const [isAdmin, settings] = await Promise.all([
     isAdminUser(user.id),

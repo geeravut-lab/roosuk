@@ -496,6 +496,23 @@ value, unit, start_at, end_at, source (healthkit / health_connect / oura / ble /
 - **⚠ ต้องแก้ใน Supabase dashboard:** Redirect URLs มี `https://roosuk.netlify.app` แต่ไม่มี `/**` จึงไม่ตรงกับ `/auth/callback` → Google login จะกลับมาที่หน้าแรกโดยไม่เข้าสู่ระบบ ให้เพิ่ม `https://roosuk.netlify.app/**`
 - **ก่อนเปิดใช้จริง:** เปิดยืนยันอีเมล + ตั้ง SMTP ของตัวเอง · ตั้งความยาวรหัสผ่านขั้นต่ำเป็น 8 · เพิ่ม `NEXT_PUBLIC_SITE_URL`
 
+### 11.3 ความคืบหน้า Phase 1
+
+| งาน                                                                 | สถานะ                            | หมายเหตุ                                                                                                                                      |
+| ------------------------------------------------------------------- | -------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| ทดลอง Premium 14 วัน เริ่มเมื่อยินยอมครบ (D1)                       | ✅ เสร็จ + ทดสอบกับของจริง       | เก็บฝั่งเซิร์ฟเวอร์ ผู้ใช้แก้เองไม่ได้ · `trial_days` ปรับได้ใน `platform_settings`                                                           |
+| Free-lite หลังหมด trial (D1–D2)                                     | ✅ เสร็จ + ทดสอบ                 | ไม่ restart trial ซ้ำ                                                                                                                         |
+| ด่านโควตา AI (K10)                                                  | ✅ เสร็จ + ทดสอบกับฐานข้อมูลจริง | `checkAndConsume()` — atomic ใน SQL, ล้มแบบปิดกั้น, นับ "ไม่จำกัด" ด้วย, หน้าต่างโควตา 3 เดือนของ Quiz, เพดาน fair-use ของ trial/Premium (D4) |
+| หน้า `/subscription`                                                | ✅ เสร็จ                         | แพ็กเกจปัจจุบัน · แถบการใช้ AI · เปรียบเทียบ 3 แพ็กเกจ (ราคา D3 จากฐานข้อมูล)                                                                 |
+| ชำระเงิน PromptPay + admin ตรวจสลิป (K03/04)                        | ⏳ ถัดไป                         | ปุ่มชำระเงินยังปิดอยู่                                                                                                                        |
+| AI router + `/admin/ai` (K11)                                       | ⏳ ถัดไป                         |                                                                                                                                               |
+| Daily check-in · Health Score · Today's 3 Actions · Streak          | ⏳                               |                                                                                                                                               |
+| Quiz ก่อนสมัคร + แผน 7 วัน + Shareable card                         | ⏳                               |                                                                                                                                               |
+| Food Scan · Lab Scan + หน้าตรวจทาน                                  | ⏳                               | ต้องมี AI router และ `ANTHROPIC_API_KEY` ก่อน                                                                                                 |
+| Health Profile · Timeline · Ask My Health                           | ⏳                               |                                                                                                                                               |
+| หน้า PDPA 3 การ์ด (ดาวน์โหลด/ลบข้อมูล)                              | ⏳                               |                                                                                                                                               |
+| ผูก LINE + แจ้งเตือน LINE · usage analytics · ปุ่ม "สนใจตรวจสุขภาพ" | ⏳                               |                                                                                                                                               |
+
 ---
 
 ## 12. สิ่งที่ต้องได้จากเจ้าของโครงการก่อน/ระหว่างสร้าง
@@ -560,6 +577,7 @@ value, unit, start_at, end_at, source (healthkit / health_connect / oura / ble /
 | 2026-10-03 | v0.3     | เริ่ม Phase 0: theme, AppShell, i18n, auth (Email/Google/LINE), consent, feature flags, admin, schema + RLS + test, Playwright · เพิ่มหัวข้อ 11.1 สถานะ Phase 0                                                                       |
 | 2026-10-03 | v0.4     | apply migration ลง Supabase จริง · ชุดทดสอบ live ผ่าน · แก้ redirect หลังล็อกอิน · ด่านตรวจ env ตอน build production · กฎ sync เข้า `main` ทุกครั้ง · หัวข้อ 11.2                                                                     |
 | 2026-10-03 | v0.5     | แก้ production 404: deploy แรกของแอปรายงาน "No functions deployed" (Next runtime ไม่ทำงาน) → ระบุ `@netlify/plugin-nextjs` และ `publish = ".next"` ใน `netlify.toml` · จำลอง build ด้วย netlify-cli ได้ server handler + edge handler |
+| 2026-10-04 | v0.6     | Phase 1 slice A: แพ็กเกจ + trial 14 วัน + ด่านโควตา AI (migration `billing_core` apply แล้ว) · หน้า `/subscription` · ตั้ง `geeravut@gmail.com` เป็น admin · หัวข้อ 11.3                                                              |
 
 ---
 

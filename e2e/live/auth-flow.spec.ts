@@ -1,5 +1,6 @@
 import { randomBytes } from "node:crypto";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
+import AxeBuilder from "@axe-core/playwright";
 import { expect, test, type Page } from "@playwright/test";
 import { lineSyntheticEmail } from "../../src/lib/line/login";
 
@@ -294,4 +295,180 @@ test("an admin can open the admin area and switch a feature off and on", async (
       .update({ feature_flags: original })
       .eq("id", true);
   }
+});
+
+test("the Premium trial starts on consent and the plan page reflects plan and usage", async ({
+  page,
+}) => {
+  const user = await makeUser();
+  const db = admin();
+
+  const before = (
+    await db
+      .from("profiles")
+      .select("trial_started_at, trial_ends_at, plan_tier")
+      .eq("id", user.id)
+      .single()
+  ).data!;
+  expect(before).toEqual({
+    trial_started_at: null,
+    trial_ends_at: null,
+    plan_tier: "free",
+  });
+
+  await signIn(page, user.email, user.password);
+  await acceptConsent(page);
+  await expect(page).toHaveURL(/\/today/);
+  await expect(
+    page.getByText("กำลังทดลองใช้ Premium เหลืออีก 14 วัน"),
+  ).toBeVisible();
+
+  // trial stored server-side for exactly 14 days, and starting it twice changes nothing
+  const trial = (
+    await db
+      .from("profiles")
+      .select("trial_started_at, trial_ends_at")
+      .eq("id", user.id)
+      .single()
+  ).data!;
+  const days =
+    (new Date(trial.trial_ends_at).getTime() -
+      new Date(trial.trial_started_at).getTime()) /
+    86_400_000;
+  expect(days).toBeCloseTo(14, 5);
+  await page.goto("/subscription");
+  await page.goto("/today");
+  const again = (
+    await db
+      .from("profiles")
+      .select("trial_started_at")
+      .eq("id", user.id)
+      .single()
+  ).data!;
+  expect(again.trial_started_at).toBe(trial.trial_started_at);
+
+  // plan page: current plan, unlimited meters, comparison with the owner's prices
+  await page.goto("/subscription");
+  await expect(
+    page.getByRole("heading", { level: 1, name: "แพ็กเกจของคุณ" }),
+  ).toBeVisible();
+  await expect(
+    page.getByText("กำลังทดลองใช้ Premium", { exact: true }),
+  ).toBeVisible();
+  await expect(
+    page.getByText("เหลืออีก 14 วัน", { exact: false }),
+  ).toBeVisible();
+  const chat = page.locator("li").filter({ hasText: "ถาม AI" }).first();
+  await expect(chat).toContainText("ใช้ไปแล้ว 0 ครั้ง");
+  const axe = await new AxeBuilder({ page })
+    .withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"])
+    .analyze();
+  expect(
+    axe.violations
+      .filter((v) => v.impact === "serious" || v.impact === "critical")
+      .map((v) => v.id),
+  ).toEqual([]);
+  await expect(page.getByText("฿49 / เดือน")).toBeVisible();
+  await expect(page.getByText("฿490 / ปี")).toBeVisible();
+  await expect(page.getByText("฿89 / เดือน")).toBeVisible();
+  await expect(page.getByText("฿890 / ปี")).toBeVisible();
+  expect(
+    await page.evaluate(
+      () =>
+        document.documentElement.scrollWidth <=
+        document.documentElement.clientWidth,
+    ),
+  ).toBe(true);
+
+  // the gate counts even unlimited use, and the page shows it
+  const month =
+    new Date(Date.now() + 7 * 3600_000).toISOString().slice(0, 7) + "-01";
+  for (let i = 0; i < 2; i++) {
+    const r = await db.rpc("consume_usage", {
+      p_user: user.id,
+      p_feature: "aiChat",
+      p_month: month,
+      p_window_start: month,
+      p_limit: null,
+      p_month_cap: 200,
+    });
+    expect(r.error).toBeNull();
+    expect(r.data).toMatchObject({ allowed: true });
+  }
+  await page.reload();
+  await expect(
+    page.locator("li").filter({ hasText: "ถาม AI" }).first(),
+  ).toContainText("ใช้ไปแล้ว 2 ครั้ง");
+});
+
+test("after the trial the user is on Free-lite and the real counter enforces its limits", async ({
+  page,
+}) => {
+  const user = await makeUser();
+  const db = admin();
+  const longAgo = new Date(Date.now() - 20 * 86_400_000).toISOString();
+  const ended = new Date(Date.now() - 6 * 86_400_000).toISOString();
+  const { data: set } = await db
+    .from("profiles")
+    .update({ trial_started_at: longAgo, trial_ends_at: ended })
+    .eq("id", user.id)
+    .select("id");
+  expect(set).toHaveLength(1);
+
+  await signIn(page, user.email, user.password);
+  await acceptConsent(page);
+  await page.goto("/subscription");
+  await expect(
+    page.getByText("ช่วงทดลองใช้ Premium สิ้นสุดแล้ว"),
+  ).toBeVisible();
+  await expect(
+    page.getByText("Free-lite", { exact: true }).first(),
+  ).toBeVisible();
+  await expect(
+    page.locator("li").filter({ hasText: "ถาม AI" }).first(),
+  ).toContainText("0 / 5 ครั้ง");
+  // an ended trial must not be restarted by the self-heal
+  const p = (
+    await db
+      .from("profiles")
+      .select("trial_started_at, trial_ends_at")
+      .eq("id", user.id)
+      .single()
+  ).data!;
+  expect(new Date(p.trial_started_at).toISOString()).toBe(longAgo);
+  expect(new Date(p.trial_ends_at).toISOString()).toBe(ended);
+
+  // Free-lite chat limit is 5 → the 6th call is refused by the real database function
+  const month =
+    new Date(Date.now() + 7 * 3600_000).toISOString().slice(0, 7) + "-01";
+  const call = () =>
+    db.rpc("consume_usage", {
+      p_user: user.id,
+      p_feature: "aiChat",
+      p_month: month,
+      p_window_start: month,
+      p_limit: 5,
+      p_month_cap: 0,
+    });
+  const results = [];
+  for (let i = 0; i < 6; i++)
+    results.push((await call()).data as { allowed: boolean; reason: string });
+  expect(results.map((r) => r.allowed)).toEqual([
+    true,
+    true,
+    true,
+    true,
+    true,
+    false,
+  ]);
+  expect(results[5].reason).toBe("quota_exhausted");
+
+  await page.reload();
+  const chat = page.locator("li").filter({ hasText: "ถาม AI" }).first();
+  await expect(chat).toContainText("5 / 5 ครั้ง");
+  await expect(chat).toContainText("ครบแล้ว");
+  await expect(chat.getByRole("progressbar")).toHaveAttribute(
+    "aria-valuenow",
+    "100",
+  );
 });

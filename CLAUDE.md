@@ -43,7 +43,7 @@ Teal `#0A8FA3` (primary) · Mint `#2DD4A7` (secondary) · Sky Blue `#1E90FF` (ch
 - Next 16: the old `middleware` is `src/proxy.ts`. Read `node_modules/next/dist/docs/` before using a Next API.
 - Mobile-first layouts (PWA target).
 - Secrets and AI calls stay server-side (`import "server-only"`). Never expose `SUPABASE_SERVICE_ROLE_KEY` or `ANTHROPIC_API_KEY` to the client.
-- Subscription limits live in `src/config/plans.ts`; check quotas there instead of hard-coding numbers.
+- Plans and AI quotas: defaults in `src/config/plans.ts`, real values (prices, trial days, fair-use caps, quota overrides) in `platform_settings`, parsed by `src/lib/billing/settings.ts`. **Every AI call must first pass `checkAndConsume(userId, feature)`** (`src/lib/billing/quota.server.ts`) — it resolves the current plan (live paid plan → trial = Premium → Free-lite), applies the quota and fair-use cap and counts the use atomically in SQL (`consume_usage`); it fails closed and counts "unlimited" plans too. Plan/trial columns on `profiles` are written only with the service role.
 - Database changes go in `supabase/migrations/` as SQL (`YYYYMMDDHHMMSS_name.sql`); every user-data table needs RLS plus tests in `supabase/tests/` (they run in `npm test` against in-memory Postgres — extend them with each migration). Revoke default grants and grant back only what is needed; give users column-level `update` grants only.
 
 ## Health guardrails (non-negotiable)

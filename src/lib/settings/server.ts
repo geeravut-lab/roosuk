@@ -1,13 +1,23 @@
 import "server-only";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { normalizeFlags, type FlagMap } from "@/lib/flags/flags";
+import {
+  DEFAULT_BILLING_SETTINGS,
+  parseBillingSettings,
+  type BillingSettings,
+} from "@/lib/billing/settings";
 
 export interface PlatformSettings {
   featureFlags: FlagMap;
   manualUrl: string;
+  billing: BillingSettings;
 }
 
-const DEFAULTS: PlatformSettings = { featureFlags: {}, manualUrl: "" };
+const DEFAULTS: PlatformSettings = {
+  featureFlags: {},
+  manualUrl: "",
+  billing: DEFAULT_BILLING_SETTINGS,
+};
 
 // 30 s is the promise made to the admin page ("takes effect within 1 minute"):
 // each server instance keeps its own copy, so a longer TTL would let instances
@@ -26,15 +36,18 @@ export async function loadPlatformSettings(): Promise<PlatformSettings> {
   if (cache && now - cache.at < TTL_MS) return cache.value;
 
   try {
+    // select("*") + tolerant parsing: a column added by a migration that has not
+    // been applied yet must degrade to its default, not make the whole read fail.
     const { data, error } = await createAdminClient()
       .from("platform_settings")
-      .select("feature_flags, manual_url")
-      .maybeSingle<{ feature_flags: unknown; manual_url: string | null }>();
+      .select("*")
+      .maybeSingle<Record<string, unknown>>();
     if (error) throw error;
     cache = {
       value: {
         featureFlags: normalizeFlags(data?.feature_flags),
-        manualUrl: (data?.manual_url ?? "").trim(),
+        manualUrl: String(data?.manual_url ?? "").trim(),
+        billing: parseBillingSettings(data),
       },
       at: now,
     };

@@ -1,6 +1,7 @@
 import {
   Camera,
   ChartLine,
+  Crown,
   House,
   MessageCircleHeart,
   Settings,
@@ -29,6 +30,12 @@ export const NAV: readonly NavItem[] = [
   { href: "/timeline", label: "navTimeline", icon: ChartLine, group: "daily" },
   { href: "/scan", label: "navScan", icon: Camera, group: "daily" },
   { href: "/ask", label: "navAsk", icon: MessageCircleHeart, group: "daily" },
+  {
+    href: "/subscription",
+    label: "navSubscription",
+    icon: Crown,
+    group: "account",
+  },
   { href: "/settings", label: "navSettings", icon: Settings, group: "account" },
 ];
 
