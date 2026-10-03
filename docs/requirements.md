@@ -1,4 +1,7 @@
-# Roosuk — Requirements Summary
+# RooSuk — Requirements Summary
+
+> **แผนหลักและข้อกำหนดล่าสุดอยู่ที่ [`ROOSUK-MASTER-PLAN.md`](ROOSUK-MASTER-PLAN.md)** — ไฟล์นี้เป็นสรุปย่อของเอกสารต้นทางเท่านั้น
+> หากข้อมูลไม่ตรงกัน ให้ยึด Master Plan
 
 สรุปจากเอกสารต้นฉบับใน `docs/` (ใช้เป็น baseline ก่อนเริ่มพัฒนา — เอกสารต้นฉบับยังเป็น source of truth):
 

@@ -2,7 +2,19 @@
 
 # Roosuk
 
-AI Personal Health OS ("AI ที่รู้จักสุขภาพของคุณ") — consumer health app with a Cal AI–style daily habit loop on top of a precision health check business. Read `docs/requirements.md` first; the original source docs are in `docs/`.
+RooSuk (รู้สุข) — AI Personal Health OS ("AI ที่รู้จักสุขภาพของคุณ"): consumer health app with a Cal AI–style daily habit loop on top of a precision health check business.
+
+**`docs/ROOSUK-MASTER-PLAN.md` is the source of truth** for the owner's requirements, the build plan and open decisions — read it before starting any work and keep its change log updated. Implementation patterns come from the knowledge files `docs/01–13-*.md` (index: `docs/README.md`) and `docs/PDPA-RIGHTS-SECTION-KNOWLEDGE.md`; their cross-cutting rules in `docs/README.md` apply here.
+
+## Working rules (owner's instructions)
+
+- Test only in Claude's own environment (`npm run check`, `npm run build`, local `next start`, Playwright at 390×844, the Supabase dev project). **Never deploy to or test on Netlify production** without asking the owner first — Netlify credits are limited. Merging to `main` only when the owner says so.
+- Unit tests mock AI providers; real AI calls cost money and never run in CI.
+- Deploy: Netlify · Auth/DB/Storage: Supabase · Repo: github.com/geeravut-lab/roosuk.
+
+## Brand
+
+Teal `#0A8FA3` (primary) · Mint `#2DD4A7` (secondary) · Sky Blue `#1E90FF` (charts/numbers) · Coral `#FF7A6B` (CTAs, encouragement) · background `#F7FBFA` · text `#1F2A30` (never pure black). Bright red is reserved for genuinely abnormal values only. Accessible-usage rules (dark text on coral/mint buttons, `#07707F` for small teal text) are in the master plan §3. Logo: `docs/RooSuk Logo.jpg`.
 
 ## Stack
 
