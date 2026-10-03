@@ -18,6 +18,9 @@
 
   --color-primary: #0a8fa3;
   --color-primary-strong: #07707f;
+  /* Selected menu item: Blustering Blue (owner request, 7.6:1 on white) */
+  --color-active: #311fff;
+  --color-tint-active: #ecebff;
   --color-secondary: #2dd4a7;
   --color-sky: #1e90ff;
   --color-coral: #ff7a6b;

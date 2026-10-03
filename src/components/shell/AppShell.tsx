@@ -28,7 +28,7 @@ interface AppShellProps {
 const linkBase =
   "flex min-h-11 items-center gap-3 rounded-xl px-3 text-[15px] font-medium transition-colors";
 const linkIdle = "text-foreground hover:bg-tint-primary";
-const linkActive = "bg-tint-primary text-primary-strong";
+const linkActive = "bg-tint-active text-active font-semibold";
 
 /**
  * One shell for both layouts, split at a single breakpoint (`md`, 768px):
@@ -196,7 +196,7 @@ export function AppShell({
                     <span
                       className={`bg-coral text-foreground ring-surface flex size-14 items-center justify-center rounded-full shadow-md ring-4 ${
                         active
-                          ? "outline-primary-strong outline-2 outline-offset-2"
+                          ? "outline-active outline-2 outline-offset-2"
                           : ""
                       }`}
                     >
@@ -213,7 +213,7 @@ export function AppShell({
                   href={item.href}
                   aria-current={active ? "page" : undefined}
                   className={`flex h-16 flex-col items-center justify-center gap-0.5 text-xs font-medium ${
-                    active ? "text-primary-strong" : "text-muted"
+                    active ? "text-active font-semibold" : "text-muted"
                   }`}
                 >
                   <Icon className="size-6" aria-hidden />
@@ -229,7 +229,7 @@ export function AppShell({
               aria-haspopup="dialog"
               aria-expanded={moreOpen}
               className={`flex h-16 w-full flex-col items-center justify-center gap-0.5 text-xs font-medium ${
-                moreActive ? "text-primary-strong" : "text-muted"
+                moreActive ? "text-active font-semibold" : "text-muted"
               }`}
             >
               <Ellipsis className="size-6" aria-hidden />
