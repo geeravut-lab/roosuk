@@ -138,6 +138,21 @@ LINE Official Account + Messaging API channel (สำหรับแจ้งเ
 
 **ถ้าเผลอวางคีย์ลับในแชท:** ให้สร้างคีย์ใหม่ (Roll/Regenerate) ที่ Supabase แล้วเพิกถอนอันเก่าทันที
 
+### A7. หลังใส่ค่าเสร็จ — ใครทำอะไร (Phase 0)
+
+**ผมทำ (ใน session ใหม่):**
+
+1. `npm run db:status` → `npm run db:migrate` สร้างตารางทั้งหมด (profiles, admins, consent_records, platform_settings, line_links, privacy_audit_log) พร้อม RLS
+2. ตรวจว่าเรียก API ของโปรเจกต์ได้จริง และทดสอบสมัคร/ล็อกอินด้วย Email
+
+**คุณทำ:**
+
+1. ทดสอบ **Google login** และ **LINE login** ด้วยบัญชีจริง (ผมทำแทนไม่ได้ เพราะต้องล็อกอินด้วยบัญชีของคน) — ถ้าไม่ผ่านให้ส่งข้อความ error ที่เห็นมา
+2. ตั้งตัวเองเป็นผู้ดูแล: สมัครสมาชิกในแอปก่อน แล้วบอกอีเมลที่ใช้สมัคร ผมจะรัน `node scripts/grant-admin.mjs <อีเมล>` ให้
+   (หรือรันเองก็ได้ ถ้าตั้ง `NEXT_PUBLIC_SUPABASE_URL` + `SUPABASE_SERVICE_ROLE_KEY` ในเครื่องของคุณ)
+3. เมื่อ deploy จริง ตั้ง `NEXT_PUBLIC_SITE_URL` บน Netlify เป็นโดเมนจริง และเพิ่ม URL ต่อไปนี้ใน Supabase → Authentication → URL Configuration → Redirect URLs:
+   `https://<โดเมน>/auth/callback` (หรือ `https://<โดเมน>/**` ตามที่ตั้งไว้ใน A4)
+
 ---
 
 ## B. Netlify — ปิด auto-deploy ของ branch `claude/*`

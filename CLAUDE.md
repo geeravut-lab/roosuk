@@ -31,14 +31,18 @@ Teal `#0A8FA3` (primary) · Mint `#2DD4A7` (secondary) · Sky Blue `#1E90FF` (ch
 - `npm run check` — lint + typecheck + test + format check (run before committing)
 - `npm run build` — production build
 - `npm run format` — apply Prettier
+- `npm run build && npm run e2e` — Playwright layout + accessibility tests at 390×844 and 1280×800 (uses `/preview/*`, a backend-free fixture enabled only by `ENABLE_UI_PREVIEW=1`)
+- `npm run db:status` / `npm run db:migrate` — apply `supabase/migrations/*.sql` via the Management API (needs `SUPABASE_PROJECT_REF` + `SUPABASE_ACCESS_TOKEN`)
 
 ## Conventions
 
-- UI copy is Thai-first; keep code, identifiers and comments in English.
+- UI copy is Thai-first; keep code, identifiers and comments in English. Every UI string lives in `src/lib/i18n/dict.ts` (`th` is the source, `en satisfies Dict`); write `t.key`, never inline text. Server actions/routes return `err_*` error CODES, never sentences.
+- Auth/consent: `(app)/layout.tsx` enforces sign-in + current consent; `requireUser()` / `requireAdmin()` in `src/lib/auth/server.ts`; feature switches via `assertFeature()` on the first line of every feature's server action. Always check how many rows a write touched (`.select("id")`) — an UPDATE matching nothing is "success" to PostgREST.
+- Next 16: the old `middleware` is `src/proxy.ts`. Read `node_modules/next/dist/docs/` before using a Next API.
 - Mobile-first layouts (PWA target).
 - Secrets and AI calls stay server-side (`import "server-only"`). Never expose `SUPABASE_SERVICE_ROLE_KEY` or `ANTHROPIC_API_KEY` to the client.
 - Subscription limits live in `src/config/plans.ts`; check quotas there instead of hard-coding numbers.
-- Database changes go in `supabase/migrations/` as SQL; every user-data table needs RLS.
+- Database changes go in `supabase/migrations/` as SQL (`YYYYMMDDHHMMSS_name.sql`); every user-data table needs RLS plus tests in `supabase/tests/` (they run in `npm test` against in-memory Postgres — extend them with each migration). Revoke default grants and grant back only what is needed; give users column-level `update` grants only.
 
 ## Health guardrails (non-negotiable)
 

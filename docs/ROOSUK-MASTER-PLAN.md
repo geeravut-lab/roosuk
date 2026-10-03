@@ -471,6 +471,19 @@ value, unit, start_at, end_at, source (healthkit / health_connect / oura / ble /
 | **3 Intelligence + Wearables**    | 4–6 สัปดาห์       | Health Agent · Passport + Pre-Doctor Brief · Family (+1) · Wearables: นำเข้าไฟล์ + ingestion API + Companion app (Capacitor) HealthKit/Health Connect (D10) · Supplement + Marketplace · Corporate plan พื้นฐาน · Creator toolkit                                                                                                                                                                                                                                  | Premium มีฟีเจอร์ครบตามตาราง                                                   |
 | **4 Scale (สุดท้าย)**             | ต่อเนื่อง         | **Omise recurring (D5)** · **จองแพ็กเกจตรวจ + Home Service + Staff portal อัปโหลดผล (D6)** · Multi-branch / Franchise · BLE / CGM · อายุสุขภาพจากผลเลือด · Genomic insights · Voice Thai · B2B dashboard · AI Business Copilot · P&L / Unit Economics                                                                                                                                                                                                              |                                                                                |
 
+### 11.1 สถานะ Phase 0 (อัปเดต 2026-10-03)
+
+| งาน                                                  | สถานะ                                                                            | หมายเหตุ                                                                                                                     |
+| ---------------------------------------------------- | -------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| Theme + โลโก้ + PWA icon + manifest                  | ✅ เสร็จ                                                                         | โลโก้โปร่งใสสร้างจาก `docs/RooSuk Logo.jpg` ด้วย `npm run assets:brand`                                                      |
+| AppShell + เมนู (K01/02)                             | ✅ เสร็จ                                                                         | sidebar / bottom bar (ปุ่มสแกนกลาง) / sheet "เพิ่มเติม" · ทดสอบ Playwright 390×844 และ 1280×800 · axe ไม่พบ serious/critical |
+| i18n สองภาษา (K12)                                   | ✅ เสร็จ                                                                         | ไทยเป็นต้นฉบับ · อังกฤษ `satisfies` · สลับภาษาด้วย cookie + `profiles.language`                                              |
+| Auth: Email+password / Google / LINE                 | 🟡 โค้ดเสร็จ ยังไม่ได้ทดสอบกับ Supabase จริง                                     | รอ environment variables · Google/LINE ต้องทดสอบด้วยบัญชีจริง (R7)                                                           |
+| schema ฐาน + RLS                                     | ✅ เขียน + ทดสอบ RLS 16 ข้อบน Postgres จำลอง · 🟡 ยังไม่ได้ apply ลงโปรเจกต์จริง | `npm run db:migrate` เมื่อมี `SUPABASE_ACCESS_TOKEN`                                                                         |
+| consent รายข้อ + หน้านโยบาย/ข้อกำหนด (ร่าง)          | ✅ เสร็จ                                                                         | เนื้อหากฎหมายเป็นร่าง ต้องให้ผู้เชี่ยวชาญตรวจก่อนเปิดจริง                                                                    |
+| platform_settings + feature flags (K09) + admin role | ✅ โค้ดเสร็จ · 🟡 รอ apply                                                       | หน้า `/admin/flags` · ตั้ง admin ด้วย `scripts/grant-admin.mjs`                                                              |
+| Playwright มือถือ                                    | ✅ เสร็จ                                                                         | `npm run build && npm run e2e`                                                                                               |
+
 ---
 
 ## 12. สิ่งที่ต้องได้จากเจ้าของโครงการก่อน/ระหว่างสร้าง
@@ -532,6 +545,7 @@ value, unit, start_at, end_at, source (healthkit / health_connect / oura / ble /
 | ---------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | 2026-10-03 | v0.1     | ร่างแรก: บันทึกข้อกำหนดทั้ง 7 ข้อของเจ้าของโครงการ + แผน + ประเด็นรอตัดสินใจ                                                                                                                    |
 | 2026-10-03 | v0.2     | บันทึกการตัดสินใจ D1–D13 · ปรับ roadmap (LINE → Phase 1, wearables → Phase 3, Omise + การจอง → Phase 4) · เพิ่มหัวข้อ 10.1 Auth และ 13.1 ความเสี่ยง · เพิ่ม `SETUP-GUIDE.md` และ `netlify.toml` |
+| 2026-10-03 | v0.3     | เริ่ม Phase 0: theme, AppShell, i18n, auth (Email/Google/LINE), consent, feature flags, admin, schema + RLS + test, Playwright · เพิ่มหัวข้อ 11.1 สถานะ Phase 0                                 |
 
 ---
 

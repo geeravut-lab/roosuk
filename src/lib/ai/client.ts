@@ -1,6 +1,6 @@
 import "server-only";
 import Anthropic from "@anthropic-ai/sdk";
-import { getServerEnv } from "@/lib/env";
+import { getAiEnv } from "@/lib/env";
 
 /**
  * Model routing per the business model doc: a mid-tier model for health
@@ -15,6 +15,6 @@ export const AI_MODELS = {
 let client: Anthropic | undefined;
 
 export function getAnthropic(): Anthropic {
-  client ??= new Anthropic({ apiKey: getServerEnv().ANTHROPIC_API_KEY });
+  client ??= new Anthropic({ apiKey: getAiEnv().ANTHROPIC_API_KEY });
   return client;
 }

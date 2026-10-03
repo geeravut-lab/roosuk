@@ -1,25 +1,74 @@
 @import "tailwindcss";
 
+/*
+ * RooSuk theme — docs/ROOSUK-MASTER-PLAN.md §3.
+ * Coral and mint backgrounds take DARK text (white on them fails contrast);
+ * small teal text uses --color-primary-strong. Red is only for genuinely
+ * abnormal health values — never for generic errors or decoration.
+ */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #f7fbfa;
+  --foreground: #1f2a30;
+  color-scheme: light;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+
+  --color-primary: #0a8fa3;
+  --color-primary-strong: #07707f;
+  --color-secondary: #2dd4a7;
+  --color-sky: #1e90ff;
+  --color-coral: #ff7a6b;
+  --color-warn: #f2a93b;
+  --color-danger: #e5484d;
+
+  --color-surface: #ffffff;
+  --color-muted: #5b6b73;
+  --color-line: #d5e5e2;
+  --color-field-border: #6e8985;
+  --color-tint-primary: #e3f4f6;
+  --color-tint-secondary: #e3f8f2;
+
   --font-sans: var(--font-geist-sans), var(--font-noto-sans-thai), sans-serif;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  -webkit-tap-highlight-color: transparent;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-sans);
+}
+
+:focus-visible {
+  outline: 3px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+@layer components {
+  .btn {
+    @apply inline-flex min-h-11 items-center justify-center gap-2 rounded-xl px-5 text-base font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-60;
+  }
+  .btn-primary {
+    @apply bg-coral text-foreground hover:bg-[#ff6a59];
+  }
+  .btn-secondary {
+    @apply border-primary bg-surface text-primary-strong hover:bg-tint-primary border;
+  }
+  .btn-ghost {
+    @apply text-primary-strong hover:bg-tint-primary;
+  }
+  .card {
+    @apply border-line bg-surface rounded-2xl border p-4 shadow-sm;
+  }
+  .field {
+    @apply border-field-border bg-surface text-foreground placeholder:text-muted min-h-11 w-full rounded-xl border px-3 text-base;
+  }
+  .label {
+    @apply text-foreground mb-1 block text-sm font-medium;
+  }
 }
