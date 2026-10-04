@@ -29,6 +29,11 @@ export interface LabItem {
   /** The value converted to the catalog unit (null when not convertible). */
   value_std: number | null;
   status: LabStatus;
+  /**
+   * What the status was judged against: our reference table, the range printed
+   * on the report itself (for tests our table does not cover), or nothing.
+   */
+  basis: "catalog" | "printed" | null;
   /** The reference range printed on the report, for the user to compare. */
   printed_range: string;
   confidence: number;
@@ -42,13 +47,23 @@ export function isPdf(bytes: Uint8Array): boolean {
 
 // ── units ───────────────────────────────────────────────────────────────────
 export function normalizeUnit(unit: string): string {
-  return unit
-    .toLowerCase()
-    .replace(/[µμ]/g, "u")
-    .replace(/²/g, "2")
-    .replace(/\s+/g, "")
-    .replace(/^x?10(\^3|e3|³)\//, "k/")
-    .replace(/^thou\//, "k/");
+  return (
+    unit
+      .toLowerCase()
+      .replace(/[µμ]/g, "u")
+      .replace(/\s+/g, "")
+      // 10^3/uL, x10e3/uL, ×10³/µL → K/uL; 10^6/uL → M/uL; 10^9/L → K/uL; 10^12/L → M/uL
+      .replace(/^[x×]?10(\^3|\*\*3|e3|³)\//, "k/")
+      .replace(/^[x×]?10(\^6|\*\*6|e6|⁶)\//, "m/")
+      .replace(/^[x×]?10(\^9|\*\*9|e9|⁹)\/l$/, "k/ul")
+      .replace(/^[x×]?10(\^12|\*\*12|e12)\/l$/, "m/ul")
+      .replace(/^thou\//, "k/")
+      .replace(/²/g, "2")
+      .replace(/³/g, "3")
+      .replace(/\^/g, "")
+      // a cubic millimetre is a microlitre: /mm3, cells/mm^3, /cumm, /cmm
+      .replace(/(mm3|cumm|cmm)$/, "ul")
+  );
 }
 
 /** Convert `value` in `unit` into the marker's catalog unit, or null when we do not know the unit. */
@@ -73,17 +88,67 @@ export function classifyValue(marker: Biomarker, valueStd: number): LabStatus {
   return "abnormal";
 }
 
-/** The status of an item from its marker, unit and value — recomputed whenever the value changes. */
+/**
+ * A reference range as printed on a report ("12-16", "[3,700 - 10,000]",
+ * "< 5.7", "≥ 40", "ไม่เกิน 200") → bounds, or null when it cannot be read with
+ * confidence. A truncated or inverted range ("138000-40") is treated as unreadable.
+ */
+export function parsePrintedRange(text: string): Range | null {
+  const t = text
+    .toLowerCase()
+    .replace(/(?<=\d),(?=\d{3}\b)/g, "")
+    .replace(/[[\]()]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+  const num = "(\\d+(?:\\.\\d+)?)";
+  const between = new RegExp(`^${num}\\s*(?:-|–|—|~|to)\\s*${num}(?!\\d)`).exec(
+    t,
+  );
+  if (between) {
+    const lo = Number(between[1]);
+    const hi = Number(between[2]);
+    return lo < hi ? [lo, hi] : null;
+  }
+  const upper = new RegExp(
+    `^(?:<|≤|<=|up to|less than|ไม่เกิน|น้อยกว่า)\\s*${num}`,
+  ).exec(t);
+  if (upper) return [null, Number(upper[1])];
+  const lower = new RegExp(
+    `^(?:>|≥|>=|more than|greater than|มากกว่า|ไม่น้อยกว่า)\\s*${num}`,
+  ).exec(t);
+  if (lower) return [Number(lower[1]), null];
+  return null;
+}
+
+/**
+ * The status of an item from its marker, unit and value — recomputed whenever
+ * the value changes. Our table decides when it knows the marker AND the unit;
+ * otherwise the report's own printed range is used (inside → normal, outside →
+ * watch, never "abnormal": how far out is a call for the doctor, not for us);
+ * otherwise "unknown".
+ */
 export function assess(
   markerKey: string | null,
   value: number,
   unit: string,
-): { value_std: number | null; status: LabStatus } {
+  printedRange = "",
+): { value_std: number | null; status: LabStatus; basis: LabItem["basis"] } {
   const marker = biomarkerByKey(markerKey);
-  if (!marker) return { value_std: null, status: "unknown" };
-  const std = toCatalogUnit(marker, value, unit);
-  if (std === null) return { value_std: null, status: "unknown" };
-  return { value_std: std, status: classifyValue(marker, std) };
+  const std = marker ? toCatalogUnit(marker, value, unit) : null;
+  if (marker && std !== null)
+    return {
+      value_std: std,
+      status: classifyValue(marker, std),
+      basis: "catalog",
+    };
+  const printed = printedRange ? parsePrintedRange(printedRange) : null;
+  if (printed)
+    return {
+      value_std: null,
+      status: within(value, printed) ? "normal" : "watch",
+      basis: "printed",
+    };
+  return { value_std: null, status: "unknown", basis: null };
 }
 
 export function formatRange(marker: Biomarker): string {
@@ -202,7 +267,12 @@ export function normalizeLabResult(
     // Our alias table decides; the model's own claim only counts for names our table does not know.
     const byName = biomarkerKeyForName(r.name);
     const claimed = biomarkerByKey(r.marker_key) ? r.marker_key : null;
-    const marker_key = byName ?? claimed;
+    let marker_key = byName ?? claimed;
+    // The same name in a unit we cannot convert (an absolute count for a "%" marker) is a different
+    // measurement: keep it, but do not file it under the marker or let it shadow the real one.
+    const known = biomarkerByKey(marker_key);
+    if (known && r.unit && toCatalogUnit(known, r.value, r.unit) === null)
+      marker_key = null;
     if (marker_key) {
       if (seen.has(marker_key)) continue; // keep the first reading of a marker
       seen.add(marker_key);
@@ -214,7 +284,7 @@ export function normalizeLabResult(
       unit: r.unit,
       printed_range: r.printed_range,
       confidence: Math.round(clamp(r.confidence, 0, 1) * 10) / 10,
-      ...assess(marker_key, r.value, r.unit),
+      ...assess(marker_key, r.value, r.unit, r.printed_range),
     });
   }
   return items.length
@@ -232,12 +302,19 @@ export function parseStoredLabItems(value: unknown): LabItem[] {
       unit: z.string(),
       value_std: z.number().nullable(),
       status: z.enum(["normal", "watch", "abnormal", "unknown"]),
+      basis: z.enum(["catalog", "printed"]).nullable().catch(null),
       printed_range: z.string(),
       confidence: z.number(),
     }),
   );
   const r = schema.safeParse(value);
-  return r.success ? r.data : [];
+  // Reports saved before `basis` existed were all judged by our table.
+  return r.success
+    ? r.data.map((i) => ({
+        ...i,
+        basis: i.basis ?? (i.status === "unknown" ? null : "catalog"),
+      }))
+    : [];
 }
 
 /**
@@ -260,7 +337,11 @@ export function applyLabReview(
       const value = ok ? v : item.value;
       return {
         keep: !edits.remove[i],
-        item: { ...item, value, ...assess(item.marker_key, value, item.unit) },
+        item: {
+          ...item,
+          value,
+          ...assess(item.marker_key, value, item.unit, item.printed_range),
+        },
       };
     })
     .filter((x) => x.keep)

@@ -58,7 +58,12 @@ export function explainPrompt(
 ): string {
   const lines = items.map((i) => {
     const marker = biomarkerByKey(i.marker_key);
-    const ref = marker ? `; general reference ${formatRange(marker)}` : "";
+    const ref =
+      marker && i.basis === "catalog"
+        ? `; general reference ${formatRange(marker)}`
+        : i.basis === "printed"
+          ? `; judged against the range printed on the report (${i.printed_range})`
+          : "";
     return `- marker_key=${i.marker_key ?? "none"}; ${marker?.en ?? i.name}: ${i.value} ${i.unit}; status=${i.status}${ref}`;
   });
   return `Profile: ${profileText}.\nLab values (statuses decided by the app):\n${lines.join("\n")}`;

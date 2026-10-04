@@ -485,7 +485,9 @@ const th = {
   labStatus_abnormal: "ผิดปกติ ควรปรึกษาแพทย์",
   labStatus_unknown: "ไม่ได้ประเมิน",
   labUnknownNote:
-    "ไม่ได้ประเมิน: ไม่มีช่วงอ้างอิงของรายการนี้ หรือไม่รู้จักหน่วย",
+    "ไม่ได้ประเมิน: ระบบยังไม่มีช่วงอ้างอิงของรายการนี้ และอ่านช่วงที่พิมพ์ในเอกสารไม่ได้",
+  labBasisPrinted:
+    "ประเมินจากช่วงอ้างอิงที่พิมพ์ในเอกสารของคุณ (ไม่ใช่ช่วงของรู้สุข)",
   labRefOurs: "ช่วงอ้างอิงทั่วไป: {range}",
   labRefPrinted: "ช่วงที่พิมพ์ในเอกสาร: {range}",
   labPrevious: "ครั้งก่อน {value} ({date})",
@@ -1261,6 +1263,8 @@ const en = {
   labStatus_unknown: "Not assessed",
   labUnknownNote:
     "Not assessed: no reference range for this test, or the unit is not recognised.",
+  labBasisPrinted:
+    "Judged against the reference range printed on your report (not RooSuk’s own range)",
   labRefOurs: "General reference range: {range}",
   labRefPrinted: "Range printed on the report: {range}",
   labPrevious: "Previous {value} ({date})",

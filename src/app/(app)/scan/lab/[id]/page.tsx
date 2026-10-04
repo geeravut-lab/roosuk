@@ -261,10 +261,12 @@ export default async function LabReportPage({
                   {it.unit}
                 </span>
               </p>
-              {marker && it.status !== "unknown" ? (
+              {marker && it.basis === "catalog" ? (
                 <p className="text-muted text-sm">
                   {fmt(t.labRefOurs, { range: formatRange(marker) })}
                 </p>
+              ) : it.basis === "printed" ? (
+                <p className="text-muted text-sm">{t.labBasisPrinted}</p>
               ) : (
                 <p className="text-muted text-sm">{t.labUnknownNote}</p>
               )}

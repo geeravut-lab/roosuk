@@ -8,6 +8,7 @@ import {
 import {
   applyLabReview,
   assess,
+  parsePrintedRange,
   classifyValue,
   cleanDate,
   countOutOfRange,
@@ -64,6 +65,24 @@ describe("units and conversion", () => {
     expect(normalizeUnit("10³/uL")).toBe("k/ul");
     expect(normalizeUnit(" mg / dL ")).toBe("mg/dl");
     expect(normalizeUnit("mL/min/1.73m²")).toBe("ml/min/1.73m2");
+    // a cubic millimetre is a microlitre
+    for (const u of ["/mm^3", "/mm3", "cells/mm³", "/cumm", "cells/uL"])
+      expect(normalizeUnit(u).endsWith("/ul"), u).toBe(true);
+    expect(normalizeUnit("10^3/mm^3")).toBe("k/ul");
+    expect(normalizeUnit("x10^9/L")).toBe("k/ul");
+    expect(normalizeUnit("10^6/uL")).toBe("m/ul");
+    expect(normalizeUnit("x10^12/L")).toBe("m/ul");
+  });
+  it("reads the units a Thai CBC sheet prints (/mm^3) — the bug that left WBC and platelets unassessed", () => {
+    const wbc = biomarkerByKey("wbc")!;
+    const plt = biomarkerByKey("platelets")!;
+    const rbc = biomarkerByKey("rbc")!;
+    expect(toCatalogUnit(wbc, 7270, "/mm^3")).toBe(7.27);
+    expect(toCatalogUnit(plt, 293000, "/mm^3")).toBe(293);
+    expect(toCatalogUnit(rbc, 4_800_000, "/mm^3")).toBe(4.8);
+    expect(assess("wbc", 7270, "/mm^3").status).toBe("normal");
+    expect(assess("platelets", 293000, "/mm^3").status).toBe("normal");
+    expect(assess("platelets", 90000, "/mm^3").status).toBe("abnormal");
   });
   it("converts known units and refuses unknown ones", () => {
     const glu = biomarkerByKey("fasting_glucose")!;
@@ -74,6 +93,54 @@ describe("units and conversion", () => {
     const wbc = biomarkerByKey("wbc")!;
     expect(toCatalogUnit(wbc, 7500, "/uL")).toBe(7.5);
     expect(toCatalogUnit(wbc, 7.5, "x10^3/uL")).toBe(7.5);
+  });
+});
+
+describe("printed reference ranges", () => {
+  it("reads the ways a report prints a range", () => {
+    expect(parsePrintedRange("[12-16]")).toEqual([12, 16]);
+    expect(parsePrintedRange("3,700 - 10,000")).toEqual([3700, 10000]);
+    expect(parsePrintedRange("0.6 – 1.3")).toEqual([0.6, 1.3]);
+    expect(parsePrintedRange("< 5.7")).toEqual([null, 5.7]);
+    expect(parsePrintedRange("≤200")).toEqual([null, 200]);
+    expect(parsePrintedRange("ไม่เกิน 150")).toEqual([null, 150]);
+    expect(parsePrintedRange(">= 40")).toEqual([40, null]);
+    expect(parsePrintedRange("> 60")).toEqual([60, null]);
+  });
+  it("refuses what it cannot read with confidence", () => {
+    for (const bad of ["", "normal", "138000-40", "16-12", "Negative", "-"])
+      expect(parsePrintedRange(bad), bad).toBeNull();
+  });
+  it("judges tests outside our table by the report's own range: inside normal, outside watch, never abnormal", () => {
+    expect(assess(null, 14, "mg/L", "5-20")).toEqual({
+      value_std: null,
+      status: "normal",
+      basis: "printed",
+    });
+    expect(assess(null, 30, "mg/L", "5-20").status).toBe("watch");
+    expect(assess(null, 3, "mg/L", "5-20").status).toBe("watch");
+    expect(assess(null, 4, "x", "< 5").status).toBe("normal");
+    expect(assess(null, 3, "mg/L", "garbled").status).toBe("unknown");
+  });
+  it("prefers our table when it knows the marker and the unit, and falls back when the unit is foreign", () => {
+    expect(assess("hemoglobin", 11.9, "g/dL", "12-16")).toMatchObject({
+      status: "watch",
+      basis: "catalog",
+    });
+    expect(assess("hemoglobin", 119, "weird", "110-160")).toMatchObject({
+      status: "normal",
+      basis: "printed",
+    });
+  });
+  it("covers the differential and red-cell indices of a CBC", () => {
+    expect(assess("neutrophil_pct", 62, "%").status).toBe("normal");
+    expect(assess("lymphocyte_pct", 28, "%").status).toBe("normal");
+    expect(assess("monocyte_pct", 6, "%").status).toBe("normal");
+    expect(assess("mcv", 91, "fL").status).toBe("normal");
+    expect(biomarkerKeyForName("Neutrophil")).toBe("neutrophil_pct");
+    expect(biomarkerKeyForName("Lymphocyte")).toBe("lymphocyte_pct");
+    expect(biomarkerKeyForName("นิวโทรฟิล")).toBe("neutrophil_pct");
+    expect(biomarkerKeyForName("MCHC")).toBe("mchc");
   });
 });
 
@@ -100,10 +167,12 @@ describe("status", () => {
     expect(assess("fasting_glucose", 95, "weird")).toEqual({
       value_std: null,
       status: "unknown",
+      basis: null,
     });
     expect(assess(null, 95, "mg/dL")).toEqual({
       value_std: null,
       status: "unknown",
+      basis: null,
     });
     expect(assess("nope", 95, "mg/dL").status).toBe("unknown");
   });
@@ -186,6 +255,34 @@ describe("normalizeLabResult", () => {
     expect(r.items).toHaveLength(1);
     expect(r.items[0].value).toBe(104);
   });
+  it("keeps an absolute count out of the % marker of the same name", () => {
+    const r = normalizeLabResult(
+      raw([
+        rawItem({
+          name: "Neutrophil",
+          marker_key: "neutrophil_pct",
+          value: 62,
+          unit: "%",
+          printed_range: "35-80",
+        }),
+        rawItem({
+          name: "Neutrophil",
+          marker_key: "neutrophil_pct",
+          value: 4500,
+          unit: "/mm^3",
+          printed_range: "1800-7500",
+        }),
+      ]),
+      TODAY,
+    )!;
+    expect(r.items).toHaveLength(2);
+    expect(r.items[0]).toMatchObject({ marker_key: "neutrophil_pct" });
+    expect(r.items[1]).toMatchObject({
+      marker_key: null,
+      status: "normal",
+      basis: "printed",
+    });
+  });
   it("keeps unknown tests without judging them", () => {
     const r = normalizeLabResult(
       raw([
@@ -194,6 +291,7 @@ describe("normalizeLabResult", () => {
           marker_key: "",
           value: 3,
           unit: "u",
+          printed_range: "",
         }),
       ]),
       TODAY,
@@ -235,6 +333,14 @@ describe("review", () => {
       items,
     );
     expect(parseStoredLabItems([{ name: 1 }])).toEqual([]);
+  });
+  it("reads reports stored before `basis` existed: judged ones came from our table", () => {
+    const legacy = [
+      { ...items[0], basis: undefined },
+      { ...items[0], status: "unknown", value_std: null, basis: undefined },
+    ];
+    const out = parseStoredLabItems(JSON.parse(JSON.stringify(legacy)));
+    expect(out.map((i) => i.basis)).toEqual(["catalog", null]);
   });
   it("recomputes the status from a corrected value and ignores junk edits", () => {
     const out = applyLabReview(items, {

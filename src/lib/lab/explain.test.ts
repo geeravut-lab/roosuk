@@ -14,6 +14,7 @@ const item = (o: Partial<LabItem>): LabItem => ({
   unit: "mg/dL",
   value_std: 104,
   status: "watch",
+  basis: "catalog",
   printed_range: "70-99",
   confidence: 0.9,
   ...o,
