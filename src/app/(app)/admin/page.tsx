@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Bot, ReceiptText, ToggleLeft } from "lucide-react";
+import { Bot, ReceiptText, Timer, ToggleLeft } from "lucide-react";
 import { fmt } from "@/lib/i18n/dict";
 import { getT } from "@/lib/i18n/server";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -38,6 +38,13 @@ export default async function AdminHome() {
       >
         <Bot className="text-primary-strong size-6" aria-hidden />
         <span className="font-semibold">{t.adminAiTitle}</span>
+      </Link>
+      <Link
+        href="/admin/rules"
+        className="card hover:bg-tint-primary flex items-center gap-3"
+      >
+        <Timer className="text-primary-strong size-6" aria-hidden />
+        <span className="font-semibold">{t.adminRulesTitle}</span>
       </Link>
       <Link
         href="/admin/flags"

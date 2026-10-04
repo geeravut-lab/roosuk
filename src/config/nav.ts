@@ -1,4 +1,5 @@
 import {
+  Bell,
   Camera,
   ChartLine,
   Crown,
@@ -35,6 +36,12 @@ export const NAV: readonly NavItem[] = [
     href: "/subscription",
     label: "navSubscription",
     icon: Crown,
+    group: "account",
+  },
+  {
+    href: "/notifications",
+    label: "navNotifications",
+    icon: Bell,
     group: "account",
   },
   {

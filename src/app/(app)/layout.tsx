@@ -6,6 +6,7 @@ import { startTrialIfEligible } from "@/lib/billing/trial.server";
 import { isConsentCurrent } from "@/lib/consent/consent";
 import { getLatestConsent } from "@/lib/consent/server";
 import { loadPlatformSettings } from "@/lib/settings/server";
+import { createClient } from "@/lib/supabase/server";
 
 /**
  * Everything signed-in lives under here. Besides the proxy's redirect, this is
@@ -35,6 +36,13 @@ export default async function AppLayout({
     isAdminUser(user.id),
     loadPlatformSettings(),
   ]);
+  // Unread count for the bell, read with the user's own client (RLS: own rows only).
+  const { count: unread } = await (
+    await createClient()
+  )
+    .from("app_notifications")
+    .select("id", { count: "exact", head: true })
+    .is("read_at", null);
   const meta = user.user_metadata as { full_name?: string } | undefined;
   const displayName =
     meta?.full_name?.trim() || user.email?.split("@")[0] || "";
@@ -44,6 +52,7 @@ export default async function AppLayout({
       isAdmin={isAdmin}
       manualUrl={settings.manualUrl}
       displayName={displayName}
+      unreadCount={unread ?? 0}
     >
       {children}
     </AppShell>

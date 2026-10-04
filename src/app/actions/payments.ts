@@ -20,6 +20,12 @@ import {
   invalidatePlatformSettingsCache,
   loadPlatformSettings,
 } from "@/lib/settings/server";
+import {
+  paymentPaidNotice,
+  paymentRejectedNotice,
+  paymentToReviewNotice,
+} from "@/lib/notify/messages";
+import { dictFor, notifyAdmins, notifyUser } from "@/lib/notify/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -111,6 +117,25 @@ export async function reportPaymentAction(
   revalidatePath(`/subscription/pay/${id}`);
   revalidatePath("/subscription");
   revalidatePath("/admin/payments");
+
+  // Tell the reviewers (never fails the payer's report: see notifyUser).
+  const { data: pay } = await createAdminClient()
+    .from("payments")
+    .select("plan_tier, amount")
+    .eq("id", id)
+    .maybeSingle<{ plan_tier: "gold" | "premium"; amount: number }>();
+  if (pay)
+    await notifyAdmins(
+      (t) =>
+        paymentToReviewNotice(
+          t,
+          id,
+          t[`planName_${pay.plan_tier}` as const],
+          pay.amount,
+          ref,
+        ),
+      user.id,
+    );
   return { ok: true };
 }
 
@@ -128,8 +153,34 @@ export async function confirmPaymentAction(formData: FormData): Promise<void> {
     p_admin: admin.id,
   });
   if (error) throw new AppError("err_save_failed");
-  if (!(data as { ok?: boolean } | null)?.ok)
-    throw new AppError("err_payment_state");
+  const result = data as {
+    ok?: boolean;
+    granted?: boolean;
+    plan_tier?: "gold" | "premium";
+    ends_at?: string;
+  } | null;
+  if (!result?.ok) throw new AppError("err_payment_state");
+
+  if (result.granted) {
+    const { data: pay } = await createAdminClient()
+      .from("payments")
+      .select("user_id")
+      .eq("id", id)
+      .maybeSingle<{ user_id: string | null }>();
+    if (pay?.user_id) {
+      const { t, lang } = await dictFor(pay.user_id);
+      await notifyUser(
+        pay.user_id,
+        paymentPaidNotice(
+          t,
+          lang,
+          id,
+          t[`planName_${result.plan_tier ?? "gold"}` as const],
+          result.ends_at ? new Date(result.ends_at) : null,
+        ),
+      );
+    }
+  }
 
   revalidatePath("/admin/payments");
 }
@@ -151,9 +202,18 @@ export async function rejectPaymentAction(formData: FormData): Promise<void> {
     })
     .eq("id", id)
     .eq("status", "review")
-    .select("id");
+    .select("id, user_id");
   if (error) throw new AppError("err_save_failed");
   if (data?.length !== 1) throw new AppError("err_payment_state");
+
+  const payer = (data[0] as { user_id: string | null }).user_id;
+  if (payer) {
+    const { t } = await dictFor(payer);
+    await notifyUser(
+      payer,
+      paymentRejectedNotice(t, id, cleanReviewNote(formData.get("note"))),
+    );
+  }
 
   revalidatePath("/admin/payments");
 }

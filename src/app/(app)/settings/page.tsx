@@ -12,6 +12,7 @@ import { getLineLoginEnv } from "@/lib/env";
 import { isLineSyntheticEmail } from "@/lib/line/login";
 import { createClient } from "@/lib/supabase/server";
 import { signOutAction } from "@/app/actions/auth";
+import { savePrefsAction } from "@/app/actions/notifications";
 
 export async function generateMetadata(): Promise<Metadata> {
   return { title: (await getT()).settingsTitle };
@@ -33,6 +34,13 @@ export default async function SettingsPage({
     .select("display_name")
     .eq("user_id", user.id)
     .maybeSingle<{ display_name: string | null }>();
+
+  const { data: prefs } = await supabase
+    .from("notification_prefs")
+    .select("line_transactional, line_reminders")
+    .eq("user_id", user.id)
+    .maybeSingle<{ line_transactional: boolean; line_reminders: boolean }>();
+  const addFriendUrl = process.env.LINE_OA_ADD_FRIEND_URL?.trim();
 
   const rawError = Array.isArray(params.error) ? params.error[0] : params.error;
   const email = isLineSyntheticEmail(user.email) ? "—" : (user.email ?? "—");
@@ -92,6 +100,63 @@ export default async function SettingsPage({
           )}
         </section>
       ) : null}
+
+      <section className="card space-y-3" aria-labelledby="notif-h">
+        <h2 id="notif-h" className="font-semibold">
+          {t.notifSettingsTitle}
+        </h2>
+        {params.notif === "saved" ? (
+          <p
+            role="status"
+            className="bg-tint-secondary rounded-xl px-3 py-2 text-sm font-medium"
+          >
+            {t.notifSaved}
+          </p>
+        ) : null}
+        {lineLink ? (
+          <form action={savePrefsAction} className="space-y-3">
+            <label className="flex min-h-11 items-start gap-3">
+              <input
+                type="checkbox"
+                name="line_transactional"
+                defaultChecked={prefs?.line_transactional ?? true}
+                className="mt-1 size-5 shrink-0"
+              />
+              <span>{t.notifTransactional}</span>
+            </label>
+            <label className="flex min-h-11 items-start gap-3">
+              <input
+                type="checkbox"
+                name="line_reminders"
+                defaultChecked={prefs?.line_reminders ?? false}
+                className="mt-1 size-5 shrink-0"
+              />
+              <span>
+                {t.notifReminders}
+                <span className="text-muted block text-sm">
+                  {t.notifRemindersHint}
+                </span>
+              </span>
+            </label>
+            <p className="text-muted text-sm">{t.notifSettingsFriend}</p>
+            {addFriendUrl?.startsWith("https://") ? (
+              <a
+                href={addFriendUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="btn btn-secondary"
+              >
+                {t.notifSettingsAddFriend}
+              </a>
+            ) : null}
+            <button type="submit" className="btn btn-primary">
+              {t.save}
+            </button>
+          </form>
+        ) : (
+          <p className="text-muted text-sm">{t.notifSettingsNotLinked}</p>
+        )}
+      </section>
 
       <section className="card space-y-3" aria-labelledby="consent-h">
         <h2 id="consent-h" className="font-semibold">

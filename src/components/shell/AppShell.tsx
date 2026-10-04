@@ -3,7 +3,7 @@
 import { useEffect, useState, type ReactNode } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { BookOpen, Ellipsis, LogOut, ShieldCheck, X } from "lucide-react";
+import { Bell, BookOpen, Ellipsis, LogOut, ShieldCheck, X } from "lucide-react";
 import { signOutAction } from "@/app/actions/auth";
 import { LangSwitch } from "@/components/LangSwitch";
 import { LogoMark, Wordmark } from "@/components/Logo";
@@ -15,6 +15,7 @@ import {
   PRIMARY_NAV_COUNT,
   type NavItem,
 } from "@/config/nav";
+import { fmt } from "@/lib/i18n/dict";
 import { useI18n } from "@/lib/i18n/provider";
 
 interface AppShellProps {
@@ -23,6 +24,8 @@ interface AppShellProps {
   /** Admin-configured manual link (https only); empty hides the menu entry. */
   manualUrl: string;
   displayName: string;
+  /** Unread in-app notifications (0 = none). */
+  unreadCount?: number;
 }
 
 const linkBase =
@@ -40,6 +43,7 @@ export function AppShell({
   isAdmin,
   manualUrl,
   displayName,
+  unreadCount = 0,
 }: AppShellProps) {
   const { t } = useI18n();
   const rawPath = usePathname();
@@ -77,6 +81,14 @@ export function AppShell({
       >
         <Icon className="size-5 shrink-0" aria-hidden />
         <span className="truncate">{t[item.label]}</span>
+        {item.href === "/notifications" && unreadCount > 0 ? (
+          <span className="bg-coral text-foreground ml-auto rounded-full px-2 py-0.5 text-xs font-semibold">
+            <span aria-hidden>{unreadCount > 99 ? "99+" : unreadCount}</span>
+            <span className="sr-only">
+              {fmt(t.notificationsUnreadCount, { n: unreadCount })}
+            </span>
+          </span>
+        ) : null}
       </Link>
     );
   };
@@ -165,7 +177,28 @@ export function AppShell({
           <Link href="/today">
             <Wordmark name={t.appName} size={32} />
           </Link>
-          <LangSwitch />
+          <div className="flex items-center gap-1">
+            <Link
+              href="/notifications"
+              aria-label={
+                unreadCount > 0
+                  ? `${t.navNotifications}: ${fmt(t.notificationsUnreadCount, { n: unreadCount })}`
+                  : t.navNotifications
+              }
+              className="text-foreground hover:bg-tint-primary relative flex size-11 items-center justify-center rounded-full"
+            >
+              <Bell className="size-5" aria-hidden />
+              {unreadCount > 0 ? (
+                <span
+                  aria-hidden
+                  className="bg-coral text-foreground absolute top-1.5 right-1 min-w-5 rounded-full px-1 text-center text-xs font-semibold"
+                >
+                  {unreadCount > 99 ? "99+" : unreadCount}
+                </span>
+              ) : null}
+            </Link>
+            <LangSwitch />
+          </div>
         </header>
 
         <main
