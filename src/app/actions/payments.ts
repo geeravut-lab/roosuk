@@ -16,6 +16,7 @@ import {
   normalizePromptpayId,
 } from "@/lib/billing/promptpay";
 import { AppError } from "@/lib/errors";
+import { variantFor, variantTag } from "@/lib/paywall/paywall";
 import { creditDiscount } from "@/lib/rewards/rewards";
 import { loadBalance } from "@/lib/rewards/server";
 import type { ErrorKey } from "@/lib/i18n/dict";
@@ -53,7 +54,8 @@ export async function startPaymentAction(formData: FormData): Promise<void> {
   if (!isPaidTier(tier) || !isBillingPeriod(period))
     redirect("/subscription?error=err_invalid_input");
 
-  const { billing, promptpayId, rewards } = await loadPlatformSettings();
+  const { billing, promptpayId, rewards, paywallMode } =
+    await loadPlatformSettings();
   const amount = priceFor(billing.pricing, tier, period);
   if (!promptpayId || amount <= 0)
     redirect("/subscription?error=err_payment_not_ready");
@@ -91,7 +93,11 @@ export async function startPaymentAction(formData: FormData): Promise<void> {
   if (error || data?.length !== 1)
     redirect("/subscription?error=err_save_failed");
 
-  await trackEvent("order_created", user.id);
+  await trackEvent(
+    "order_created",
+    user.id,
+    variantTag(variantFor(user.id, paywallMode)),
+  );
   redirect(`/subscription/pay/${data[0].id}`);
 }
 
@@ -136,7 +142,11 @@ export async function reportPaymentAction(
   // Nothing matched: not theirs, or already reported/paid (e.g. a double click).
   if (data?.length !== 1) return { error: "err_payment_state" };
 
-  await trackEvent("payment_reported", user.id);
+  await trackEvent(
+    "payment_reported",
+    user.id,
+    variantTag(variantFor(user.id, (await loadPlatformSettings()).paywallMode)),
+  );
   revalidatePath(`/subscription/pay/${id}`);
   revalidatePath("/subscription");
   revalidatePath("/admin/payments");
@@ -191,7 +201,13 @@ export async function confirmPaymentAction(formData: FormData): Promise<void> {
       .eq("id", id)
       .maybeSingle<{ user_id: string | null }>();
     if (pay?.user_id) {
-      await trackEvent("subscribed", pay.user_id);
+      await trackEvent(
+        "subscribed",
+        pay.user_id,
+        variantTag(
+          variantFor(pay.user_id, (await loadPlatformSettings()).paywallMode),
+        ),
+      );
       const { t, lang } = await dictFor(pay.user_id);
       await notifyUser(
         pay.user_id,

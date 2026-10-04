@@ -12,6 +12,7 @@ import { quotaText } from "@/lib/billing/format";
 import type { BillingSettings } from "@/lib/billing/settings";
 import { fmt, type Dict } from "@/lib/i18n/dict";
 import { SubmitButton } from "@/components/SubmitButton";
+import { savingFor, type PaywallVariant } from "@/lib/paywall/paywall";
 
 function Yes({ t, on }: { t: Dict; on: boolean }) {
   return on ? (
@@ -47,12 +48,15 @@ export function PlanComparison({
   current,
   billing,
   credit,
+  variant = "a",
 }: {
   t: Dict;
   current: PlanId;
   billing: BillingSettings;
   /** the person's reward credit and the admin's per-payment maximum; offered only when both are above zero */
   credit?: { balance: number; maxPerUse: number };
+  /** which paywall version: same plans and prices, different order and wording */
+  variant?: PaywallVariant;
 }) {
   const overrides: QuotaOverrides = billing.planOverrides;
   const price = (id: "gold" | "premium") => {
@@ -64,10 +68,18 @@ export function PlanComparison({
   const priceLines = (id: PlanId) => {
     if (id === "free") return [t.subPriceFree];
     const { monthly, yearly } = price(id);
-    return [
-      fmt(t.subPricePerMonth, { price: monthly }),
-      fmt(t.subPricePerYear, { price: yearly }),
-    ];
+    const saving = savingFor(billing.pricing, id);
+    const perMonth = fmt(t.subPricePerMonth, { price: monthly });
+    const perYear = fmt(t.subPricePerYear, { price: yearly });
+    // b: the yearly price first, with what it really saves
+    return variant === "b"
+      ? [
+          saving > 0
+            ? `${perYear} · ${fmt(t.subSavePercent, { n: saving })}`
+            : perYear,
+          perMonth,
+        ]
+      : [perMonth, perYear];
   };
 
   return (
@@ -147,20 +159,49 @@ export function PlanComparison({
                     </span>
                   </label>
                 ) : null}
-                <SubmitButton
-                  name="period"
-                  value="monthly"
-                  className="btn btn-primary w-full"
-                >
-                  {fmt(t.subPayMonthly, { price: price(id).monthly })}
-                </SubmitButton>
-                <SubmitButton
-                  name="period"
-                  value="yearly"
-                  className="btn btn-secondary w-full"
-                >
-                  {fmt(t.subPayYearly, { price: price(id).yearly })}
-                </SubmitButton>
+                {variant === "b" ? (
+                  <>
+                    <SubmitButton
+                      name="period"
+                      value="yearly"
+                      className={
+                        variant === "b"
+                          ? "btn btn-primary w-full"
+                          : "btn btn-secondary w-full"
+                      }
+                    >
+                      {fmt(t.subPayYearly, { price: price(id).yearly })}
+                    </SubmitButton>
+                    <SubmitButton
+                      name="period"
+                      value="monthly"
+                      className={
+                        variant === "b"
+                          ? "btn btn-secondary w-full"
+                          : "btn btn-primary w-full"
+                      }
+                    >
+                      {fmt(t.subPayMonthly, { price: price(id).monthly })}
+                    </SubmitButton>
+                  </>
+                ) : (
+                  <>
+                    <SubmitButton
+                      name="period"
+                      value="monthly"
+                      className="btn btn-primary w-full"
+                    >
+                      {fmt(t.subPayMonthly, { price: price(id).monthly })}
+                    </SubmitButton>
+                    <SubmitButton
+                      name="period"
+                      value="yearly"
+                      className="btn btn-secondary w-full"
+                    >
+                      {fmt(t.subPayYearly, { price: price(id).yearly })}
+                    </SubmitButton>
+                  </>
+                )}
               </form>
             ) : null}
           </li>

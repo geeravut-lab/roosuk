@@ -1494,6 +1494,29 @@ const th = {
   voiceUnsupported: "เบราว์เซอร์นี้ยังไม่รองรับการอัดเสียง",
   voiceDone: "ถอดเสียงแล้ว ตรวจและแก้ข้อความก่อนส่งนะ",
   voiceHint: "เสียงไม่ถูกเก็บไว้ ใช้สิทธิ์พิมพ์ด้วยเสียง 1 ครั้ง",
+  subReassure:
+    "แพ็กเกจฟรีใช้ต่อได้ตลอด และไม่มีการต่ออายุอัตโนมัติ คุณจ่ายเมื่ออยากต่อเท่านั้น",
+  subSavePercent: "ประหยัด {n}% เมื่อเทียบกับรายเดือน",
+  adminPaywallTitle: "ทดสอบหน้าสมัครสมาชิก (A/B)",
+  adminPaywallHint:
+    "ทั้งสองแบบมีแพ็กเกจ ราคา และตัวเลือกเหมือนกันทุกอย่าง ต่างกันแค่ลำดับและถ้อยคำ: A แสดงราคารายเดือนก่อน · B แสดงราคารายปีก่อนพร้อมส่วนที่ประหยัดได้ และย้ำว่าแพ็กเกจฟรียังใช้ได้และไม่ต่ออายุอัตโนมัติ ผู้ใช้แต่ละคนเห็นแบบเดิมเสมอ",
+  adminPaywallMode: "โหมด",
+  adminPaywallMode_ab: "แบ่งครึ่ง A/B",
+  adminPaywallMode_a: "ทุกคนเห็น A",
+  adminPaywallMode_b: "ทุกคนเห็น B",
+  adminPaywallMode_off: "ปิดการทดสอบ (ทุกคนเห็น A)",
+  adminPaywallModeNote:
+    "เปลี่ยนโหมดระหว่างทดสอบจะทำให้ผลปนกัน ถ้าจะเริ่มทดสอบใหม่ ให้จดผลเดิมไว้ก่อน",
+  adminPaywallSaved: "บันทึกโหมดแล้ว",
+  adminPaywallResults: "ผลจนถึงตอนนี้ (นับจำนวนคน ไม่ซ้ำ)",
+  adminPaywallViewed: "เห็นหน้านี้",
+  adminPaywallOrdered: "เริ่มสั่งซื้อ",
+  adminPaywallReported: "แจ้งโอนแล้ว",
+  adminPaywallSubscribed: "สมัครสำเร็จ",
+  adminPaywallRate: "สมัครสำเร็จ {n}% ของผู้ที่เห็น",
+  adminPaywallTooFew:
+    "ตัวอย่างน้อยกว่า {n} คนต่อแบบ ยังสรุปไม่ได้ว่าแบบไหนดีกว่า",
+  adminPaywallVersion: "แบบ {v}",
 } as const;
 
 export type Dict = { [K in keyof typeof th]: string };
@@ -3033,6 +3056,29 @@ const en = {
   voiceUnsupported: "This browser cannot record audio.",
   voiceDone: "Done. Please check the text before sending.",
   voiceHint: "The audio is not kept. Uses one voice-typing allowance.",
+  subReassure:
+    "The free plan stays free, and nothing renews by itself — you pay only when you choose to.",
+  subSavePercent: "saves {n}% compared with monthly",
+  adminPaywallTitle: "Paywall test (A/B)",
+  adminPaywallHint:
+    "Both versions have exactly the same plans, prices and options; only the order and wording differ. A shows the monthly price first. B shows the yearly price first with what it saves, and reminds that the free plan stays free and nothing renews by itself. Each person always sees the same version.",
+  adminPaywallMode: "Mode",
+  adminPaywallMode_ab: "Split A/B",
+  adminPaywallMode_a: "Everyone sees A",
+  adminPaywallMode_b: "Everyone sees B",
+  adminPaywallMode_off: "Off (everyone sees A)",
+  adminPaywallModeNote:
+    "Changing the mode during a test mixes the results. Note the current results before you start a new test.",
+  adminPaywallSaved: "Mode saved.",
+  adminPaywallResults: "Results so far (distinct people)",
+  adminPaywallViewed: "Viewed",
+  adminPaywallOrdered: "Started an order",
+  adminPaywallReported: "Reported a transfer",
+  adminPaywallSubscribed: "Subscribed",
+  adminPaywallRate: "{n}% of viewers subscribed",
+  adminPaywallTooFew:
+    "Fewer than {n} viewers per version — too early to say which is better.",
+  adminPaywallVersion: "Version {v}",
 } satisfies Dict;
 
 export const dict: Record<Lang, Dict> = { th, en };

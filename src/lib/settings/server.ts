@@ -2,6 +2,7 @@ import "server-only";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { normalizeFlags, type FlagMap } from "@/lib/flags/flags";
 import { isValidPromptpayId } from "@/lib/billing/promptpay";
+import { isPaywallMode, type PaywallMode } from "@/lib/paywall/paywall";
 import {
   DEFAULT_REWARD_SETTINGS,
   parseRewardSettings,
@@ -20,6 +21,8 @@ export interface PlatformSettings {
   promptpayId: string | null;
   billing: BillingSettings;
   rewards: RewardSettings;
+  /** paywall A/B: off, split, or pinned to one version */
+  paywallMode: PaywallMode;
 }
 
 const DEFAULTS: PlatformSettings = {
@@ -28,6 +31,7 @@ const DEFAULTS: PlatformSettings = {
   promptpayId: null,
   billing: DEFAULT_BILLING_SETTINGS,
   rewards: DEFAULT_REWARD_SETTINGS,
+  paywallMode: "ab",
 };
 
 // 30 s is the promise made to the admin page ("takes effect within 1 minute"):
@@ -63,6 +67,7 @@ export async function loadPlatformSettings(): Promise<PlatformSettings> {
           : null,
         billing: parseBillingSettings(data),
         rewards: parseRewardSettings(data),
+        paywallMode: isPaywallMode(data?.paywall_ab) ? data.paywall_ab : "ab",
       },
       at: now,
     };

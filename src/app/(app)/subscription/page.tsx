@@ -16,6 +16,7 @@ import {
 import { errorText, fmt } from "@/lib/i18n/dict";
 import { formatDate } from "@/lib/i18n/format";
 import { getLang, getT } from "@/lib/i18n/server";
+import { variantFor, variantTag } from "@/lib/paywall/paywall";
 import { loadBalance } from "@/lib/rewards/server";
 import { loadPlatformSettings } from "@/lib/settings/server";
 import { createClient } from "@/lib/supabase/server";
@@ -39,14 +40,13 @@ export default async function SubscriptionPage({
 }: PageProps<"/subscription">) {
   const user = await requireUser();
   const { error } = await searchParams;
-  after(() => trackEvent("paywall_viewed", user.id));
   const now = new Date();
   const monthStart = bangkokMonthStart(now);
   const supabase = await createClient();
   const [
     t,
     lang,
-    { billing, rewards },
+    { billing, rewards, paywallMode },
     profile,
     rows,
     { data: payments },
@@ -68,6 +68,9 @@ export default async function SubscriptionPage({
     loadBalance(user.id),
   ]);
 
+  const variant = variantFor(user.id, paywallMode);
+  // the version is fixed by the person, and tagged on every funnel step so the two can be compared
+  after(() => trackEvent("paywall_viewed", user.id, variantTag(variant)));
   const plan = resolvePlan(profile ?? NO_BILLING, now);
   const usage = summarizeUsage(
     rows,
@@ -145,11 +148,17 @@ export default async function SubscriptionPage({
         <h2 id="plans-h" className="font-semibold">
           {t.subPlansTitle}
         </h2>
+        {variant === "b" ? (
+          <p className="bg-tint-secondary rounded-xl px-3 py-2 text-sm font-medium">
+            {t.subReassure}
+          </p>
+        ) : null}
         <PlanComparison
           t={t}
           current={plan.tier}
           billing={billing}
           credit={{ balance, maxPerUse: rewards.redeemMaxSubscriptionThb }}
+          variant={variant}
         />
         <p className="text-muted text-sm">{t.subPayNote}</p>
       </section>
