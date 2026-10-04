@@ -19,6 +19,7 @@ export const EVENTS = [
   "lab_explained",
   "report_generated",
   "vault_uploaded",
+  "insight_explained",
   "ask_sent",
   "checkin_done",
   "lead_created",

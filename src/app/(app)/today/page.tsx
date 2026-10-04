@@ -7,6 +7,10 @@ import {
   Stethoscope,
   UserRound,
 } from "lucide-react";
+import { loadInsightNote, loadInsights } from "@/lib/insights/server";
+import { featureEnabled } from "@/lib/flags/server";
+import { errorText } from "@/lib/i18n/dict";
+import { InsightCard } from "./InsightCard";
 import { ACHIEVEMENTS } from "@/lib/achievements/achievements";
 import { awardAchievements } from "@/lib/achievements/server";
 import { requireUser } from "@/lib/auth/server";
@@ -30,7 +34,8 @@ export async function generateMetadata(): Promise<Metadata> {
   return { title: (await getT()).navToday };
 }
 
-export default async function TodayPage() {
+export default async function TodayPage({ searchParams }: PageProps<"/today">) {
+  const { error } = await searchParams;
   const user = await requireUser();
   const today = bangkokDate(new Date());
   const supabase = await createClient();
@@ -60,6 +65,10 @@ export default async function TodayPage() {
       .select("key", { count: "exact", head: true }),
   ]);
   const plan = billing ? resolvePlan(billing) : null;
+  const insight = (await featureEnabled("insights"))
+    ? ((await loadInsights(today, rows))[0] ?? null)
+    : null;
+  const insightNote = insight ? await loadInsightNote(insight) : null;
   const view = buildHabitView(rows, doneKeys, today);
 
   return (
@@ -81,7 +90,18 @@ export default async function TodayPage() {
         </Link>
       ) : null}
 
+      {typeof error === "string" ? (
+        <p
+          role="alert"
+          className="border-field-border bg-surface rounded-xl border px-3 py-2 text-sm font-medium"
+        >
+          {errorText(error, t)}
+        </p>
+      ) : null}
       {view.lowMood ? <LowMoodCard t={t} /> : null}
+      {insight ? (
+        <InsightCard t={t} lang={lang} insight={insight} note={insightNote} />
+      ) : null}
       {profileRow ? null : (
         <Link
           href="/profile"

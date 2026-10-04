@@ -1312,6 +1312,40 @@ const th = {
   adminRuleParam_day: "วันที่ของเดือนที่เริ่มแจ้ง (1–28)",
   adminRuleParam_annual_months: "ตรวจประจำปี: ผ่านกี่เดือนนับจากผลตรวจล่าสุด",
   adminRuleParam_recheck_days: "ตรวจซ้ำ: ผ่านกี่วัน (เมื่อมีรายการนอกช่วง)",
+  insightHeading: "ข้อสังเกตจากข้อมูลของคุณ",
+  insightNote: "ระบบคำนวณจากข้อมูลที่คุณบันทึกเอง ไม่ใช่การวินิจฉัย",
+  insight_lab_worse_title: "ผลตรวจบางรายการเปลี่ยนไปจากครั้งก่อน",
+  insight_lab_worse_body:
+    "{names} อยู่ในระดับที่ควรติดตามมากขึ้นกว่าผลครั้งก่อน",
+  insight_lab_worse_next:
+    "ลองพูดคุยกับแพทย์เกี่ยวกับผลนี้ แล้วดูรายละเอียดในรายงาน",
+  insight_lab_worse_cta: "ดูผลตรวจ",
+  insight_score_drop_title: "คะแนนสัปดาห์นี้ต่ำกว่าสัปดาห์ก่อน",
+  insight_score_drop_body:
+    "คะแนนเฉลี่ย {recent} เทียบกับ {previous} ในสัปดาห์ก่อน",
+  insight_score_drop_next:
+    "เช็กอินต่อเนื่องอีกสองสามวัน แล้วดูว่าด้านไหนปรับได้ง่ายที่สุด",
+  insight_score_drop_cta: "ดูไทม์ไลน์",
+  insight_sleep_short_title: "นอนไม่ถึง 5 ชั่วโมงหลายวัน",
+  insight_sleep_short_body:
+    "{days} จาก {of} วันล่าสุดที่เช็กอิน คุณนอนไม่ถึง 5 ชั่วโมง",
+  insight_sleep_short_next: "คืนนี้ลองเข้านอนเร็วขึ้นสัก 30 นาที",
+  insight_sleep_short_cta: "ดูเป้าหมายวันนี้",
+  insight_comeback_title: "อยากให้คุณกลับมาดูแลตัวเองนะ",
+  insight_comeback_body: "คุณเคยเช็กอินต่อเนื่อง {run} วัน และห่างไป {gap} วัน",
+  insight_comeback_next:
+    "เริ่มใหม่วันนี้ได้เลย ใช้เวลาไม่ถึงนาที ไม่มีอะไรเสียไป",
+  insight_comeback_cta: "เช็กอินวันนี้",
+  insightAiCta: "ให้ AI อธิบายเพิ่ม",
+  insightAiHint: "ใช้สิทธิ์ถาม AI 1 ครั้ง AI ไม่วินิจฉัยและไม่เดาสาเหตุ",
+  insightAiBusy: "กำลังเขียนคำอธิบาย…",
+  insightAiTitle: "AI อธิบายเพิ่ม",
+  insightAiSteps: "ลองทำ",
+  insightAiDisclaimer:
+    "ไม่ใช่การวินิจฉัยหรือคำแนะนำทางการแพทย์ หากกังวลควรปรึกษาแพทย์",
+  err_insight_gone: "ข้อสังเกตนี้ไม่มีแล้ว (ข้อมูลเปลี่ยนไป)",
+  flag_insights: "ข้อสังเกตและขั้นตอนถัดไป",
+  eventName_insight_explained: "ให้ AI อธิบายข้อสังเกต",
 } as const;
 
 export type Dict = { [K in keyof typeof th]: string };
@@ -2651,6 +2685,41 @@ const en = {
     "Yearly check-up: months since the last results",
   adminRuleParam_recheck_days:
     "Re-check: days since the last results (when some were outside range)",
+  insightHeading: "Something worth a look",
+  insightNote: "Worked out from what you logged. Not a diagnosis.",
+  insight_lab_worse_title: "Some results changed since last time",
+  insight_lab_worse_body:
+    "{names} moved to a level worth watching more closely than last time",
+  insight_lab_worse_next:
+    "Talk it through with a doctor, and look at the details in the report.",
+  insight_lab_worse_cta: "View the results",
+  insight_score_drop_title: "This week's score is lower than last week's",
+  insight_score_drop_body:
+    "Average {recent}, compared with {previous} the week before",
+  insight_score_drop_next:
+    "Keep checking in for a few more days and see which area is easiest to nudge.",
+  insight_score_drop_cta: "Open the timeline",
+  insight_sleep_short_title: "Several short nights",
+  insight_sleep_short_body:
+    "On {days} of your last {of} check-ins you slept under 5 hours",
+  insight_sleep_short_next: "Try going to bed 30 minutes earlier tonight.",
+  insight_sleep_short_cta: "See today's steps",
+  insight_comeback_title: "We would love to see you back",
+  insight_comeback_body:
+    "You checked in {run} days in a row, then paused for {gap} days",
+  insight_comeback_next:
+    "Start again today — under a minute, and nothing is lost.",
+  insight_comeback_cta: "Check in today",
+  insightAiCta: "Ask AI to explain more",
+  insightAiHint: "Uses one AI allowance. It never diagnoses or guesses causes.",
+  insightAiBusy: "Writing…",
+  insightAiTitle: "More from AI",
+  insightAiSteps: "Small steps",
+  insightAiDisclaimer:
+    "Not a diagnosis or medical advice. If you are worried, talk to a doctor.",
+  err_insight_gone: "That observation no longer applies (your data changed).",
+  flag_insights: "Insights and next steps",
+  eventName_insight_explained: "Asked AI to explain an insight",
 } satisfies Dict;
 
 export const dict: Record<Lang, Dict> = { th, en };
