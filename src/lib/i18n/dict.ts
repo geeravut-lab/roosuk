@@ -428,7 +428,8 @@ const th = {
   scanLabDesc:
     "ถ่ายรูปหรืออัปโหลดผลตรวจ ให้ AI ดึงค่าออกมา แล้วคุณตรวจทานก่อนบันทึก",
   scanSoon: "เร็ว ๆ นี้",
-  foodChoose: "เลือกหรือถ่ายรูปอาหาร",
+  foodChoose: "เลือกรูปจากเครื่อง",
+  foodTakePhoto: "ถ่ายรูปอาหาร",
   foodChooseAnother: "เปลี่ยนรูป",
   foodPreviewAlt: "ตัวอย่างรูปอาหารที่เลือก",
   foodAnalyze: "วิเคราะห์อาหาร",
@@ -713,6 +714,7 @@ const th = {
   adminAiFallbackDefaultNone: "ค่าเริ่มต้น (ไม่มีสำรอง)",
   adminAiModels: "รุ่นโมเดล",
   adminAiModelPlaceholder: "ค่าเริ่มต้น: {model}",
+  adminAiModelNotListed: "{model} (ไม่อยู่ในรายการของผู้ให้บริการแล้ว)",
   adminAiModelsFromApi: "รายการรุ่นมาจาก API ของผู้ให้บริการ",
   adminAiModelsFromCode: "เรียกรายการรุ่นจาก API ไม่ได้ — ใช้ค่าในโค้ด",
   adminAiTest: "ทดสอบ",
@@ -1200,7 +1202,8 @@ const en = {
   scanLabDesc:
     "Photograph or upload your results; AI reads the values and you review them before saving.",
   scanSoon: "Coming soon",
-  foodChoose: "Choose or take a photo of your food",
+  foodChoose: "Choose from your device",
+  foodTakePhoto: "Take a photo",
   foodChooseAnother: "Change photo",
   foodPreviewAlt: "Preview of the chosen food photo",
   foodAnalyze: "Analyse food",
@@ -1494,6 +1497,7 @@ const en = {
   adminAiFallbackDefaultNone: "Default (no fallback)",
   adminAiModels: "Models",
   adminAiModelPlaceholder: "Default: {model}",
+  adminAiModelNotListed: "{model} (no longer in the provider’s list)",
   adminAiModelsFromApi: "Model list comes from the provider’s API",
   adminAiModelsFromCode:
     "Could not fetch the model list from the API — showing the code defaults",

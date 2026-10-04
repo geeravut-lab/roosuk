@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useRef, useState, useTransition } from "react";
+import { useActionState, useState, useTransition } from "react";
 import {
   saveAiSettingsAction,
   testModelAction,
@@ -28,19 +28,21 @@ export interface ProviderView {
   label: string;
   hasKey: boolean;
   envKey: string;
-  /** Models the provider's API reports (empty when it could not be listed). */
+  /** Dropdown options: the API's list, or the code's known models when it could not be listed. */
   models: string[];
+  fromApi: boolean;
 }
 
 const initial: AiFormState = {};
 
 function TestButton({
   provider,
-  inputRef,
+  model,
   fallbackModel,
 }: {
   provider: string;
-  inputRef: React.RefObject<HTMLInputElement | null>;
+  /** Current field value ("" = the code default). */
+  model: string;
   fallbackModel: string;
 }) {
   const { t } = useI18n();
@@ -56,8 +58,10 @@ function TestButton({
         disabled={pending}
         onClick={() =>
           start(async () => {
-            const model = inputRef.current?.value.trim() || fallbackModel;
-            const r = await testModelAction(provider, model);
+            const r = await testModelAction(
+              provider,
+              model.trim() || fallbackModel,
+            );
             setOk(r.ok);
             setResult(
               r.ok
@@ -91,28 +95,39 @@ function ModelField({
   defaultModel: string;
 }) {
   const { t } = useI18n();
-  const ref = useRef<HTMLInputElement>(null);
-  const listId = `models-${provider.id}`;
+  const [model, setModel] = useState(value);
+  const id = `m-${provider.id}-${task}`;
+  // A saved value the provider no longer lists must stay visible, or saving would silently drop it.
+  const extra = model && !provider.models.includes(model);
   return (
     <div className="space-y-1.5">
-      <label htmlFor={`m-${provider.id}-${task}`} className="label">
+      <label htmlFor={id} className="label">
         {provider.label}
       </label>
-      <input
-        id={`m-${provider.id}-${task}`}
-        ref={ref}
+      <select
+        id={id}
         name={`model.${provider.id}.${task}`}
-        defaultValue={value}
-        placeholder={fmt(t.adminAiModelPlaceholder, { model: defaultModel })}
-        list={provider.models.length ? listId : undefined}
+        value={model}
+        onChange={(e) => setModel(e.target.value)}
         className="field"
-        maxLength={100}
-        autoComplete="off"
-        spellCheck={false}
-      />
+      >
+        <option value="">
+          {fmt(t.adminAiModelPlaceholder, { model: defaultModel })}
+        </option>
+        {extra ? (
+          <option value={model}>
+            {fmt(t.adminAiModelNotListed, { model })}
+          </option>
+        ) : null}
+        {provider.models.map((m) => (
+          <option key={m} value={m}>
+            {m}
+          </option>
+        ))}
+      </select>
       <TestButton
         provider={provider.id}
-        inputRef={ref}
+        model={model}
         fallbackModel={defaultModel}
       />
     </div>
@@ -135,16 +150,6 @@ export function AiForm({
 
   return (
     <form action={action} className="space-y-4">
-      {providers.map((p) =>
-        p.models.length ? (
-          <datalist key={p.id} id={`models-${p.id}`}>
-            {p.models.map((m) => (
-              <option key={m} value={m} />
-            ))}
-          </datalist>
-        ) : null,
-      )}
-
       <ul className="space-y-4">
         {tasks.map((v) => (
           <li key={v.task} className="card space-y-3">

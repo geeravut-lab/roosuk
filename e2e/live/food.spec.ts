@@ -115,6 +115,13 @@ test("food scan: input checks cost nothing; review → confirm → timeline → 
   await expect(page).toHaveURL(/\/scan\/food$/);
   expect(await serious(page)).toEqual([]);
 
+  // Two ways in: a camera button (opens the camera directly) and the gallery picker.
+  await expect(page.getByText("ถ่ายรูปอาหาร", { exact: true })).toBeVisible();
+  await expect(page.locator("#photo-camera")).toHaveAttribute(
+    "capture",
+    "environment",
+  );
+
   // A file that is not an image is refused by the server — before any quota or AI is touched.
   await page.locator("#photo").setInputFiles({
     name: "evil.jpg",

@@ -242,3 +242,11 @@ LINE Official Account + Messaging API channel (สำหรับแจ้งเ
 - [ ] **8. ตั้งค่าจริงใน `platform_settings`:** ราคา, `trial_days`, PromptPay ID, ลิงก์คู่มือ/LINE OA
 - [ ] **9. แพทย์ที่ปรึกษา** ตรวจ prompt, ช่วงค่าอ้างอิง และถ้อยคำสำคัญ
 - [ ] **10. Smoke test บน production** — ผมจะ **ขออนุญาตคุณก่อน** (หรือส่งขั้นตอนให้คุณทดสอบเอง) ตามกฎข้อ 5
+
+### LIFF app id (`LINE_LIFF_ID`, ไม่บังคับ)
+
+ทำให้การ์ดแจ้งเตือนใน LINE เปิดหน้าแอปภายใน LINE ได้เลย (ไม่มี LIFF ก็ยังกดเปิดผ่านเบราว์เซอร์ได้)
+
+1. LINE Developers Console → provider → channel **LINE Login** (ตัวเดียวกับที่ใช้ล็อกอิน) → แท็บ **LIFF** → **Add**
+2. กรอก: **LIFF app name** = `RooSuk` · **Size** = `Full` · **Endpoint URL** = โดเมนหลักของเว็บ เช่น `https://roosuk.netlify.app` (ไม่ใส่ path ต่อท้าย และไม่มี `#`) · **Scopes** = ติ๊ก `openid` และ `profile` (ไม่ต้องติ๊ก `chat_message.write`) · **Add friend option** = `On (Normal)` หรือ `Off`
+3. กด Add แล้วคัดลอก **LIFF ID** (หน้าตาแบบ `2011849201-AbCdEfGh`) ไปใส่ `LINE_LIFF_ID` ใน Netlify → deploy ใหม่

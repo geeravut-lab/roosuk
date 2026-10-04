@@ -141,7 +141,11 @@ test("only admins reach /admin/ai; an admin edits routing, which is stored and v
   });
   await foodCard.getByLabel("ผู้ให้บริการสำรอง").selectOption("none");
   await foodCard.getByText("รุ่นโมเดล", { exact: true }).click();
-  await foodCard.getByLabel("Google Gemini").fill("gemini-flash-lite-latest");
+  const gemini = foodCard.getByLabel("Google Gemini");
+  // A dropdown now: the options come from the provider's API list (or the code's known models).
+  await expect(gemini).toHaveJSProperty("tagName", "SELECT");
+  expect(await gemini.locator("option").count()).toBeGreaterThan(2);
+  await gemini.selectOption("gemini-flash-lite-latest");
   expect(
     await new AxeBuilder({ page })
       .withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"])
@@ -172,7 +176,11 @@ test("only admins reach /admin/ai; an admin edits routing, which is stored and v
   await foodCard
     .locator("details")
     .evaluate((d: HTMLDetailsElement) => (d.open = true));
-  await foodCard.getByLabel("Google Gemini").fill("bad model!");
+  // The UI cannot offer junk, so inject an option to prove the server still refuses it.
+  await gemini.evaluate((el: HTMLSelectElement) => {
+    el.add(new Option("bad model!", "bad model!"));
+    el.value = "bad model!";
+  });
   await page.getByRole("button", { name: "บันทึก", exact: true }).click();
   await expect(
     page

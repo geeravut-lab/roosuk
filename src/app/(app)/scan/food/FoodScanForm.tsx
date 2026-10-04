@@ -1,7 +1,7 @@
 "use client";
 
 import { useActionState, useEffect, useRef, useState } from "react";
-import { Camera } from "lucide-react";
+import { Camera, Images } from "lucide-react";
 import { scanFoodAction, type ScanState } from "@/app/actions/food";
 import { shrinkImage } from "@/lib/image-resize";
 import { errorText } from "@/lib/i18n/dict";
@@ -22,6 +22,7 @@ export function FoodScanForm() {
     [preview],
   );
 
+  // Both pickers (camera / gallery) end up in the single named `photo` input.
   async function onPick(e: React.ChangeEvent<HTMLInputElement>) {
     const picked = e.target.files?.[0];
     if (!picked) return;
@@ -55,13 +56,32 @@ export function FoodScanForm() {
         />
       ) : null}
 
-      <label
-        htmlFor="photo"
-        className="btn btn-secondary w-full cursor-pointer has-[:focus-visible]:outline-2"
-      >
-        <Camera className="size-5" aria-hidden />
-        {preview ? t.foodChooseAnother : t.foodChoose}
-      </label>
+      {/* No name/required: only a hand-over to the `photo` input above. capture opens the camera directly. */}
+      <input
+        id="photo-camera"
+        type="file"
+        accept="image/*"
+        capture="environment"
+        className="sr-only"
+        onChange={onPick}
+      />
+
+      <div className="grid gap-2 sm:grid-cols-2">
+        <label
+          htmlFor="photo-camera"
+          className="btn btn-secondary w-full cursor-pointer has-[:focus-visible]:outline-2"
+        >
+          <Camera className="size-5" aria-hidden />
+          {t.foodTakePhoto}
+        </label>
+        <label
+          htmlFor="photo"
+          className="btn btn-secondary w-full cursor-pointer has-[:focus-visible]:outline-2"
+        >
+          <Images className="size-5" aria-hidden />
+          {preview ? t.foodChooseAnother : t.foodChoose}
+        </label>
+      </div>
 
       {state.error ? (
         <p

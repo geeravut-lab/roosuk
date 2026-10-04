@@ -59,12 +59,16 @@ export default async function AdminAiPage() {
   ]);
   const freeTierProviders = freeTier;
 
+  // Dropdown options: the provider's own list; when it cannot be fetched (no key / API error), the models the code knows.
   const providers: ProviderView[] = PROVIDER_IDS.map((id, i) => ({
     id,
     label: PROVIDERS[id].label,
     hasKey: !!apiKeyFor(id),
     envKey: PROVIDERS[id].envKey,
-    models: modelLists[i],
+    fromApi: modelLists[i].length > 0,
+    models: modelLists[i].length
+      ? modelLists[i]
+      : [...new Set(Object.values(PROVIDERS[id].models))].sort(),
   }));
 
   const tasks: TaskView[] = TASK_KINDS.map((task) => {
@@ -138,7 +142,7 @@ export default async function AdminAiPage() {
                 <p className="font-semibold">{p.label}</p>
                 <p className="text-muted text-sm">
                   {p.hasKey
-                    ? `${t.adminAiKeySet} · ${p.models.length ? t.adminAiModelsFromApi : t.adminAiModelsFromCode}`
+                    ? `${t.adminAiKeySet} · ${p.fromApi ? t.adminAiModelsFromApi : t.adminAiModelsFromCode}`
                     : fmt(t.adminAiKeyMissing, { env: p.envKey })}
                 </p>
               </div>
