@@ -180,7 +180,10 @@ test("admins see the built-in prompts and guardrails, and additions are screened
   expect(await versions("chat")).toEqual([]);
 
   // ── a harmless addition goes through the AI review: each outcome is right ──
-  const good = "ใช้ภาษาที่อบอุ่น เป็นกันเอง และเรียกผู้ใช้ว่า 'คุณ' เสมอ";
+  // (a different sentence from what is already saved, or "save" would have nothing to do)
+  const sentence = "ใช้ภาษาที่อบอุ่น เป็นกันเอง และเรียกผู้ใช้ว่า 'คุณ' เสมอ";
+  const good =
+    baseline === sentence ? "ตอบสั้นกระชับ และใช้ภาษาที่อบอุ่น" : sentence;
   await box.fill(good);
   await chat.getByRole("button", { name: "ตรวจสอบและบันทึก" }).click();
   await expect(
