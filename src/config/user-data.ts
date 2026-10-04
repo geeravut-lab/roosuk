@@ -191,6 +191,18 @@ export const OWNED_TABLES: readonly OwnedTable[] = [
     countable: true,
   },
   {
+    table: "company_members",
+    column: "user_id",
+    onDelete: "erased",
+    countable: true,
+  },
+  {
+    table: "creators",
+    column: "user_id",
+    onDelete: "erased",
+    countable: true,
+  },
+  {
     table: "monthly_reports",
     column: "user_id",
     onDelete: "erased",

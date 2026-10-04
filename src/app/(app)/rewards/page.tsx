@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
-import { Gift } from "lucide-react";
+import Link from "next/link";
+import { Gift, Megaphone } from "lucide-react";
 import { applyReferralCodeAction } from "@/app/actions/rewards";
 import { CopyButton } from "@/components/CopyButton";
 import { SubmitButton } from "@/components/SubmitButton";
@@ -9,7 +10,9 @@ import { formatDate } from "@/lib/i18n/format";
 import { getLang, getT } from "@/lib/i18n/server";
 import { getOrigin } from "@/lib/http/origin";
 import { loadWallet } from "@/lib/rewards/server";
+import { featureEnabled } from "@/lib/flags/server";
 import { loadPlatformSettings } from "@/lib/settings/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 
 export async function generateMetadata(): Promise<Metadata> {
   return { title: (await getT()).rewardsTitle };
@@ -30,6 +33,16 @@ export default async function RewardsPage({
     getOrigin(),
   ]);
   const link = `${origin}/r/${wallet.code}`;
+  // people the admin made creators get a link to their toolkit
+  const isCreator =
+    (await featureEnabled("creator")) &&
+    !!(
+      await createAdminClient()
+        .from("creators")
+        .select("user_id")
+        .eq("user_id", user.id)
+        .maybeSingle()
+    ).data;
   const note = CODE_NOTES.find((n) => n === sp.code);
 
   return (
@@ -40,6 +53,16 @@ export default async function RewardsPage({
         </h1>
         <p className="text-muted text-sm">{t.rewardsIntro}</p>
       </div>
+
+      {isCreator ? (
+        <Link
+          href="/creator"
+          className="card hover:bg-tint-primary flex items-center gap-3"
+        >
+          <Megaphone className="text-primary-strong size-6" aria-hidden />
+          <span className="font-semibold">{t.creatorLink}</span>
+        </Link>
+      ) : null}
 
       {note ? (
         <p

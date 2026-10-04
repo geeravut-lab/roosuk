@@ -45,6 +45,16 @@ export function withGrant(
   return { ...profile, plan_tier: grant.tier, plan_expires_at: grant.until };
 }
 
+/** The better of two grants (higher plan, then the later end); either may be absent. */
+export function bestGrant(
+  a: PlanGrant | null,
+  b: PlanGrant | null,
+): PlanGrant | null {
+  if (!a || !b) return a ?? b;
+  if (RANK[a.tier] !== RANK[b.tier]) return RANK[a.tier] > RANK[b.tier] ? a : b;
+  return new Date(a.until) >= new Date(b.until) ? a : b;
+}
+
 export type PlanSource = "paid" | "trial" | "free";
 
 export interface EffectivePlan {

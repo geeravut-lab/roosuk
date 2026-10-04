@@ -138,7 +138,7 @@ export function creditDiscount(a: {
   return Number.isFinite(d) && d > 0 ? d : 0;
 }
 
-const CODE_RE = /^[2-9A-HJ-NP-Z]{7}$/;
+const CODE_RE = /^[2-9A-HJ-NP-Z]{6,10}$/;
 
 /** A referral code as typed by a person or found in a link: upper-cased, spaces and look-alike letters tidied; null when it cannot be one. */
 export function normalizeReferralCode(raw: unknown): string | null {

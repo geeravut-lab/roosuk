@@ -91,10 +91,13 @@ describe("normalizeReferralCode", () => {
   it("tidies a typed code and rejects what cannot be one", () => {
     expect(normalizeReferralCode(" ab3-kx7 m ")).toBe("AB3KX7M");
     expect(normalizeReferralCode("AB3KX7M")).toBe("AB3KX7M");
+    // a creator's own code may be 6 to 10 letters and digits, from the same look-alike-free alphabet
+    expect(normalizeReferralCode("maya23")).toBe("MAYA23");
+    expect(normalizeReferralCode("AB3KX7MM")).toBe("AB3KX7MM");
     for (const bad of [
       "",
       "SHORT",
-      "AB3KX7MM",
+      "AB3KX7MMMMM",
       "AB3KX70",
       "AB3KX1M",
       "AB3KXOM",

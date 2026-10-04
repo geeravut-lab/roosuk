@@ -10,6 +10,7 @@ import {
   Bot,
   UsersRound,
   ShoppingBag,
+  Building2,
   Watch,
   Gift,
   Trophy,
@@ -89,6 +90,12 @@ export const NAV: readonly NavItem[] = [
     href: "/shop",
     label: "navShop",
     icon: ShoppingBag,
+    group: "account",
+  },
+  {
+    href: "/company",
+    label: "navCompany",
+    icon: Building2,
     group: "account",
   },
   {

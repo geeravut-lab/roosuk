@@ -16,6 +16,8 @@ export const FEATURE_FLAGS = [
   "wearables",
   "family",
   "marketplace",
+  "corporate",
+  "creator",
   "booking",
   "voice",
   "checkup_lead",

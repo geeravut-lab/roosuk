@@ -4,6 +4,7 @@ import {
   fairUseCapFor,
   resolvePlan,
   summarizeUsage,
+  bestGrant,
   withGrant,
   type BillingProfile,
 } from "./plan";
@@ -261,5 +262,27 @@ describe("withGrant", () => {
     expect(
       withGrant(base, { tier: "premium", until: "2026-10-19T00:00:00Z" }, now),
     ).toBe(base);
+  });
+});
+
+describe("bestGrant", () => {
+  const g = (tier: "gold" | "premium", until: string) => ({ tier, until });
+  it("takes the higher plan, then the later end, and copes with none", () => {
+    expect(bestGrant(null, null)).toBeNull();
+    expect(bestGrant(g("gold", "2026-12-01T00:00:00Z"), null)).toEqual(
+      g("gold", "2026-12-01T00:00:00Z"),
+    );
+    expect(
+      bestGrant(
+        g("gold", "2027-01-01T00:00:00Z"),
+        g("premium", "2026-11-01T00:00:00Z"),
+      )?.tier,
+    ).toBe("premium");
+    expect(
+      bestGrant(
+        g("premium", "2026-11-01T00:00:00Z"),
+        g("premium", "2026-12-01T00:00:00Z"),
+      )?.until,
+    ).toBe("2026-12-01T00:00:00Z");
   });
 });

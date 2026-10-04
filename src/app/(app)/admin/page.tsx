@@ -10,6 +10,8 @@ import {
   FlaskConical,
   ReceiptText,
   ShoppingBag,
+  Building2,
+  Megaphone,
   Stethoscope,
   Timer,
   ToggleLeft,
@@ -78,6 +80,20 @@ export default async function AdminHome({ searchParams }: PageProps<"/admin">) {
       >
         <ShoppingBag className="text-primary-strong size-6" aria-hidden />
         <span className="font-semibold">{t.adminShopTitle}</span>
+      </Link>
+      <Link
+        href="/admin/corporate"
+        className="card hover:bg-tint-primary flex items-center gap-3"
+      >
+        <Building2 className="text-primary-strong size-6" aria-hidden />
+        <span className="font-semibold">{t.adminCorpTitle}</span>
+      </Link>
+      <Link
+        href="/admin/creators"
+        className="card hover:bg-tint-primary flex items-center gap-3"
+      >
+        <Megaphone className="text-primary-strong size-6" aria-hidden />
+        <span className="font-semibold">{t.adminCreatorsTitle}</span>
       </Link>
       <Link
         href="/admin/biomarkers"

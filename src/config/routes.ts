@@ -16,6 +16,8 @@ export const PROTECTED_PREFIXES = [
   "/agent",
   "/family",
   "/shop",
+  "/company",
+  "/creator",
   "/rewards",
   "/challenges",
   "/quiz-result",
