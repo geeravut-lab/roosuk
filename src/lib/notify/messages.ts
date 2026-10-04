@@ -187,3 +187,26 @@ export function checkupReminderNotice(
     dedupeKey: `checkup:${kind}:${labDate}`,
   };
 }
+
+/** Credit earned: for an invited friend who started showing up, or a finished challenge. */
+export function rewardEarnedNotice(
+  t: Dict,
+  source: "referral" | "referee" | "challenge",
+  amount: number,
+  ref: string,
+): Notice {
+  const title =
+    source === "referral"
+      ? t.notifRewardReferral
+      : source === "referee"
+        ? t.notifRewardReferee
+        : t.notifRewardChallenge;
+  return {
+    kind: "reward_earned",
+    category: "transactional",
+    title: fmt(title, { amount }),
+    body: noticeBody(t.notifRewardBody),
+    href: "/rewards",
+    dedupeKey: `reward:${source}:${ref}`,
+  };
+}

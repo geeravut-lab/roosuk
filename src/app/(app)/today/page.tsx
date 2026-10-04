@@ -13,6 +13,7 @@ import { errorText } from "@/lib/i18n/dict";
 import { InsightCard } from "./InsightCard";
 import { ACHIEVEMENTS } from "@/lib/achievements/achievements";
 import { awardAchievements } from "@/lib/achievements/server";
+import { maybeQualifyReferral } from "@/lib/rewards/server";
 import { requireUser } from "@/lib/auth/server";
 import { getBillingProfile } from "@/lib/billing/profile.server";
 import { resolvePlan } from "@/lib/billing/plan";
@@ -41,6 +42,7 @@ export default async function TodayPage({ searchParams }: PageProps<"/today">) {
   const supabase = await createClient();
   // Before reading, so a badge earned by what the person just did is counted on this very visit.
   await awardAchievements(user.id);
+  await maybeQualifyReferral(user.id); // an invited person who has shown up earns the inviter's reward
   const [
     t,
     lang,

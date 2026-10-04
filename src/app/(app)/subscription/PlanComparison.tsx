@@ -46,10 +46,13 @@ export function PlanComparison({
   t,
   current,
   billing,
+  credit,
 }: {
   t: Dict;
   current: PlanId;
   billing: BillingSettings;
+  /** the person's reward credit and the admin's per-payment maximum; offered only when both are above zero */
+  credit?: { balance: number; maxPerUse: number };
 }) {
   const overrides: QuotaOverrides = billing.planOverrides;
   const price = (id: "gold" | "premium") => {
@@ -129,6 +132,21 @@ export function PlanComparison({
             {id !== "free" ? (
               <form action={startPaymentAction} className="grid gap-2">
                 <input type="hidden" name="tier" value={id} />
+                {credit && credit.balance > 0 && credit.maxPerUse > 0 ? (
+                  <label className="flex min-h-11 items-center gap-3">
+                    <input
+                      type="checkbox"
+                      name="useCredit"
+                      className="size-5 shrink-0"
+                    />
+                    <span className="text-sm">
+                      {fmt(t.subUseCredit, {
+                        max: credit.maxPerUse,
+                        balance: credit.balance,
+                      })}
+                    </span>
+                  </label>
+                ) : null}
                 <SubmitButton
                   name="period"
                   value="monthly"

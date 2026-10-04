@@ -16,6 +16,7 @@ import {
 import { errorText, fmt } from "@/lib/i18n/dict";
 import { formatDate } from "@/lib/i18n/format";
 import { getLang, getT } from "@/lib/i18n/server";
+import { loadBalance } from "@/lib/rewards/server";
 import { loadPlatformSettings } from "@/lib/settings/server";
 import { createClient } from "@/lib/supabase/server";
 import { PlanComparison } from "./PlanComparison";
@@ -42,22 +43,30 @@ export default async function SubscriptionPage({
   const now = new Date();
   const monthStart = bangkokMonthStart(now);
   const supabase = await createClient();
-  const [t, lang, { billing }, profile, rows, { data: payments }] =
-    await Promise.all([
-      getT(),
-      getLang(),
-      loadPlatformSettings(),
-      getBillingProfile(user.id),
-      getUsageRows(user.id, monthStart),
-      supabase
-        .from("payments")
-        .select(PAYMENT_COLUMNS)
-        .eq("user_id", user.id)
-        .neq("status", "cancelled")
-        .order("created_at", { ascending: false })
-        .limit(10)
-        .returns<PaymentRow[]>(),
-    ]);
+  const [
+    t,
+    lang,
+    { billing, rewards },
+    profile,
+    rows,
+    { data: payments },
+    balance,
+  ] = await Promise.all([
+    getT(),
+    getLang(),
+    loadPlatformSettings(),
+    getBillingProfile(user.id),
+    getUsageRows(user.id, monthStart),
+    supabase
+      .from("payments")
+      .select(PAYMENT_COLUMNS)
+      .eq("user_id", user.id)
+      .neq("status", "cancelled")
+      .order("created_at", { ascending: false })
+      .limit(10)
+      .returns<PaymentRow[]>(),
+    loadBalance(user.id),
+  ]);
 
   const plan = resolvePlan(profile ?? NO_BILLING, now);
   const usage = summarizeUsage(
@@ -136,7 +145,12 @@ export default async function SubscriptionPage({
         <h2 id="plans-h" className="font-semibold">
           {t.subPlansTitle}
         </h2>
-        <PlanComparison t={t} current={plan.tier} billing={billing} />
+        <PlanComparison
+          t={t}
+          current={plan.tier}
+          billing={billing}
+          credit={{ balance, maxPerUse: rewards.redeemMaxSubscriptionThb }}
+        />
         <p className="text-muted text-sm">{t.subPayNote}</p>
       </section>
 

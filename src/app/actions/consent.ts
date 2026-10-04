@@ -7,6 +7,7 @@ import { requireUser } from "@/lib/auth/server";
 import { safeNextPath } from "@/lib/auth/utils";
 import { parseConsentForm } from "@/lib/consent/consent";
 import type { ErrorKey } from "@/lib/i18n/dict";
+import { attachReferralFromCookie } from "@/lib/rewards/server";
 import { startTrialIfEligible } from "@/lib/billing/trial.server";
 import { createClient } from "@/lib/supabase/server";
 
@@ -47,6 +48,9 @@ export async function recordConsentAction(
   } catch (err) {
     console.error("[trial] could not start:", err);
   }
+
+  // An invite link's code (cookie) is attached now, once, if it is a real code of someone else.
+  await attachReferralFromCookie(user.id);
 
   redirect(safeNextPath(formData.get("next")));
 }

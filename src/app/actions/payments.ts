@@ -16,6 +16,8 @@ import {
   normalizePromptpayId,
 } from "@/lib/billing/promptpay";
 import { AppError } from "@/lib/errors";
+import { creditDiscount } from "@/lib/rewards/rewards";
+import { loadBalance } from "@/lib/rewards/server";
 import type { ErrorKey } from "@/lib/i18n/dict";
 import {
   invalidatePlatformSettingsCache,
@@ -51,10 +53,20 @@ export async function startPaymentAction(formData: FormData): Promise<void> {
   if (!isPaidTier(tier) || !isBillingPeriod(period))
     redirect("/subscription?error=err_invalid_input");
 
-  const { billing, promptpayId } = await loadPlatformSettings();
+  const { billing, promptpayId, rewards } = await loadPlatformSettings();
   const amount = priceFor(billing.pricing, tier, period);
   if (!promptpayId || amount <= 0)
     redirect("/subscription?error=err_payment_not_ready");
+
+  // Reward credit the person chose to use: capped by the admin's per-use maximum, their balance and the price.
+  const discount =
+    formData.get("useCredit") === "on"
+      ? creditDiscount({
+          price: amount,
+          balance: await loadBalance(user.id),
+          maxPerUse: rewards.redeemMaxSubscriptionThb,
+        })
+      : 0;
 
   const db = createAdminClient();
   // One open draft per user (a unique index enforces it): the new order replaces the old.
@@ -71,7 +83,8 @@ export async function startPaymentAction(formData: FormData): Promise<void> {
       user_id: user.id,
       plan_tier: tier,
       period,
-      amount,
+      amount: amount - discount,
+      credit_applied_thb: discount,
       promptpay_id: promptpayId,
     })
     .select("id");
@@ -98,6 +111,13 @@ export async function reportPaymentAction(
   if (typeof id !== "string" || !UUID.test(id))
     return { error: "err_invalid_input" };
   if (!ref) return { error: "err_payer_ref_required" };
+
+  // The credit this order was priced with is spent now (once; a repeat press spends nothing more).
+  const spent = await createAdminClient().rpc("consume_payment_credit", {
+    p_payment: id,
+  });
+  if (spent.error) return { error: "err_save_failed" };
+  if (spent.data !== true) return { error: "err_credit_changed" };
 
   const { data, error } = await createAdminClient()
     .from("payments")
@@ -209,6 +229,9 @@ export async function rejectPaymentAction(formData: FormData): Promise<void> {
     .select("id, user_id");
   if (error) throw new AppError("err_save_failed");
   if (data?.length !== 1) throw new AppError("err_payment_state");
+
+  // A rejected transfer gives the credit back (it is spent again if they report again).
+  await createAdminClient().rpc("refund_payment_credit", { p_payment: id });
 
   const payer = (data[0] as { user_id: string | null }).user_id;
   if (payer) {

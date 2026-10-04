@@ -10,6 +10,7 @@ export const PROTECTED_PREFIXES = [
   "/achievements",
   "/report",
   "/vault",
+  "/rewards",
   "/quiz-result",
   "/subscription",
   "/consent",

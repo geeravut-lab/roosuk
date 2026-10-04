@@ -56,6 +56,11 @@ export default async function PayPage({
         <p className="text-primary-strong text-3xl font-bold">
           ฿{pay.amount.toLocaleString("en-US")}
         </p>
+        {pay.credit_applied_thb > 0 ? (
+          <p className="text-sm font-medium">
+            {fmt(t.payCreditLine, { n: pay.credit_applied_thb })}
+          </p>
+        ) : null}
       </section>
 
       {canReport(pay.status) && !qr ? (

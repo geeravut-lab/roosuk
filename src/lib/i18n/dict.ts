@@ -1346,6 +1346,69 @@ const th = {
   err_insight_gone: "ข้อสังเกตนี้ไม่มีแล้ว (ข้อมูลเปลี่ยนไป)",
   flag_insights: "ข้อสังเกตและขั้นตอนถัดไป",
   eventName_insight_explained: "ให้ AI อธิบายข้อสังเกต",
+  notifRewardReferral: "เพื่อนที่คุณชวนเริ่มใช้งานแล้ว คุณได้เครดิต ฿{amount}",
+  notifRewardReferee: "คุณได้เครดิตต้อนรับ ฿{amount}",
+  notifRewardChallenge: "ทำชาเลนจ์สำเร็จ ได้เครดิต ฿{amount}",
+  notifRewardBody: "ใช้เป็นส่วนลดค่าสมาชิกรอบถัดไปได้ ดูได้ที่หน้ารางวัล",
+  subUseCredit: "ใช้เครดิตสะสม (ลดได้ครั้งละไม่เกิน ฿{max} · คุณมี ฿{balance})",
+  payCreditLine: "ใช้เครดิตสะสมลดไปแล้ว ฿{n}",
+  adminPaymentCredit: "ใช้เครดิตสะสม ฿{n}",
+  err_credit_changed:
+    "เครดิตสะสมของคุณไม่พอสำหรับคำสั่งซื้อนี้แล้ว กรุณาเริ่มสั่งซื้อใหม่",
+  navRewards: "รางวัลของฉัน",
+  copyBtn: "คัดลอก",
+  copyDone: "คัดลอกแล้ว",
+  copyFailed: "คัดลอกไม่ได้ เลือกข้อความแล้วคัดลอกเอง",
+  rewardsTitle: "รางวัลของฉัน",
+  rewardsIntro: "เครดิตสะสมจากการชวนเพื่อนและทำชาเลนจ์ ใช้เป็นส่วนลดได้",
+  rewardsBalance: "เครดิตสะสม",
+  rewardsUseSubscription:
+    "ใช้เป็นส่วนลดค่าสมาชิกรอบถัดไปได้ครั้งละไม่เกิน ฿{n}",
+  rewardsUseOther:
+    "ใช้เป็นส่วนลดสินค้า/บริการได้ครั้งละไม่เกิน ฿{n} (เร็ว ๆ นี้ รวมถึงการตรวจสุขภาพ)",
+  rewardsInviteTitle: "ชวนเพื่อน",
+  rewardsInviteBody:
+    "เมื่อเพื่อนที่สมัครผ่านลิงก์ของคุณเช็กอินครบ {days} วัน คุณได้เครดิต ฿{n}",
+  rewardsInviteFriendGets: "เพื่อนของคุณได้ ฿{n} ด้วย",
+  rewardsYourCode: "รหัสของคุณ",
+  rewardsInviteStats: "ชวนแล้ว {invited} คน · ได้รางวัลแล้ว {done} คน",
+  rewardsHaveCode: "มีรหัสจากเพื่อน?",
+  rewardsApplyCode: "ใช้รหัส",
+  rewardsCodeHint: "ใช้ได้ภายใน 14 วันแรกของบัญชี และใช้ได้ครั้งเดียว",
+  rewardsCode_ok:
+    "ใช้รหัสแล้ว เพื่อนของคุณจะได้รางวัลเมื่อคุณเช็กอินครบตามกำหนด",
+  rewardsCode_invalid: "รหัสไม่ถูกต้อง",
+  rewardsCode_self: "ใช้รหัสของตัวเองไม่ได้",
+  rewardsCode_already: "คุณใช้รหัสไปแล้ว",
+  rewardsCode_too_late: "บัญชีนี้เกิน 14 วันแล้ว จึงใช้รหัสไม่ได้",
+  rewardsHistory: "ประวัติเครดิต",
+  rewardsHistoryNone: "ยังไม่มีรายการ",
+  rewardsKind_referral_reward: "ชวนเพื่อนสำเร็จ",
+  rewardsKind_referee_bonus: "เครดิตต้อนรับ",
+  rewardsKind_challenge_reward: "ทำชาเลนจ์สำเร็จ",
+  rewardsKind_redeem_subscription: "ใช้เป็นส่วนลดค่าสมาชิก",
+  rewardsKind_redeem_refund: "คืนเครดิต (ชำระเงินไม่สำเร็จ)",
+  rewardsKind_redeem_other: "ใช้เป็นส่วนลดสินค้า/บริการ",
+  rewardsKind_admin_adjust: "ปรับโดยผู้ดูแล",
+  err_reward_value: "ค่าที่กรอกไม่ถูกต้อง ต้องเป็นจำนวนเต็มในช่วงที่กำหนด",
+  adminRewardsTitle: "รางวัลและเครดิต",
+  adminRewardsHint:
+    "ตั้งจำนวนเงินรางวัล (บาท) และข้อจำกัด มีผลภายใน 1 นาที ใช้กับรางวัลที่เกิดหลังจากบันทึกเท่านั้น เครดิตเดิมของผู้ใช้ไม่เปลี่ยน",
+  adminRewardsSummary: "ภาพรวม",
+  adminRewardsOutstanding: "เครดิตคงค้างของผู้ใช้ทั้งหมด ฿{n}",
+  adminRewardsGranted: "ให้ไปแล้วรวม ฿{n} · ใช้ไปแล้ว ฿{spent}",
+  adminRewardsReferrals: "ชวนเพื่อน {invited} คน · ได้รางวัลแล้ว {done} คน",
+  adminRewardSaved: "บันทึกแล้ว",
+  adminReward_referralThb: "รางวัลชวนเพื่อน (฿ ต่อคนที่ชวนสำเร็จ)",
+  adminReward_refereeThb: "เครดิตต้อนรับเพื่อนที่ถูกชวน (฿)",
+  adminReward_challengeThb: "รางวัลชาเลนจ์ (฿ ต่อครั้งที่ทำสำเร็จ)",
+  adminReward_redeemMaxSubscriptionThb: "ใช้ลดค่าสมาชิกได้สูงสุดต่อครั้ง (฿)",
+  adminReward_redeemMaxOtherThb: "ใช้ลดสินค้า/บริการได้สูงสุดต่อครั้ง (฿)",
+  adminReward_referralMinCheckinDays: "เพื่อนต้องเช็กอินกี่วันจึงนับว่าสำเร็จ",
+  adminReward_referralMaxRewards: "รางวัลชวนเพื่อนสูงสุดต่อคน (ครั้ง)",
+  adminReward_challengeMaxRewardsPerMonth:
+    "รางวัลชาเลนจ์สูงสุดต่อคนต่อเดือน (ครั้ง)",
+  rewardsCodeLabel: "รหัสของเพื่อน",
 } as const;
 
 export type Dict = { [K in keyof typeof th]: string };
@@ -2720,6 +2783,78 @@ const en = {
   err_insight_gone: "That observation no longer applies (your data changed).",
   flag_insights: "Insights and next steps",
   eventName_insight_explained: "Asked AI to explain an insight",
+  notifRewardReferral:
+    "A friend you invited got started — you earned ฿{amount} credit",
+  notifRewardReferee: "You earned ฿{amount} welcome credit",
+  notifRewardChallenge: "Challenge complete — you earned ฿{amount} credit",
+  notifRewardBody:
+    "Use it as a discount on your next membership payment. See the Rewards page.",
+  subUseCredit:
+    "Use my credit (up to ฿{max} off per payment · you have ฿{balance})",
+  payCreditLine: "Credit used: ฿{n} off",
+  adminPaymentCredit: "credit ฿{n} applied",
+  err_credit_changed:
+    "Your credit is no longer enough for this order. Please start a new one.",
+  navRewards: "My rewards",
+  copyBtn: "Copy",
+  copyDone: "Copied",
+  copyFailed: "Could not copy — select the text and copy it yourself",
+  rewardsTitle: "My rewards",
+  rewardsIntro:
+    "Credit earned by inviting friends and finishing challenges, usable as a discount.",
+  rewardsBalance: "Credit balance",
+  rewardsUseSubscription:
+    "Use it as a discount on your next membership payment, up to ฿{n} each time.",
+  rewardsUseOther:
+    "Use it as a discount on products and services, up to ฿{n} each time (coming soon, including health check-ups).",
+  rewardsInviteTitle: "Invite a friend",
+  rewardsInviteBody:
+    "When a friend who signed up through your link has checked in for {days} days, you earn ฿{n} credit.",
+  rewardsInviteFriendGets: "Your friend gets ฿{n} too.",
+  rewardsYourCode: "Your code",
+  rewardsInviteStats: "{invited} invited · {done} earned",
+  rewardsHaveCode: "Have a friend's code?",
+  rewardsApplyCode: "Apply",
+  rewardsCodeHint: "Works in the first 14 days of an account, once.",
+  rewardsCode_ok:
+    "Code applied. Your friend earns their reward once you have checked in enough days.",
+  rewardsCode_invalid: "That code is not valid.",
+  rewardsCode_self: "You cannot use your own code.",
+  rewardsCode_already: "You already used a code.",
+  rewardsCode_too_late:
+    "This account is older than 14 days, so a code cannot be used.",
+  rewardsHistory: "Credit history",
+  rewardsHistoryNone: "Nothing yet.",
+  rewardsKind_referral_reward: "Friend invited",
+  rewardsKind_referee_bonus: "Welcome credit",
+  rewardsKind_challenge_reward: "Challenge complete",
+  rewardsKind_redeem_subscription: "Used on a membership payment",
+  rewardsKind_redeem_refund: "Credit returned (payment not accepted)",
+  rewardsKind_redeem_other: "Used on a product or service",
+  rewardsKind_admin_adjust: "Adjusted by an admin",
+  err_reward_value:
+    "That value is not valid. It must be a whole number in range.",
+  adminRewardsTitle: "Rewards and credit",
+  adminRewardsHint:
+    "Set the reward amounts (baht) and limits. They apply within a minute and only to rewards earned afterwards; people's existing credit does not change.",
+  adminRewardsSummary: "Overview",
+  adminRewardsOutstanding: "Credit outstanding across users: ฿{n}",
+  adminRewardsGranted: "Granted in total ฿{n} · used ฿{spent}",
+  adminRewardsReferrals: "{invited} referrals · {done} rewarded",
+  adminRewardSaved: "Saved.",
+  adminReward_referralThb: "Referral reward (฿ per friend)",
+  adminReward_refereeThb: "Welcome credit for the invited friend (฿)",
+  adminReward_challengeThb: "Challenge reward (฿ per completion)",
+  adminReward_redeemMaxSubscriptionThb:
+    "Most credit usable per membership payment (฿)",
+  adminReward_redeemMaxOtherThb:
+    "Most credit usable per product/service purchase (฿)",
+  adminReward_referralMinCheckinDays:
+    "Check-in days a friend needs before the referral counts",
+  adminReward_referralMaxRewards: "Most referral rewards per person",
+  adminReward_challengeMaxRewardsPerMonth:
+    "Most challenge rewards per person per month",
+  rewardsCodeLabel: "Friend code",
 } satisfies Dict;
 
 export const dict: Record<Lang, Dict> = { th, en };

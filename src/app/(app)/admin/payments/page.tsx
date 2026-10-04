@@ -73,7 +73,7 @@ export default async function AdminPaymentsPage() {
   const who = (r: PaymentRow) =>
     (r.user_id && names.get(r.user_id)) || t.adminPaymentUnknownUser;
   const what = (r: PaymentRow) =>
-    `${t[`planName_${r.plan_tier}` as const]} · ${t[`payPeriod_${r.period}` as const]} · ฿${r.amount.toLocaleString("en-US")}`;
+    `${t[`planName_${r.plan_tier}` as const]} · ${t[`payPeriod_${r.period}` as const]} · ฿${r.amount.toLocaleString("en-US")}${r.credit_applied_thb > 0 ? ` (${fmt(t.adminPaymentCredit, { n: r.credit_applied_thb })})` : ""}`;
 
   return (
     <div className="space-y-6">

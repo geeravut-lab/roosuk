@@ -19,10 +19,12 @@ export interface PaymentRow {
   review_note: string | null;
   paid_at: string | null;
   created_at: string;
+  /** baht of reward credit this order was priced with (spent when the transfer is reported) */
+  credit_applied_thb: number;
 }
 
 export const PAYMENT_COLUMNS =
-  "id, user_id, plan_tier, period, amount, promptpay_id, status, payer_ref, reported_at, reviewed_at, review_note, paid_at, created_at";
+  "id, user_id, plan_tier, period, amount, promptpay_id, status, payer_ref, reported_at, reviewed_at, review_note, paid_at, created_at, credit_applied_thb";
 
 export function isPaidTier(v: unknown): v is PaidTier {
   return v === "gold" || v === "premium";

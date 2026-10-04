@@ -3,6 +3,11 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { normalizeFlags, type FlagMap } from "@/lib/flags/flags";
 import { isValidPromptpayId } from "@/lib/billing/promptpay";
 import {
+  DEFAULT_REWARD_SETTINGS,
+  parseRewardSettings,
+  type RewardSettings,
+} from "@/lib/rewards/rewards";
+import {
   DEFAULT_BILLING_SETTINGS,
   parseBillingSettings,
   type BillingSettings,
@@ -14,6 +19,7 @@ export interface PlatformSettings {
   /** PromptPay account the subscription QR pays into; null = payments not set up. */
   promptpayId: string | null;
   billing: BillingSettings;
+  rewards: RewardSettings;
 }
 
 const DEFAULTS: PlatformSettings = {
@@ -21,6 +27,7 @@ const DEFAULTS: PlatformSettings = {
   manualUrl: "",
   promptpayId: null,
   billing: DEFAULT_BILLING_SETTINGS,
+  rewards: DEFAULT_REWARD_SETTINGS,
 };
 
 // 30 s is the promise made to the admin page ("takes effect within 1 minute"):
@@ -55,6 +62,7 @@ export async function loadPlatformSettings(): Promise<PlatformSettings> {
           ? String(data?.promptpay_id)
           : null,
         billing: parseBillingSettings(data),
+        rewards: parseRewardSettings(data),
       },
       at: now,
     };

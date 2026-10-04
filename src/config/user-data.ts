@@ -103,6 +103,25 @@ export const OWNED_TABLES: readonly OwnedTable[] = [
   },
   // Usage events (no content): the user's copy is in the export; they go with the account.
   {
+    table: "reward_ledger",
+    column: "user_id",
+    onDelete: "erased",
+    countable: true,
+  },
+  {
+    table: "referral_codes",
+    column: "user_id",
+    onDelete: "erased",
+    countable: false,
+  },
+  {
+    table: "referrals",
+    column: "referee_id",
+    onDelete: "erased",
+    countable: false,
+  },
+
+  {
     table: "insight_notes",
     column: "user_id",
     onDelete: "erased",
@@ -181,6 +200,8 @@ export const INTERNAL_USER_REFERENCES: readonly string[] = [
   "ai_settings.updated_by",
   "ai_prompt_versions.created_by",
   "biomarker_extras.approved_by",
+  // the inviter: the person's own copy holds the invitation as the invited person (referee_id)
+  "referrals.referrer_id",
   "biomarker_extras.created_by",
   "automation_rules.updated_by",
   "notification_settings.updated_by",
