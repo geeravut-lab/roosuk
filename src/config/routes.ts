@@ -6,6 +6,7 @@ export const PROTECTED_PREFIXES = [
   "/ask",
   "/settings",
   "/profile",
+  "/quiz-result",
   "/subscription",
   "/consent",
   "/admin",

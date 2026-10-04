@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Clock, UserRound } from "lucide-react";
+import { ClipboardCheck, Clock, UserRound } from "lucide-react";
 import { requireUser } from "@/lib/auth/server";
 import { getBillingProfile } from "@/lib/billing/profile.server";
 import { resolvePlan } from "@/lib/billing/plan";
@@ -80,6 +80,16 @@ export default async function TodayPage() {
         </Link>
       )}
       <CheckinCard t={t} view={view} />
+      <Link
+        href="/quiz"
+        className="card hover:bg-tint-primary flex items-center gap-3 font-semibold"
+      >
+        <ClipboardCheck
+          className="text-primary-strong size-5 shrink-0"
+          aria-hidden
+        />
+        {t.todayQuizCta}
+      </Link>
       <ScoreCard t={t} score={view.score} />
       <ActionsCard t={t} view={view} />
       <StreakCard t={t} lang={lang} view={view} />

@@ -29,7 +29,10 @@ export default async function Home() {
           <Link href="/auth?mode=signup" className="btn btn-primary w-full">
             {t.landingCtaStart}
           </Link>
-          <Link href="/auth" className="btn btn-secondary w-full">
+          <Link href="/quiz" className="btn btn-secondary w-full">
+            {t.landingQuizCta}
+          </Link>
+          <Link href="/auth" className="btn btn-ghost w-full">
             {t.landingCtaLogin}
           </Link>
           <p className="text-muted text-sm">{t.landingTrial}</p>

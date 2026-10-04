@@ -16,6 +16,7 @@ export function ChoiceGroup({
   options,
   selected,
   hint,
+  required,
 }: {
   id: string;
   label: string;
@@ -24,6 +25,8 @@ export function ChoiceGroup({
   options: readonly ChoiceOption[];
   selected: readonly string[];
   hint?: string;
+  /** Radio groups only: the browser blocks submitting until one is chosen. */
+  required?: boolean;
 }) {
   return (
     <div role="group" aria-labelledby={id} className="card space-y-3">
@@ -43,6 +46,7 @@ export function ChoiceGroup({
               type={type}
               name={name}
               value={o.value}
+              required={required}
               defaultChecked={selected.includes(o.value)}
               className="sr-only"
             />
