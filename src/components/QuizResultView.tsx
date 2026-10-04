@@ -131,6 +131,15 @@ export function QuizResultView({
           {t.quizBackToday}
         </Link>
       ) : null}
+      {mode !== "anonymous" ? (
+        <Link
+          href="/checkup-interest"
+          className="card hover:bg-tint-primary block"
+        >
+          <span className="block font-semibold">{t.leadCta}</span>
+          <span className="text-muted block text-sm">{t.leadCtaHint}</span>
+        </Link>
+      ) : null}
     </div>
   );
 }

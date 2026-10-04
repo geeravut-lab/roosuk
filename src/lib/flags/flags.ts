@@ -12,6 +12,7 @@ export const FEATURE_FLAGS = [
   "marketplace",
   "booking",
   "voice",
+  "checkup_lead",
 ] as const;
 
 export type FeatureFlag = (typeof FEATURE_FLAGS)[number];

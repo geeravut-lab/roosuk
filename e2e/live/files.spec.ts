@@ -179,6 +179,12 @@ test("keep the original: asked every time, consent-gated, sealed at rest, owner-
   await expect(
     page.getByText("กรุณาเลือกว่าจะเก็บไฟล์ต้นฉบับไว้หรือไม่"),
   ).toBeVisible();
+  // the refusal does not throw the chosen photo away
+  expect(
+    await page
+      .locator("#photo")
+      .evaluate((i: HTMLInputElement) => i.files?.length),
+  ).toBe(1);
 
   await stranger.goto("/scan/lab");
   await stranger.locator("#file").setInputFiles({

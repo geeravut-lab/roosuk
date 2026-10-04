@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Camera, Images } from "lucide-react";
 import { scanFoodAction, type ScanState } from "@/app/actions/food";
 import { shrinkImage } from "@/lib/image-resize";
@@ -8,12 +8,13 @@ import { errorText } from "@/lib/i18n/dict";
 import { KeepFileChoice } from "@/components/KeepFileChoice";
 import type { KeepMode } from "@/lib/files/types";
 import { useI18n } from "@/lib/i18n/provider";
+import { useFormAction } from "@/lib/use-form-action";
 
 const initial: ScanState = {};
 
 export function FoodScanForm({ keepMode }: { keepMode: KeepMode }) {
   const { t } = useI18n();
-  const [state, action, pending] = useActionState(scanFoodAction, initial);
+  const [state, onSubmit, pending] = useFormAction(scanFoodAction, initial);
   const input = useRef<HTMLInputElement>(null);
   const [preview, setPreview] = useState<string | null>(null);
 
@@ -37,7 +38,7 @@ export function FoodScanForm({ keepMode }: { keepMode: KeepMode }) {
   }
 
   return (
-    <form action={action} className="space-y-4">
+    <form onSubmit={onSubmit} className="space-y-4">
       <input
         ref={input}
         id="photo"

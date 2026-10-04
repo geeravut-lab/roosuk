@@ -1,6 +1,13 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Bot, ChartColumn, ReceiptText, Timer, ToggleLeft } from "lucide-react";
+import {
+  Bot,
+  ChartColumn,
+  ReceiptText,
+  Stethoscope,
+  Timer,
+  ToggleLeft,
+} from "lucide-react";
 import { fmt } from "@/lib/i18n/dict";
 import { getT } from "@/lib/i18n/server";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -10,12 +17,17 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function AdminHome() {
-  const [t, { count }] = await Promise.all([
+  const db = createAdminClient();
+  const [t, { count }, { count: leads }] = await Promise.all([
     getT(),
-    createAdminClient()
+    db
       .from("payments")
       .select("id", { count: "exact", head: true })
       .eq("status", "review"),
+    db
+      .from("checkup_leads")
+      .select("id", { count: "exact", head: true })
+      .eq("status", "new"),
   ]);
   return (
     <div className="space-y-4">
@@ -29,6 +41,18 @@ export default async function AdminHome() {
         {count ? (
           <span className="bg-coral text-foreground ml-auto rounded-full px-2.5 py-1 text-xs font-semibold">
             {fmt(t.adminPaymentsPending, { n: count })}
+          </span>
+        ) : null}
+      </Link>
+      <Link
+        href="/admin/leads"
+        className="card hover:bg-tint-primary flex items-center gap-3"
+      >
+        <Stethoscope className="text-primary-strong size-6" aria-hidden />
+        <span className="font-semibold">{t.adminLeadsTitle}</span>
+        {leads ? (
+          <span className="bg-coral text-foreground ml-auto rounded-full px-2.5 py-1 text-xs font-semibold">
+            {fmt(t.adminLeadsOpen, { n: leads })}
           </span>
         ) : null}
       </Link>

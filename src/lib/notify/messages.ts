@@ -120,3 +120,20 @@ export function paymentToReviewNotice(
     dedupeKey: `payment:${paymentId}:review:${Date.now()}`,
   };
 }
+
+/** To the admins: someone asked to be called back about a health check. */
+export function leadNewNotice(
+  t: Dict,
+  leadId: string,
+  interest: string,
+  method: string,
+): Notice {
+  return {
+    kind: "lead_new",
+    category: "transactional",
+    title: t.notifLeadTitle,
+    body: noticeBody(interest, [[t.notifLabelContact, method]]),
+    href: "/admin/leads",
+    dedupeKey: `lead:${leadId}`,
+  };
+}

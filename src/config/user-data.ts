@@ -89,6 +89,12 @@ export const OWNED_TABLES: readonly OwnedTable[] = [
     onDelete: "erased",
     countable: true,
   },
+  {
+    table: "checkup_leads",
+    column: "user_id",
+    onDelete: "erased",
+    countable: true,
+  },
   // Usage events (no content): the user's copy is in the export; they go with the account.
   {
     table: "product_events",

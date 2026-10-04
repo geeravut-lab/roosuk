@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { FileUp } from "lucide-react";
 import { scanLabAction, type LabScanState } from "@/app/actions/lab";
 import { shrinkImage } from "@/lib/image-resize";
@@ -8,12 +8,13 @@ import { errorText, fmt } from "@/lib/i18n/dict";
 import { KeepFileChoice } from "@/components/KeepFileChoice";
 import type { KeepMode } from "@/lib/files/types";
 import { useI18n } from "@/lib/i18n/provider";
+import { useFormAction } from "@/lib/use-form-action";
 
 const initial: LabScanState = {};
 
 export function LabScanForm({ keepMode }: { keepMode: KeepMode }) {
   const { t } = useI18n();
-  const [state, action, pending] = useActionState(scanLabAction, initial);
+  const [state, onSubmit, pending] = useFormAction(scanLabAction, initial);
   const input = useRef<HTMLInputElement>(null);
   const [name, setName] = useState<string | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
@@ -43,7 +44,7 @@ export function LabScanForm({ keepMode }: { keepMode: KeepMode }) {
   }
 
   return (
-    <form action={action} className="space-y-4">
+    <form onSubmit={onSubmit} className="space-y-4">
       <input
         ref={input}
         id="file"

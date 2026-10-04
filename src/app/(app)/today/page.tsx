@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ClipboardCheck, Clock, UserRound } from "lucide-react";
+import { ClipboardCheck, Clock, Stethoscope, UserRound } from "lucide-react";
 import { requireUser } from "@/lib/auth/server";
 import { getBillingProfile } from "@/lib/billing/profile.server";
 import { resolvePlan } from "@/lib/billing/plan";
@@ -89,6 +89,19 @@ export default async function TodayPage() {
           aria-hidden
         />
         {t.todayQuizCta}
+      </Link>
+      <Link
+        href="/checkup-interest"
+        className="card hover:bg-tint-primary flex items-center gap-3"
+      >
+        <Stethoscope
+          className="text-primary-strong size-5 shrink-0"
+          aria-hidden
+        />
+        <span className="min-w-0 flex-1">
+          <span className="block font-semibold">{t.leadCta}</span>
+          <span className="text-muted block text-sm">{t.leadCtaHint}</span>
+        </span>
       </Link>
       <ScoreCard t={t} score={view.score} />
       <ActionsCard t={t} view={view} />

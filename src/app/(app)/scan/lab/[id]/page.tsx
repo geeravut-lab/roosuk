@@ -323,6 +323,15 @@ export default async function LabReportPage({
       </ul>
 
       <p className="text-muted text-sm">{t.labDisclaimer}</p>
+      {outside > 0 ? (
+        <Link
+          href="/checkup-interest"
+          className="card hover:bg-tint-primary block"
+        >
+          <span className="block font-semibold">{t.leadCta}</span>
+          <span className="text-muted block text-sm">{t.leadCtaHint}</span>
+        </Link>
+      ) : null}
       <Link href="/scan/lab" className="btn btn-primary w-full">
         {t.labScanAnother}
       </Link>
