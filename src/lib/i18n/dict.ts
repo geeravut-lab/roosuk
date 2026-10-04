@@ -1615,6 +1615,27 @@ const th = {
   err_passport_ack: "กรุณาติ๊กยืนยันว่าเข้าใจเรื่องการเปิดดูผ่านลิงก์",
   err_passport_max:
     "มีลิงก์ที่ใช้งานอยู่ครบ 10 ลิงก์แล้ว ยกเลิกลิงก์เก่าก่อนสร้างใหม่",
+  adminAdminsTitle: "ผู้ดูแลระบบ (Admin)",
+  adminAdminsIntro:
+    "ทุกคนในรายการนี้เข้าหน้าผู้ดูแลระบบได้ทั้งหมด เพิ่มได้เฉพาะคนที่มีบัญชีในระบบแล้ว",
+  adminAdminsSelf: "คุณ",
+  adminAdminsOwner: "เจ้าของระบบ · ถอดสิทธิ์ไม่ได้",
+  adminAdminsSince: "เป็น Admin ตั้งแต่ {date}",
+  adminAdminsNoEmail: "บัญชีที่เข้าด้วย LINE (ไม่มีอีเมล)",
+  adminAdminsRevoke: "ถอนสิทธิ์ Admin",
+  adminAdminsRevokeFor: "ถอนสิทธิ์ Admin ของ {who}",
+  adminAdminsAddTitle: "เพิ่ม Admin",
+  adminAdminsEmail: "อีเมลของผู้ใช้ที่มีบัญชีอยู่แล้ว",
+  adminAdminsAdd: "เพิ่มเป็น Admin",
+  adminAdminsAdding: "กำลังเพิ่ม…",
+  adminAdminsAdded: "เพิ่ม {email} เป็น Admin แล้ว",
+  adminAdminsRevoked: "ถอนสิทธิ์ Admin แล้ว",
+  err_admin_not_found:
+    "ไม่พบอีเมลนี้ในระบบ (ผู้ใช้ต้องสมัครและมีบัญชีอยู่แล้ว)",
+  err_admin_already: "ผู้ใช้นี้เป็น Admin อยู่แล้ว",
+  err_admin_self: "ถอนสิทธิ์ Admin ของตัวเองไม่ได้",
+  err_admin_protected: "บัญชีเจ้าของระบบถอนสิทธิ์ Admin ไม่ได้",
+  err_admin_not_admin: "ผู้ใช้นี้ไม่ได้เป็น Admin แล้ว",
 } as const;
 
 export type Dict = { [K in keyof typeof th]: string };
@@ -3281,6 +3302,27 @@ const en = {
     "Please tick the box to confirm you understand how the link works.",
   err_passport_max:
     "You already have 10 active links. Cancel an old one first.",
+  adminAdminsTitle: "Administrators",
+  adminAdminsIntro:
+    "Everyone listed can use every admin page. You can only add people who already have an account.",
+  adminAdminsSelf: "You",
+  adminAdminsOwner: "Owner · cannot be removed",
+  adminAdminsSince: "Admin since {date}",
+  adminAdminsNoEmail: "Signed in with LINE (no email)",
+  adminAdminsRevoke: "Remove admin",
+  adminAdminsRevokeFor: "Remove admin from {who}",
+  adminAdminsAddTitle: "Add an admin",
+  adminAdminsEmail: "Email of an existing user",
+  adminAdminsAdd: "Make admin",
+  adminAdminsAdding: "Adding…",
+  adminAdminsAdded: "{email} is now an admin.",
+  adminAdminsRevoked: "Admin removed.",
+  err_admin_not_found:
+    "No account has this email. The person must sign up first.",
+  err_admin_already: "This person is already an admin.",
+  err_admin_self: "You cannot remove your own admin access.",
+  err_admin_protected: "The owner's account can never lose admin access.",
+  err_admin_not_admin: "This person is no longer an admin.",
 } satisfies Dict;
 
 export const dict: Record<Lang, Dict> = { th, en };

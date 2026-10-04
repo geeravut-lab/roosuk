@@ -13,15 +13,20 @@ import {
   Timer,
   ToggleLeft,
 } from "lucide-react";
+import { requireAdmin } from "@/lib/auth/server";
 import { fmt } from "@/lib/i18n/dict";
 import { getT } from "@/lib/i18n/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { AdminsCard } from "./_admins/AdminsCard";
 
 export async function generateMetadata(): Promise<Metadata> {
   return { title: (await getT()).adminTitle };
 }
 
-export default async function AdminHome() {
+export default async function AdminHome({ searchParams }: PageProps<"/admin">) {
+  const self = await requireAdmin();
+  const sp = await searchParams;
+  const error = Array.isArray(sp.error) ? sp.error[0] : sp.error;
   const db = createAdminClient();
   const [t, { count }, { count: leads }, { count: unknownLabs }] =
     await Promise.all([
@@ -134,6 +139,11 @@ export default async function AdminHome() {
         <ToggleLeft className="text-primary-strong size-6" aria-hidden />
         <span className="font-semibold">{t.adminFlagsTitle}</span>
       </Link>
+      <AdminsCard
+        selfId={self.id}
+        error={error}
+        revoked={sp.admins === "revoked"}
+      />
     </div>
   );
 }
