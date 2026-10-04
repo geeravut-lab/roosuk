@@ -12,9 +12,11 @@ import { errorText, fmt, isErrorKey } from "@/lib/i18n/dict";
 import { formatDate, formatDateTime } from "@/lib/i18n/format";
 import { getLang, getT } from "@/lib/i18n/server";
 import { getLineLoginEnv } from "@/lib/env";
+import { canUnlinkLine } from "@/lib/line/link";
 import { isLineSyntheticEmail } from "@/lib/line/login";
 import { createClient } from "@/lib/supabase/server";
 import { signOutAction } from "@/app/actions/auth";
+import { unlinkLineAction } from "@/app/actions/line";
 import { savePrefsAction } from "@/app/actions/notifications";
 import { updateOptionalConsentAction } from "@/app/actions/privacy";
 import Link from "next/link";
@@ -102,6 +104,14 @@ export default async function SettingsPage({
           {t.settingsLineLinkedOk}
         </p>
       ) : null}
+      {params.line === "unlinked" ? (
+        <p
+          role="status"
+          className="bg-tint-secondary rounded-xl px-3 py-2 text-sm font-medium"
+        >
+          {t.settingsLineUnlinkedOk}
+        </p>
+      ) : null}
 
       <section className="card space-y-3" aria-labelledby="account-h">
         <h2 id="account-h" className="font-semibold">
@@ -130,11 +140,23 @@ export default async function SettingsPage({
           </h2>
           <p className="text-muted text-sm">{t.settingsLineHint}</p>
           {lineLink ? (
-            <p className="text-primary-strong inline-flex items-center gap-2 font-medium">
-              <Check className="size-5" aria-hidden />
-              {t.settingsLineLinked}
-              {lineLink.display_name ? ` (${lineLink.display_name})` : ""}
-            </p>
+            <>
+              <p className="text-primary-strong inline-flex items-center gap-2 font-medium">
+                <Check className="size-5" aria-hidden />
+                {t.settingsLineLinked}
+                {lineLink.display_name ? ` (${lineLink.display_name})` : ""}
+              </p>
+              {canUnlinkLine(user.email) ? (
+                <form action={unlinkLineAction} className="space-y-2">
+                  <SubmitButton className="btn btn-secondary">
+                    {t.settingsUnlinkLine}
+                  </SubmitButton>
+                  <p className="text-muted text-xs">
+                    {t.settingsLineUnlinkHint}
+                  </p>
+                </form>
+              ) : null}
+            </>
           ) : (
             <a
               href="/api/auth/line?mode=link&next=/settings"

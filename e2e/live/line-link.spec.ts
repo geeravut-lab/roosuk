@@ -45,10 +45,9 @@ const db = (): SupabaseClient =>
 
 const createdIds: string[] = [];
 
-async function makeUser() {
-  const email = lineSyntheticEmail(
-    `e2e${Date.now()}${randomBytes(3).toString("hex")}`,
-  );
+async function makeUser(realEmail = false) {
+  const tag = `e2e${Date.now()}${randomBytes(3).toString("hex")}`;
+  const email = realEmail ? `${tag}@example.test` : lineSyntheticEmail(tag);
   const password = `Pw-${randomBytes(9).toString("hex")}`;
   const { data, error } = await db().auth.admin.createUser({
     email,
@@ -175,4 +174,62 @@ test("linking LINE: the first step goes to LINE, and every failure of the second
   await expect(
     page.getByRole("status").filter({ hasText: "เชื่อมบัญชี LINE สำเร็จแล้ว" }),
   ).toBeVisible();
+});
+
+test("disconnecting LINE: a normal account can, a LINE-only account cannot", async ({
+  page,
+}) => {
+  const real = await makeUser(true);
+  const sub = `Ue2e${randomBytes(8).toString("hex")}`;
+  const { error } = await db()
+    .from("line_links")
+    .insert({ user_id: real.id, line_sub: sub, display_name: "E2E Line" });
+  expect(error).toBeNull();
+
+  await signInAndConsent(page, real.email, real.password);
+  await page.goto("/settings");
+  await expect(page.getByText("เชื่อมกับ LINE แล้ว (E2E Line)")).toBeVisible();
+  await page.getByRole("button", { name: "ยกเลิกการเชื่อมต่อ LINE" }).click();
+  await expect(
+    page
+      .getByRole("status")
+      .filter({ hasText: "ยกเลิกการเชื่อมต่อ LINE แล้ว" }),
+  ).toBeVisible();
+  // gone for real, and the person can link again
+  expect(
+    (await db().from("line_links").select("user_id").eq("user_id", real.id))
+      .data,
+  ).toEqual([]);
+  await expect(
+    page.getByRole("link", { name: "เชื่อมบัญชี LINE" }),
+  ).toBeVisible();
+
+  // someone else's link is never touched by this button
+  const other = await makeUser(true);
+  const otherSub = `Ue2e${randomBytes(8).toString("hex")}`;
+  await db()
+    .from("line_links")
+    .insert({ user_id: other.id, line_sub: otherSub, display_name: "Other" });
+  await page.goto("/settings");
+  expect(
+    (await db().from("line_links").select("user_id").eq("user_id", other.id))
+      .data,
+  ).toHaveLength(1);
+
+  // an account whose only way in is LINE gets no button
+  const lineOnly = await makeUser(false);
+  await db()
+    .from("line_links")
+    .insert({
+      user_id: lineOnly.id,
+      line_sub: `Ue2e${randomBytes(8).toString("hex")}`,
+      display_name: "Only LINE",
+    });
+  await page.context().clearCookies();
+  await signInAndConsent(page, lineOnly.email, lineOnly.password);
+  await page.goto("/settings");
+  await expect(page.getByText("เชื่อมกับ LINE แล้ว (Only LINE)")).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: "ยกเลิกการเชื่อมต่อ LINE" }),
+  ).toHaveCount(0);
 });

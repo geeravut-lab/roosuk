@@ -249,7 +249,8 @@ const th = {
     "คำขอเชื่อมต่อ LINE หมดอายุหรือเบราว์เซอร์ไม่ส่งข้อมูลกลับมา ลองใหม่อีกครั้งในเบราว์เซอร์เดิม",
   settingsLineLinkedOk: "เชื่อมบัญชี LINE สำเร็จแล้ว",
   errorReasonCode: "รหัสสาเหตุ: {reason}",
-  err_line_already_linked: "บัญชี LINE นี้เชื่อมกับผู้ใช้อื่นอยู่แล้ว",
+  err_line_already_linked:
+    "บัญชี LINE นี้เชื่อมกับผู้ใช้อื่นอยู่แล้ว หากเป็นบัญชีของคุณเอง ให้เข้าสู่ระบบบัญชีนั้น แล้วกด “ยกเลิกการเชื่อมต่อ LINE” ในหน้าตั้งค่า จากนั้นกลับมาเชื่อมใหม่",
   err_consent_required: "กรุณายอมรับข้อที่จำเป็นทั้งหมดก่อนเริ่มใช้งาน",
   err_save_failed: "บันทึกไม่สำเร็จ กรุณาลองใหม่อีกครั้ง",
   err_not_configured: "ระบบยังตั้งค่าไม่เสร็จ กรุณาติดต่อผู้ดูแล",
@@ -1517,6 +1518,14 @@ const th = {
   adminPaywallTooFew:
     "ตัวอย่างน้อยกว่า {n} คนต่อแบบ ยังสรุปไม่ได้ว่าแบบไหนดีกว่า",
   adminPaywallVersion: "แบบ {v}",
+  err_line_used_to_sign_in:
+    "บัญชี LINE นี้ถูกใช้เข้าสู่ระบบเป็นบัญชี RooSuk อีกบัญชีหนึ่งอยู่แล้ว (เกิดจากการกด “เข้าสู่ระบบด้วย LINE” มาก่อน) ให้ออกจากระบบ แล้วกด “เข้าสู่ระบบด้วย LINE” เพื่อเข้าบัญชีนั้น หากไม่ต้องการบัญชีนั้น ลบได้ที่ ตั้งค่า > ลบบัญชี จากนั้นกลับมาเชื่อมใหม่",
+  err_line_unlink_login_only:
+    "บัญชีนี้เข้าสู่ระบบด้วย LINE เพียงทางเดียว จึงยกเลิกการเชื่อมต่อไม่ได้ (จะเข้าสู่ระบบอีกไม่ได้)",
+  settingsUnlinkLine: "ยกเลิกการเชื่อมต่อ LINE",
+  settingsLineUnlinkedOk: "ยกเลิกการเชื่อมต่อ LINE แล้ว เชื่อมใหม่ได้ทุกเมื่อ",
+  settingsLineUnlinkHint:
+    "เมื่อยกเลิก จะไม่ได้รับแจ้งเตือนทาง LINE จนกว่าจะเชื่อมใหม่",
 } as const;
 
 export type Dict = { [K in keyof typeof th]: string };
@@ -1757,7 +1766,7 @@ const en = {
   settingsLineLinkedOk: "Your LINE account is now linked.",
   errorReasonCode: "Reason code: {reason}",
   err_line_already_linked:
-    "This LINE account is already linked to another user.",
+    "This LINE account is already linked to another user. If that is your own account, sign in to it and press “Disconnect LINE” in Settings, then come back and link again.",
   err_consent_required: "Please accept all required items before you start.",
   err_save_failed: "Couldn't save. Please try again.",
   err_not_configured:
@@ -3079,6 +3088,15 @@ const en = {
   adminPaywallTooFew:
     "Fewer than {n} viewers per version — too early to say which is better.",
   adminPaywallVersion: "Version {v}",
+  err_line_used_to_sign_in:
+    "This LINE account is already the sign-in of another RooSuk account (created by pressing “Sign in with LINE” earlier). Sign out and press “Sign in with LINE” to reach it. If you do not want that account, delete it in Settings > Delete account, then come back and link again.",
+  err_line_unlink_login_only:
+    "LINE is the only way into this account, so it cannot be disconnected (you could not sign in again).",
+  settingsUnlinkLine: "Disconnect LINE",
+  settingsLineUnlinkedOk:
+    "LINE is disconnected. You can connect again at any time.",
+  settingsLineUnlinkHint:
+    "Once disconnected you get no LINE messages until you connect again.",
 } satisfies Dict;
 
 export const dict: Record<Lang, Dict> = { th, en };

@@ -9,6 +9,7 @@ import {
   parseLineCookie,
   statesMatch,
 } from "@/lib/line/login";
+import { kindOfLinkHolder } from "@/lib/line/link.server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 
@@ -103,7 +104,9 @@ export async function GET(request: NextRequest) {
     const user = await getCurrentUser();
     if (!user) return go("/auth", "err_not_signed_in");
     if (existing && existing.user_id !== user.id)
-      return fail("err_line_already_linked", "other_user");
+      return (await kindOfLinkHolder(existing.user_id)) === "other_user"
+        ? fail("err_line_already_linked", "other_user")
+        : fail("err_line_used_to_sign_in", "other_login_account");
 
     const { data, error } = await admin
       .from("line_links")
