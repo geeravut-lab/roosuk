@@ -201,13 +201,11 @@ test("admin toolkit: partner, product with claims screen, several photos, reorde
   ).toBeVisible();
   expect(await imageCount(id)).toBe(8);
   // a file that is not an image is refused by what it IS, whatever its name says
-  await page
-    .locator("#photos")
-    .setInputFiles({
-      name: "fake.png",
-      mimeType: "image/png",
-      buffer: Buffer.from("not an image at all"),
-    });
+  await page.locator("#photos").setInputFiles({
+    name: "fake.png",
+    mimeType: "image/png",
+    buffer: Buffer.from("not an image at all"),
+  });
   await page
     .getByRole("button", { name: "เลือกรูป (เลือกได้หลายรูปพร้อมกัน)" })
     .last()
@@ -246,13 +244,11 @@ test("admin import: a ZIP with a CSV and photos creates products, matches photos
     "__MACOSX/._junk.png": PNG,
   });
   await page.goto("/admin/shop/import");
-  await page
-    .locator("#imp-files")
-    .setInputFiles({
-      name: "catalog.zip",
-      mimeType: "application/zip",
-      buffer: Buffer.from(zip),
-    });
+  await page.locator("#imp-files").setInputFiles({
+    name: "catalog.zip",
+    mimeType: "application/zip",
+    buffer: Buffer.from(zip),
+  });
   await page.getByRole("button", { name: "นำเข้า", exact: true }).click();
   const result = page.getByRole("status").filter({ hasText: "บันทึกสินค้า" });
   await expect(result).toContainText(
@@ -277,13 +273,11 @@ test("admin import: a ZIP with a CSV and photos creates products, matches photos
     price_thb: 350,
   });
   // importing again updates by SKU: no duplicates; photos are added unless "replace" is ticked
-  await page
-    .locator("#imp-files")
-    .setInputFiles({
-      name: "catalog.zip",
-      mimeType: "application/zip",
-      buffer: Buffer.from(zip),
-    });
+  await page.locator("#imp-files").setInputFiles({
+    name: "catalog.zip",
+    mimeType: "application/zip",
+    buffer: Buffer.from(zip),
+  });
   await page.getByLabel("แทนที่รูปเดิมของสินค้าที่นำเข้า").check();
   await page.getByRole("button", { name: "นำเข้า", exact: true }).click();
   await expect(result).toContainText("บันทึกสินค้า 2 รายการ (ใหม่ 0)");

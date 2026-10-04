@@ -43,10 +43,17 @@ afterAll(() => db.close());
 const order = async (
   user: string,
   lines: { id: string; qty: number }[],
-  o: { credit?: boolean; creditMax?: number; shipping?: number; free?: number } = {},
+  o: {
+    credit?: boolean;
+    creditMax?: number;
+    shipping?: number;
+    free?: number;
+  } = {},
 ) => {
   await actAsOwner(db);
-  const json = JSON.stringify(lines.map((l) => ({ product_id: l.id, qty: l.qty })));
+  const json = JSON.stringify(
+    lines.map((l) => ({ product_id: l.id, qty: l.qty })),
+  );
   return (
     await db.query<{ r: Record<string, unknown> }>(
       `select public.create_shop_order('${user}', '${json}'::jsonb, '${SHIP}'::jsonb, ${o.credit ?? false}, ${o.creditMax ?? 0}, ${o.shipping ?? 50}, ${o.free ?? 500}, '0812345678') as r`,
@@ -54,20 +61,36 @@ const order = async (
   ).rows[0].r;
 };
 const stock = async (id: string) =>
-  (await db.query<{ stock: number | null }>(`select stock from public.shop_products where id = '${id}'`)).rows[0].stock;
+  (
+    await db.query<{ stock: number | null }>(
+      `select stock from public.shop_products where id = '${id}'`,
+    )
+  ).rows[0].stock;
 const give = (u: string, n: number) =>
-  db.exec(`insert into public.reward_ledger (user_id, kind, amount_thb) values ('${u}', 'admin_adjust', ${n})`);
+  db.exec(
+    `insert into public.reward_ledger (user_id, kind, amount_thb) values ('${u}', 'admin_adjust', ${n})`,
+  );
 const balance = async (u: string) =>
-  Number((await db.query<{ s: string }>(`select coalesce(sum(amount_thb),0) as s from public.reward_ledger where user_id = '${u}'`)).rows[0].s);
+  Number(
+    (
+      await db.query<{ s: string }>(
+        `select coalesce(sum(amount_thb),0) as s from public.reward_ledger where user_id = '${u}'`,
+      )
+    ).rows[0].s,
+  );
 
 describe("catalog is the admin's", () => {
   it("people cannot read or write partners, products or images", async () => {
     await actAs(db, A);
     for (const t of ["shop_partners", "shop_products", "shop_product_images"])
       expect(await isRejected(db, `select * from public.${t}`)).toBe(true);
-    expect(await isRejected(db, `update public.shop_products set price_thb = 1`)).toBe(true);
+    expect(
+      await isRejected(db, `update public.shop_products set price_thb = 1`),
+    ).toBe(true);
     await actAs(db, null, "anon");
-    expect(await isRejected(db, `select * from public.shop_products`)).toBe(true);
+    expect(await isRejected(db, `select * from public.shop_products`)).toBe(
+      true,
+    );
   });
   it("a sale price must be below the list price, a SKU is one token, tags are few", async () => {
     await actAsOwner(db);
@@ -84,14 +107,26 @@ describe("catalog is the admin's", () => {
 describe("create_shop_order", () => {
   it("prices from the database, adds shipping below the free line, and takes stock", async () => {
     const r = await order(A, [{ id: p1, qty: 1 }]);
-    expect(r).toMatchObject({ ok: true, total: 250, status: "pending_payment", credit: 0 }); // 200 + 50 shipping
+    expect(r).toMatchObject({
+      ok: true,
+      total: 250,
+      status: "pending_payment",
+      credit: 0,
+    }); // 200 + 50 shipping
     expect(await stock(p1)).toBe(4);
-    const items = await db.query(`select sku, name, unit_price_thb, qty from public.shop_order_items`);
-    expect(items.rows).toEqual([{ sku: "MAG-1", name: "สินค้า MAG-1", unit_price_thb: 200, qty: 1 }]);
+    const items = await db.query(
+      `select sku, name, unit_price_thb, qty from public.shop_order_items`,
+    );
+    expect(items.rows).toEqual([
+      { sku: "MAG-1", name: "สินค้า MAG-1", unit_price_thb: 200, qty: 1 },
+    ]);
   });
 
   it("ships free from the admin's line, and an untracked product has no stock limit", async () => {
-    const r = await order(A, [{ id: p1, qty: 1 }, { id: p2, qty: 2 }]);
+    const r = await order(A, [
+      { id: p1, qty: 1 },
+      { id: p2, qty: 2 },
+    ]);
     expect(r).toMatchObject({ ok: true, total: 900 }); // 200 + 700, free shipping
     expect(await stock(p1)).toBe(3);
     expect(await stock(p2)).toBeNull();
@@ -99,32 +134,56 @@ describe("create_shop_order", () => {
 
   it("refuses an inactive product, too much stock, an empty or oversized cart — and changes nothing", async () => {
     const before = await stock(p1);
-    expect(await order(A, [{ id: off, qty: 1 }])).toMatchObject({ ok: false, reason: "unavailable" });
-    expect(await order(A, [{ id: p1, qty: 4 }])).toMatchObject({ ok: false, reason: "stock" });
-    expect(await order(A, [{ id: p1, qty: 11 }])).toMatchObject({ ok: false, reason: "unavailable" });
+    expect(await order(A, [{ id: off, qty: 1 }])).toMatchObject({
+      ok: false,
+      reason: "unavailable",
+    });
+    expect(await order(A, [{ id: p1, qty: 4 }])).toMatchObject({
+      ok: false,
+      reason: "stock",
+    });
+    expect(await order(A, [{ id: p1, qty: 11 }])).toMatchObject({
+      ok: false,
+      reason: "unavailable",
+    });
     expect(await order(A, [])).toMatchObject({ ok: false, reason: "empty" });
     expect(await stock(p1)).toBe(before);
   });
 
   it("an inactive partner takes its products off sale", async () => {
     await actAsOwner(db);
-    await db.exec(`update public.shop_partners set active = false where id = '${partner}'`);
-    expect(await order(A, [{ id: p2, qty: 1 }])).toMatchObject({ ok: false, reason: "unavailable" });
-    await db.exec(`update public.shop_partners set active = true where id = '${partner}'`);
+    await db.exec(
+      `update public.shop_partners set active = false where id = '${partner}'`,
+    );
+    expect(await order(A, [{ id: p2, qty: 1 }])).toMatchObject({
+      ok: false,
+      reason: "unavailable",
+    });
+    await db.exec(
+      `update public.shop_partners set active = true where id = '${partner}'`,
+    );
   });
 
   it("spends credit up to the admin's cap and the balance, once, and writes it in the ledger", async () => {
     await actAsOwner(db);
     await give(B, 15);
-    const r = await order(B, [{ id: p2, qty: 1 }], { credit: true, creditMax: 20 });
+    const r = await order(B, [{ id: p2, qty: 1 }], {
+      credit: true,
+      creditMax: 20,
+    });
     // 350 + 50 shipping - 15 (all there is; below the 20 cap)
     expect(r).toMatchObject({ ok: true, credit: 15, total: 385 });
     expect(await balance(B)).toBe(0);
     await give(B, 100);
-    const r2 = await order(B, [{ id: p2, qty: 1 }], { credit: true, creditMax: 20 });
+    const r2 = await order(B, [{ id: p2, qty: 1 }], {
+      credit: true,
+      creditMax: 20,
+    });
     expect(r2).toMatchObject({ credit: 20, total: 380 }); // the cap
     expect(await balance(B)).toBe(80);
-    const ledger = await db.query(`select kind, amount_thb from public.reward_ledger where kind = 'redeem_other' order by id`);
+    const ledger = await db.query(
+      `select kind, amount_thb from public.reward_ledger where kind = 'redeem_other' order by id`,
+    );
     expect(ledger.rows).toEqual([
       { kind: "redeem_other", amount_thb: -15 },
       { kind: "redeem_other", amount_thb: -20 },
@@ -133,25 +192,47 @@ describe("create_shop_order", () => {
 
   it("credit that covers everything makes a paid order", async () => {
     await actAsOwner(db);
-    await db.exec(`insert into public.reward_ledger (user_id, kind, amount_thb) values ('${A}', 'admin_adjust', 1000)`);
-    const r = await order(A, [{ id: p1, qty: 1 }], { credit: true, creditMax: 5000, free: 0 });
-    expect(r).toMatchObject({ ok: true, total: 0, status: "paid", credit: 250 });
-    const row = (await db.query<{ paid_at: string | null }>(`select paid_at from public.shop_orders where id = '${r.id}'`)).rows[0];
+    await db.exec(
+      `insert into public.reward_ledger (user_id, kind, amount_thb) values ('${A}', 'admin_adjust', 1000)`,
+    );
+    const r = await order(A, [{ id: p1, qty: 1 }], {
+      credit: true,
+      creditMax: 5000,
+      free: 0,
+    });
+    expect(r).toMatchObject({
+      ok: true,
+      total: 0,
+      status: "paid",
+      credit: 250,
+    });
+    const row = (
+      await db.query<{ paid_at: string | null }>(
+        `select paid_at from public.shop_orders where id = '${r.id}'`,
+      )
+    ).rows[0];
     expect(row.paid_at).not.toBeNull();
   });
 
   it("the total always equals subtotal + shipping - credit (the database says so)", async () => {
     await actAsOwner(db);
     expect(
-      await isRejected(db, `update public.shop_orders set total_thb = 1 where status = 'pending_payment'`),
+      await isRejected(
+        db,
+        `update public.shop_orders set total_thb = 1 where status = 'pending_payment'`,
+      ),
     ).toBe(true);
   });
 
   it("removes the bought lines from the cart", async () => {
     await actAsOwner(db);
-    await db.exec(`insert into public.shop_cart_items (user_id, product_id, qty) values ('${B}', '${p1}', 1), ('${B}', '${p2}', 1)`);
+    await db.exec(
+      `insert into public.shop_cart_items (user_id, product_id, qty) values ('${B}', '${p1}', 1), ('${B}', '${p2}', 1)`,
+    );
     await order(B, [{ id: p1, qty: 1 }]);
-    const left = await db.query(`select product_id from public.shop_cart_items where user_id = '${B}'`);
+    const left = await db.query(
+      `select product_id from public.shop_cart_items where user_id = '${B}'`,
+    );
     expect(left.rows).toEqual([{ product_id: p2 }]);
   });
 });
@@ -159,13 +240,24 @@ describe("create_shop_order", () => {
 describe("a person's own orders", () => {
   it("are readable by them only, and only the server writes", async () => {
     await actAs(db, B);
-    const mine = await db.query<{ user_id: string }>(`select user_id from public.shop_orders`);
+    const mine = await db.query<{ user_id: string }>(
+      `select user_id from public.shop_orders`,
+    );
     expect(mine.rows.length).toBeGreaterThan(0);
     expect(mine.rows.every((r) => r.user_id === B)).toBe(true);
-    expect((await db.query(`select 1 from public.shop_order_items`)).rows.length).toBeGreaterThan(0);
-    expect(await isRejected(db, `update public.shop_orders set status = 'paid'`)).toBe(true);
+    expect(
+      (await db.query(`select 1 from public.shop_order_items`)).rows.length,
+    ).toBeGreaterThan(0);
+    expect(
+      await isRejected(db, `update public.shop_orders set status = 'paid'`),
+    ).toBe(true);
     expect(await isRejected(db, `delete from public.shop_orders`)).toBe(true);
-    expect(await isRejected(db, `insert into public.shop_cart_items (user_id, product_id, qty) values ('${B}', '${p1}', 1)`)).toBe(true);
+    expect(
+      await isRejected(
+        db,
+        `insert into public.shop_cart_items (user_id, product_id, qty) values ('${B}', '${p1}', 1)`,
+      ),
+    ).toBe(true);
     await db.exec(`delete from public.shop_cart_items`); // clearing their own cart is allowed
     for (const fn of [
       `public.create_shop_order('${B}', '[]', '{}', false, 0, 0, 0, null)`,
@@ -180,13 +272,22 @@ describe("cancel_shop_order", () => {
   it("puts the stock and the credit back, once", async () => {
     await actAsOwner(db);
     await give(B, 30);
-    await db.exec(`update public.shop_products set stock = 10 where id = '${p1}'`);
+    await db.exec(
+      `update public.shop_products set stock = 10 where id = '${p1}'`,
+    );
     const s0 = await stock(p1);
-    const r = await order(B, [{ id: p1, qty: 2 }], { credit: true, creditMax: 20 });
+    const r = await order(B, [{ id: p1, qty: 2 }], {
+      credit: true,
+      creditMax: 20,
+    });
     const b0 = await balance(B);
     expect(await stock(p1)).toBe(s0! - 2);
     const cancel = async (user: string | null, admin: boolean) =>
-      (await db.query<{ r: string }>(`select public.cancel_shop_order('${r.id}', ${user ? `'${user}'` : "null"}, ${admin}, 'changed my mind') as r`)).rows[0].r;
+      (
+        await db.query<{ r: string }>(
+          `select public.cancel_shop_order('${r.id}', ${user ? `'${user}'` : "null"}, ${admin}, 'changed my mind') as r`,
+        )
+      ).rows[0].r;
     expect(await cancel(A, false)).toBe("forbidden"); // not theirs
     expect(await cancel(B, false)).toBe("ok");
     expect(await stock(p1)).toBe(s0);
@@ -198,13 +299,23 @@ describe("cancel_shop_order", () => {
   it("a person cannot cancel a paid order; an admin can until it ships", async () => {
     const r = await order(B, [{ id: p2, qty: 1 }]);
     await actAsOwner(db);
-    await db.exec(`update public.shop_orders set status = 'paid' where id = '${r.id}'`);
+    await db.exec(
+      `update public.shop_orders set status = 'paid' where id = '${r.id}'`,
+    );
     const run = async (admin: boolean) =>
-      (await db.query<{ r: string }>(`select public.cancel_shop_order('${r.id}', '${B}', ${admin}, 'x') as r`)).rows[0].r;
+      (
+        await db.query<{ r: string }>(
+          `select public.cancel_shop_order('${r.id}', '${B}', ${admin}, 'x') as r`,
+        )
+      ).rows[0].r;
     expect(await run(false)).toBe("state");
-    await db.exec(`update public.shop_orders set status = 'shipped' where id = '${r.id}'`);
+    await db.exec(
+      `update public.shop_orders set status = 'shipped' where id = '${r.id}'`,
+    );
     expect(await run(true)).toBe("state");
-    await db.exec(`update public.shop_orders set status = 'processing' where id = '${r.id}'`);
+    await db.exec(
+      `update public.shop_orders set status = 'processing' where id = '${r.id}'`,
+    );
     expect(await run(true)).toBe("ok");
   });
 });
@@ -214,10 +325,19 @@ describe("expire_shop_orders", () => {
     const old = await order(A, [{ id: p2, qty: 1 }]);
     const fresh = await order(A, [{ id: p2, qty: 1 }]);
     await actAsOwner(db);
-    await db.exec(`update public.shop_orders set created_at = now() - interval '5 days' where id = '${old.id}'`);
-    const n = (await db.query<{ n: number }>(`select public.expire_shop_orders(72) as n`)).rows[0].n;
+    await db.exec(
+      `update public.shop_orders set created_at = now() - interval '5 days' where id = '${old.id}'`,
+    );
+    const n = (
+      await db.query<{ n: number }>(`select public.expire_shop_orders(72) as n`)
+    ).rows[0].n;
     expect(n).toBe(1);
-    const st = async (id: unknown) => (await db.query<{ status: string }>(`select status from public.shop_orders where id = '${id}'`)).rows[0].status;
+    const st = async (id: unknown) =>
+      (
+        await db.query<{ status: string }>(
+          `select status from public.shop_orders where id = '${id}'`,
+        )
+      ).rows[0].status;
     expect(await st(old.id)).toBe("cancelled");
     expect(await st(fresh.id)).toBe("pending_payment");
   });
@@ -227,26 +347,56 @@ describe("history is kept as it was", () => {
   it("an order keeps the name and price it was made with", async () => {
     const r = await order(A, [{ id: p1, qty: 1 }]);
     await actAsOwner(db);
-    await db.exec(`update public.shop_products set price_thb = 999, name_th = 'ชื่อใหม่' where id = '${p1}'`);
-    const item = (await db.query(`select name, unit_price_thb from public.shop_order_items where order_id = '${r.id}'`)).rows[0];
+    await db.exec(
+      `update public.shop_products set price_thb = 999, name_th = 'ชื่อใหม่' where id = '${p1}'`,
+    );
+    const item = (
+      await db.query(
+        `select name, unit_price_thb from public.shop_order_items where order_id = '${r.id}'`,
+      )
+    ).rows[0];
     expect(item).toEqual({ name: "สินค้า MAG-1", unit_price_thb: 200 });
-    await db.exec(`update public.shop_products set price_thb = 200 where id = '${p1}'`);
+    await db.exec(
+      `update public.shop_products set price_thb = 200 where id = '${p1}'`,
+    );
   });
 
   it("deleting the buyer detaches their orders and scrubs where they live", async () => {
     await actAsOwner(db);
-    const before = (await db.query(`select count(*)::int as n from public.shop_orders where user_id = '${A}'`)).rows[0] as { n: number };
+    const before = (
+      await db.query(
+        `select count(*)::int as n from public.shop_orders where user_id = '${A}'`,
+      )
+    ).rows[0] as { n: number };
     expect(before.n).toBeGreaterThan(0);
     await db.exec(`delete from auth.users where id = '${A}'`);
-    const gone = await db.query<{ user_id: string | null; ship_name: string; ship_phone: string; ship_address: string; payer_ref: string | null; total_thb: number }>(
+    const gone = await db.query<{
+      user_id: string | null;
+      ship_name: string;
+      ship_phone: string;
+      ship_address: string;
+      payer_ref: string | null;
+      total_thb: number;
+    }>(
       `select user_id, ship_name, ship_phone, ship_address, payer_ref, total_thb from public.shop_orders where ship_name = '(erased)'`,
     );
     expect(gone.rows.length).toBe(before.n);
     for (const row of gone.rows) {
-      expect(row).toMatchObject({ user_id: null, ship_phone: "000000", ship_address: "(erased)", payer_ref: null });
+      expect(row).toMatchObject({
+        user_id: null,
+        ship_phone: "000000",
+        ship_address: "(erased)",
+        payer_ref: null,
+      });
       expect(row.total_thb).toBeGreaterThanOrEqual(0); // the money record is intact
     }
     // another buyer's orders are untouched
-    expect((await db.query(`select 1 from public.shop_orders where user_id = '${B}' and ship_name <> '(erased)'`)).rows.length).toBeGreaterThan(0);
+    expect(
+      (
+        await db.query(
+          `select 1 from public.shop_orders where user_id = '${B}' and ship_name <> '(erased)'`,
+        )
+      ).rows.length,
+    ).toBeGreaterThan(0);
   });
 });
