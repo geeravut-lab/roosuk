@@ -47,3 +47,7 @@ next-env.d.ts
 
 # netlify cli
 /.netlify/
+
+# Manual build intermediates (screenshots are re-recorded; final PDFs live in docs/manual/)
+docs/manual/shots/
+docs/manual/out/
