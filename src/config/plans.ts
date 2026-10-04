@@ -37,6 +37,8 @@ export interface Plan {
   timelineHistoryMonths: number | "unlimited";
   vaultMaxFiles: number | "unlimited";
   healthPassport: boolean;
+  /** none: no wearable data · basic: steps, heart rate, sleep · full: everything incl. blood pressure, glucose, SpO2, weight */
+  wearables: "none" | "basic" | "full";
   healthAgent: boolean;
   familyMembers: number;
 }
@@ -58,6 +60,7 @@ export const PLANS: Record<PlanId, Plan> = {
     timelineHistoryMonths: 1,
     vaultMaxFiles: 5,
     healthPassport: false,
+    wearables: "none",
     healthAgent: false,
     familyMembers: 0,
   },
@@ -74,6 +77,7 @@ export const PLANS: Record<PlanId, Plan> = {
     timelineHistoryMonths: 3,
     vaultMaxFiles: 20,
     healthPassport: false,
+    wearables: "basic",
     healthAgent: false,
     familyMembers: 0,
   },
@@ -90,6 +94,7 @@ export const PLANS: Record<PlanId, Plan> = {
     timelineHistoryMonths: "unlimited",
     vaultMaxFiles: "unlimited",
     healthPassport: true,
+    wearables: "full",
     healthAgent: true,
     familyMembers: 1,
   },

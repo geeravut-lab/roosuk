@@ -6,6 +6,7 @@ import { getLang } from "@/lib/i18n/server";
 import { cookies } from "next/headers";
 import { THEME_COOKIE, parseTheme, themeAttribute } from "@/lib/theme";
 import { NavigationFeedback } from "@/components/NavigationFeedback";
+import { PwaRegister } from "@/components/PwaRegister";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -22,6 +23,9 @@ export const metadata: Metadata = {
   title: { default: "รู้สุข | RooSuk", template: "%s | รู้สุข" },
   description: "AI ที่รู้จักสุขภาพของคุณ — AI Personal Health OS",
   applicationName: "RooSuk",
+  // iOS: opened from the home screen it runs full-screen like an app, with its own name under the icon.
+  appleWebApp: { capable: true, title: "รู้สุข", statusBarStyle: "default" },
+  formatDetection: { telephone: false },
 };
 
 export const viewport: Viewport = {
@@ -51,6 +55,7 @@ export default async function RootLayout({
       <body className="flex min-h-full flex-col">
         <I18nProvider lang={lang} dict={dict[lang]}>
           <NavigationFeedback />
+          <PwaRegister />
           {children}
         </I18nProvider>
       </body>

@@ -6,6 +6,21 @@ const nextConfig: NextConfig = {
   outputFileTracingIncludes: {
     "/api/share/**": ["./src/assets/fonts/**", "./public/brand/logo-mark.png"],
   },
+  async headers() {
+    return [
+      {
+        // The worker must always be re-fetched, or a fix to it never reaches the people who installed the app.
+        source: "/sw.js",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "no-cache, no-store, must-revalidate",
+          },
+          { key: "Service-Worker-Allowed", value: "/" },
+        ],
+      },
+    ];
+  },
   experimental: {
     // Photo scans post an image through a Server Action. The browser shrinks it
     // to about 1 MB first; the server re-checks its own 3 MB limit, and this

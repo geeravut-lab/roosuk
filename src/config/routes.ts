@@ -11,6 +11,8 @@ export const PROTECTED_PREFIXES = [
   "/report",
   "/vault",
   "/passport",
+  "/wearables",
+  "/install",
   "/rewards",
   "/challenges",
   "/quiz-result",

@@ -4,6 +4,9 @@ import { TrendChart } from "@/components/charts/TrendChart";
 import { biomarkerByKey } from "@/config/biomarkers";
 import { PLANS } from "@/config/plans";
 import { requireUser } from "@/lib/auth/server";
+import { featureEnabled } from "@/lib/flags/server";
+import { dailySeries } from "@/lib/wearables/series";
+import { loadObservations } from "@/lib/wearables/server";
 import { getBillingProfile } from "@/lib/billing/profile.server";
 import { resolvePlan } from "@/lib/billing/plan";
 import { addDays, bangkokDate } from "@/lib/health/dates";
@@ -149,6 +152,14 @@ export default async function TimelinePage({
     inPlan(bangkokDate(new Date(b.created_at))),
   );
 
+  // Device data (steps, resting heart rate, sleep) next to the check-ins, when the plan stores it and there is some.
+  const wearTypes = ["steps", "resting_heart_rate", "sleep_minutes"] as const;
+  const wearSeries =
+    PLANS[tier].wearables !== "none" && (await featureEnabled("wearables"))
+      ? dailySeries(await loadObservations(shownFrom, wearTypes))
+      : {};
+  const wearShown = wearTypes.filter((k) => wearSeries[k]?.length);
+
   const scores = new Map(dailyScores(visible).map((s) => [s.date, s.score]));
   const scorePoints = [...scores].map(([date, value]) => ({ date, value }));
   const kcalPoints = dailyKcal(meals);
@@ -241,6 +252,40 @@ export default async function TimelinePage({
               ? t.timelineWindowUnlimited
               : fmt(t.timelineWindow, { n: months })}
           </p>
+        </section>
+      ) : null}
+
+      {show("checkin") && wearShown.length > 0 ? (
+        <section className="card space-y-3" aria-labelledby="wear-h">
+          <h2 id="wear-h" className="font-semibold">
+            {t.timelineWearTitle}
+          </h2>
+          {wearShown.map((k) => (
+            <div key={k} className="space-y-1">
+              <h3 className="text-sm font-semibold">
+                {t[`wearType_${k}` as keyof Dict]}
+              </h3>
+              <TrendChart
+                t={t}
+                lang={lang}
+                title={t[`wearType_${k}` as keyof Dict]}
+                unit={
+                  k === "steps" ? "" : k === "sleep_minutes" ? "min" : "bpm"
+                }
+                points={wearSeries[k]!}
+                from={shownFrom}
+                to={today}
+                joinGaps
+                formatValue={(v) => String(Math.round(v))}
+              />
+            </div>
+          ))}
+          <Link
+            href="/wearables"
+            className="text-primary-strong text-sm font-medium underline"
+          >
+            {t.timelineWearMore}
+          </Link>
         </section>
       ) : null}
 

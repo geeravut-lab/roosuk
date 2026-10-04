@@ -84,6 +84,50 @@ test.describe("public pages", () => {
     expect(manifest.theme_color).toBe("#0A8FA3");
     for (const icon of manifest.icons)
       expect((await request.get(icon.src)).ok(), icon.src).toBe(true);
+    // what Android needs to offer "install", and what a launcher shows
+    expect(manifest.display).toBe("standalone");
+    expect(manifest.scope).toBe("/");
+    expect(manifest.id).toBe("/today");
+    expect(
+      manifest.icons.map((i: { purpose?: string }) => i.purpose),
+    ).toContain("maskable");
+    for (const sc of manifest.shortcuts)
+      expect(sc.url.startsWith("/")).toBe(true);
+  });
+
+  test("the service worker and its offline page are served, and the worker is never cached", async ({
+    request,
+  }) => {
+    const sw = await request.get("/sw.js");
+    expect(sw.ok()).toBe(true);
+    expect(sw.headers()["content-type"]).toContain("javascript");
+    expect(sw.headers()["cache-control"]).toContain("no-cache");
+    expect(sw.headers()["service-worker-allowed"]).toBe("/");
+    const body = await sw.text();
+    expect(body).toContain('addEventListener("fetch"');
+    // privacy: the worker only ever stores the offline page and an icon
+    expect(body).not.toMatch(/cache\.put|put\(/);
+    const offline = await request.get("/offline.html");
+    expect(offline.ok()).toBe(true);
+    expect(await offline.text()).toContain("ไม่มีสัญญาณอินเทอร์เน็ต");
+  });
+
+  test("iOS home-screen metadata is present", async ({ page }) => {
+    await page.goto("/");
+    expect(
+      await page
+        .locator('meta[name="mobile-web-app-capable"]')
+        .getAttribute("content"),
+    ).toBe("yes");
+    expect(
+      await page
+        .locator('meta[name="apple-mobile-web-app-title"]')
+        .getAttribute("content"),
+    ).toBe("รู้สุข");
+    expect(
+      await page.locator('link[rel="apple-touch-icon"]').count(),
+    ).toBeGreaterThan(0);
+    expect(await page.locator('link[rel="manifest"]').count()).toBe(1);
   });
 
   test("language switch persists via cookie and flips the whole page", async ({

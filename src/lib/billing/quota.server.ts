@@ -2,21 +2,12 @@ import "server-only";
 import type { MeteredFeature } from "@/config/plans";
 import { loadPlatformSettings } from "@/lib/settings/server";
 import { createAdminClient } from "@/lib/supabase/admin";
-import type { BillingProfile } from "./plan";
+import { loadBillingProfileAdmin } from "./profile-admin.server";
 import { bangkokMonthStart } from "./period";
 import { consumeQuota, type QuotaDecision, type QuotaDeps } from "./quota";
 
 const deps: QuotaDeps = {
-  async loadProfile(userId) {
-    const { data } = await createAdminClient()
-      .from("profiles")
-      .select(
-        "plan_tier, plan_expires_at, trial_started_at, trial_ends_at, ai_suspended",
-      )
-      .eq("id", userId)
-      .maybeSingle<BillingProfile>();
-    return data;
-  },
+  loadProfile: loadBillingProfileAdmin,
   async loadSettings() {
     return (await loadPlatformSettings()).billing;
   },
