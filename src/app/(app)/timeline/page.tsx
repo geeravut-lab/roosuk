@@ -6,6 +6,7 @@ import { getBillingProfile } from "@/lib/billing/profile.server";
 import { resolvePlan } from "@/lib/billing/plan";
 import { addDays, bangkokDate } from "@/lib/health/dates";
 import { parseStoredItems } from "@/lib/food/food";
+import { countOutOfRange, parseStoredLabItems } from "@/lib/lab/lab";
 import { loadCheckins } from "@/lib/health/server";
 import { dailyScores } from "@/lib/health/view";
 import type { Dict } from "@/lib/i18n/dict";
@@ -31,22 +32,30 @@ export default async function TimelinePage() {
   const now = new Date();
   const today = bangkokDate(now);
   const supabase = await createClient();
-  const [t, lang, billing, rows, { data: mealRows }] = await Promise.all([
-    getT(),
-    getLang(),
-    getBillingProfile(user.id),
-    loadCheckins(today),
-    supabase
-      .from("meal_logs")
-      .select("id, meal_date, kcal, items")
-      .eq("status", "confirmed")
-      .order("meal_date", { ascending: false })
-      .order("created_at", { ascending: false })
-      .limit(60)
-      .returns<
-        { id: string; meal_date: string; kcal: number; items: unknown }[]
-      >(),
-  ]);
+  const [t, lang, billing, rows, { data: mealRows }, { data: labRows }] =
+    await Promise.all([
+      getT(),
+      getLang(),
+      getBillingProfile(user.id),
+      loadCheckins(today),
+      supabase
+        .from("meal_logs")
+        .select("id, meal_date, kcal, items")
+        .eq("status", "confirmed")
+        .order("meal_date", { ascending: false })
+        .order("created_at", { ascending: false })
+        .limit(60)
+        .returns<
+          { id: string; meal_date: string; kcal: number; items: unknown }[]
+        >(),
+      supabase
+        .from("lab_reports")
+        .select("id, collected_on, items")
+        .eq("status", "confirmed")
+        .order("collected_on", { ascending: false })
+        .limit(40)
+        .returns<{ id: string; collected_on: string; items: unknown }[]>(),
+    ]);
 
   const tier = billing ? resolvePlan(billing, now).tier : "free";
   const months = PLANS[tier].timelineHistoryMonths;
@@ -55,6 +64,9 @@ export default async function TimelinePage() {
   const visible = cutoff ? rows.filter((r) => r.checkin_date >= cutoff) : rows;
   const meals = (mealRows ?? []).filter(
     (m) => !cutoff || m.meal_date >= cutoff,
+  );
+  const labs = (labRows ?? []).filter(
+    (r) => !cutoff || r.collected_on >= cutoff,
   );
   const hidden = rows.length - visible.length;
 
@@ -102,6 +114,42 @@ export default async function TimelinePage() {
             : fmt(t.timelineWindow, { n: months })}
         </p>
       </section>
+
+      {labs.length > 0 ? (
+        <section className="space-y-3" aria-labelledby="labs-h">
+          <h2 id="labs-h" className="font-semibold">
+            {t.timelineLabsTitle}
+          </h2>
+          <ul className="space-y-2">
+            {labs.map((r) => {
+              const items = parseStoredLabItems(r.items);
+              const out = countOutOfRange(items);
+              return (
+                <li key={r.id}>
+                  <Link
+                    href={`/scan/lab/${r.id}`}
+                    className="card hover:bg-tint-primary block space-y-1"
+                  >
+                    <span className="flex items-baseline justify-between gap-3">
+                      <span className="font-semibold">
+                        {formatDate(lang, r.collected_on)}
+                      </span>
+                      <span className="text-muted text-sm">
+                        {fmt(t.timelineLabItems, { n: items.length })}
+                      </span>
+                    </span>
+                    <span className="block text-sm font-medium">
+                      {out > 0
+                        ? fmt(t.timelineLabOutOfRange, { n: out })
+                        : t.timelineLabAllGood}
+                    </span>
+                  </Link>
+                </li>
+              );
+            })}
+          </ul>
+        </section>
+      ) : null}
 
       {meals.length > 0 ? (
         <section className="space-y-3" aria-labelledby="meals-h">

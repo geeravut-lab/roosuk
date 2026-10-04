@@ -17,11 +17,13 @@ import {
  *   Gemini     https://ai.google.dev/gemini-api/docs/models (the "-latest"
  *              alias follows the current Flash, so the default does not rot)
  *
- * Probed with the project's own paid key on 2026-10-07 (docs/11: the docs and
- * the live API disagree, the API wins): gemini-flash-latest, gemini-3-flash-preview,
- * gemini-3.1-flash-lite and gemini-flash-lite-latest answered; gemini-2.5-flash
- * returned 404 (closed to new users); a 503 "high demand" was seen once on
- * gemini-flash-latest — which is what the fallback is for.
+ * Probed with the project's own paid key on 2026-10-07/08 (docs/11: the docs
+ * and the live API disagree, the API wins): gemini-3-flash-preview and
+ * gemini-flash-lite-latest answered every time (~1 s); gemini-flash-latest
+ * returned 503 "high demand" for minutes on end; gemini-3.1-flash-lite was
+ * slow (7–12 s) and flaky; gemini-2.5-flash returned 404 (closed to new users).
+ * "-preview" ids can be retired without notice — /admin/ai exists so that a
+ * change of model needs no deploy, and the router's fallback covers the gap.
  */
 export interface ProviderInfo {
   envKey: string;
@@ -32,7 +34,8 @@ export interface ProviderInfo {
 
 const SONNET = "claude-sonnet-5-5";
 const HAIKU = "claude-haiku-4-5";
-const FLASH = "gemini-flash-latest";
+const FLASH = "gemini-3-flash-preview";
+const FLASH_LITE = "gemini-flash-lite-latest";
 
 export const PROVIDERS: Record<ProviderId, ProviderInfo> = {
   anthropic: {
@@ -61,9 +64,9 @@ export const PROVIDERS: Record<ProviderId, ProviderInfo> = {
       lab_explain: FLASH,
       chat: FLASH,
       agent: FLASH,
-      quick: FLASH,
-      safety: FLASH,
-      daily_plan: FLASH,
+      quick: FLASH_LITE,
+      safety: FLASH_LITE,
+      daily_plan: FLASH_LITE,
       monthly_report: FLASH,
     },
   },

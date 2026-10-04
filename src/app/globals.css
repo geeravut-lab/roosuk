@@ -23,6 +23,9 @@
   --color-tint-active: #ecebff;
   /* Streak flame: coral is too pale for a 3:1 icon on mint tint, so a deeper warm tone (5:1) */
   --color-flame: #c2410c;
+  /* Lab status chips: dark text on a light tint; the border carries the amber / red meaning */
+  --color-tint-warn: #fdf1dc;
+  --color-tint-danger: #fde8e9;
   --color-secondary: #2dd4a7;
   --color-sky: #1e90ff;
   --color-coral: #ff7a6b;

@@ -28,6 +28,17 @@ export interface RunDeps {
   apiKey(provider: ProviderId): string | null;
   adapters: Record<ProviderId, ProviderAdapter>;
   logEvent(event: AiEventInput): Promise<void>;
+  /** Pause between a provider's "try again" answer and the single retry (tests inject a no-op). */
+  sleep?(ms: number): Promise<void>;
+}
+
+const RETRY_PAUSE_MS = 1200;
+
+/** 503 (overloaded) and 429 (rate limit) often clear in a second: worth ONE retry on the same provider before switching. */
+function worthSameProviderRetry(error: unknown): boolean {
+  const e = error as { status?: unknown; statusCode?: unknown };
+  const status = typeof e?.status === "number" ? e.status : e?.statusCode;
+  return status === 503 || status === 429;
 }
 
 const short = (e: unknown) =>
@@ -72,8 +83,20 @@ export async function runAiWith(
     return deps.adapters[target.provider].call(req, target.model, key);
   };
 
+  const sleep =
+    deps.sleep ?? ((ms: number) => new Promise<void>((r) => setTimeout(r, ms)));
+  const attemptWithRetry = async (target: NonNullable<Route["fallback"]>) => {
+    try {
+      return await attempt(target);
+    } catch (error) {
+      if (!worthSameProviderRetry(error)) throw error;
+      await sleep(RETRY_PAUSE_MS);
+      return attempt(target);
+    }
+  };
+
   try {
-    return await attempt(route.primary);
+    return await attemptWithRetry(route.primary);
   } catch (error) {
     const retryable =
       shouldTryFallback(error) ||
@@ -99,7 +122,7 @@ export async function runAiWith(
       message: `${short(error)} → ${route.fallback.provider}`,
     });
     try {
-      return await attempt(route.fallback);
+      return await attemptWithRetry(route.fallback);
     } catch (fallbackError) {
       await deps.logEvent({
         provider: route.fallback.provider,

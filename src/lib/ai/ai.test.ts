@@ -283,6 +283,7 @@ describe("runAiWith", () => {
       apiKey: (p) => (keys.includes(p) ? "k" : null),
       adapters,
       logEvent: async (e) => void events.push(e),
+      sleep: async () => {},
     };
     return { deps, events };
   };
@@ -315,6 +316,40 @@ describe("runAiWith", () => {
       errorCode: "429",
     });
     expect(JSON.stringify(events)).not.toContain("SECRET");
+  });
+
+  it("retries a 503 once on the same provider before switching", async () => {
+    const flaky: ProviderAdapter = {
+      id: "google",
+      listModels: vi.fn(async () => []),
+      call: vi
+        .fn()
+        .mockRejectedValueOnce({ status: 503 })
+        .mockResolvedValueOnce({
+          text: "ok",
+          provider: "google",
+          model: "m",
+          usage: { inputTokens: 1, outputTokens: 1 },
+        }),
+    };
+    const a = { anthropic: ok("anthropic"), google: flaky };
+    const { deps, events } = make(a);
+    expect((await runAiWith(deps, "food_scan", req)).provider).toBe("google");
+    expect(flaky.call).toHaveBeenCalledTimes(2);
+    expect(a.anthropic.call).not.toHaveBeenCalled();
+    expect(events).toEqual([]);
+  });
+
+  it("does not retry a dead key on the same provider (goes straight to the fallback)", async () => {
+    const a = {
+      anthropic: ok("anthropic"),
+      google: failing("google", { status: 401 }),
+    };
+    const { deps } = make(a);
+    expect((await runAiWith(deps, "food_scan", req)).provider).toBe(
+      "anthropic",
+    );
+    expect(a.google.call).toHaveBeenCalledTimes(1);
   });
 
   it("does not fall back on our own bad request, and throws a typed error", async () => {
@@ -354,7 +389,8 @@ describe("runAiWith", () => {
       AiError,
     );
     expect(events.map((e) => e.status)).toEqual(["fallback", "error"]);
-    expect(a.google.call).toHaveBeenCalledTimes(1);
+    // google answered 503: one same-provider retry, then the fallback (which got a 500: no retry)
+    expect(a.google.call).toHaveBeenCalledTimes(2);
     expect(a.anthropic.call).toHaveBeenCalledTimes(1);
   });
 

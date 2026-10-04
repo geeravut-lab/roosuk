@@ -9,7 +9,11 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function ScanPage() {
-  const [t, foodOn] = await Promise.all([getT(), featureEnabled("food_scan")]);
+  const [t, foodOn, labOn] = await Promise.all([
+    getT(),
+    featureEnabled("food_scan"),
+    featureEnabled("lab_scan"),
+  ]);
   return (
     <div className="space-y-4">
       <h1 className="text-primary-strong text-2xl font-bold">{t.navScan}</h1>
@@ -30,23 +34,20 @@ export default async function ScanPage() {
         </Link>
       ) : null}
 
-      <div
-        className="card flex items-start gap-3 opacity-80"
-        aria-disabled="true"
-      >
-        <span className="bg-tint-secondary text-primary-strong flex size-11 shrink-0 items-center justify-center rounded-full">
-          <FlaskConical className="size-6" aria-hidden />
-        </span>
-        <span className="min-w-0">
-          <span className="block font-semibold">
-            {t.scanLabTitle}{" "}
-            <span className="bg-tint-primary text-primary-strong ml-1 rounded-full px-2 py-0.5 text-xs">
-              {t.scanSoon}
-            </span>
+      {labOn ? (
+        <Link
+          href="/scan/lab"
+          className="card hover:bg-tint-primary flex items-start gap-3"
+        >
+          <span className="bg-tint-secondary text-primary-strong flex size-11 shrink-0 items-center justify-center rounded-full">
+            <FlaskConical className="size-6" aria-hidden />
           </span>
-          <span className="text-muted block text-sm">{t.scanLabDesc}</span>
-        </span>
-      </div>
+          <span className="min-w-0">
+            <span className="block font-semibold">{t.scanLabTitle}</span>
+            <span className="text-muted block text-sm">{t.scanLabDesc}</span>
+          </span>
+        </Link>
+      ) : null}
     </div>
   );
 }
