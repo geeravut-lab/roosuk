@@ -8,6 +8,7 @@ import {
   parseRewardSettings,
   type RewardSettings,
 } from "@/lib/rewards/rewards";
+import { DEFAULT_SHOP_SETTINGS, type ShopSettings } from "@/lib/shop/shop";
 import {
   DEFAULT_BILLING_SETTINGS,
   parseBillingSettings,
@@ -23,6 +24,8 @@ export interface PlatformSettings {
   rewards: RewardSettings;
   /** paywall A/B: off, split, or pinned to one version */
   paywallMode: PaywallMode;
+  /** shipping fee and the free-shipping line of the marketplace */
+  shop: ShopSettings;
 }
 
 const DEFAULTS: PlatformSettings = {
@@ -32,6 +35,12 @@ const DEFAULTS: PlatformSettings = {
   billing: DEFAULT_BILLING_SETTINGS,
   rewards: DEFAULT_REWARD_SETTINGS,
   paywallMode: "ab",
+  shop: DEFAULT_SHOP_SETTINGS,
+};
+
+const nonNegInt = (v: unknown, fallback: number): number => {
+  const n = Number(v);
+  return Number.isInteger(n) && n >= 0 ? n : fallback;
 };
 
 // 30 s is the promise made to the admin page ("takes effect within 1 minute"):
@@ -68,6 +77,16 @@ export async function loadPlatformSettings(): Promise<PlatformSettings> {
         billing: parseBillingSettings(data),
         rewards: parseRewardSettings(data),
         paywallMode: isPaywallMode(data?.paywall_ab) ? data.paywall_ab : "ab",
+        shop: {
+          shippingThb: nonNegInt(
+            data?.shop_shipping_thb,
+            DEFAULT_SHOP_SETTINGS.shippingThb,
+          ),
+          freeShippingFromThb: nonNegInt(
+            data?.shop_free_shipping_from_thb,
+            DEFAULT_SHOP_SETTINGS.freeShippingFromThb,
+          ),
+        },
       },
       at: now,
     };

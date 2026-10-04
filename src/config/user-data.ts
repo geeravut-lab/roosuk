@@ -178,6 +178,19 @@ export const OWNED_TABLES: readonly OwnedTable[] = [
     countable: true,
   },
   {
+    table: "shop_cart_items",
+    column: "user_id",
+    onDelete: "erased",
+    countable: true,
+  },
+  {
+    // money records: kept when the person leaves, detached and scrubbed of their address and phone
+    table: "shop_orders",
+    column: "user_id",
+    onDelete: "retained",
+    countable: true,
+  },
+  {
     table: "monthly_reports",
     column: "user_id",
     onDelete: "erased",

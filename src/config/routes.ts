@@ -15,6 +15,7 @@ export const PROTECTED_PREFIXES = [
   "/install",
   "/agent",
   "/family",
+  "/shop",
   "/rewards",
   "/challenges",
   "/quiz-result",

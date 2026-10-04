@@ -504,7 +504,16 @@ async function cleanupOld(c: TickCtx): Promise<number> {
     console.error("[tick] orphan file sweep failed:", err);
     return 0;
   });
-  return (a.data?.length ?? 0) + (b.data?.length ?? 0) + files;
+  // Shop orders nobody paid for in 3 days are released: their stock and any credit used come back.
+  const expired = await db.rpc("expire_shop_orders", { p_hours: 72 });
+  if (expired.error)
+    console.error("[tick] expiring shop orders failed:", expired.error.message);
+  return (
+    (a.data?.length ?? 0) +
+    (b.data?.length ?? 0) +
+    files +
+    (typeof expired.data === "number" ? expired.data : 0)
+  );
 }
 
 function lineDeps(now: Date): DeliverDeps {

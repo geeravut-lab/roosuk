@@ -9,6 +9,7 @@ import {
   Smartphone,
   Bot,
   UsersRound,
+  ShoppingBag,
   Watch,
   Gift,
   Trophy,
@@ -83,6 +84,12 @@ export const NAV: readonly NavItem[] = [
     label: "navWearables",
     icon: Watch,
     group: "daily",
+  },
+  {
+    href: "/shop",
+    label: "navShop",
+    icon: ShoppingBag,
+    group: "account",
   },
   {
     href: "/rewards",

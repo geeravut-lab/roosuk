@@ -175,6 +175,70 @@ export function familyJoinedNotice(t: Dict, joinerId: string): Notice {
   };
 }
 
+export function shopOrderPaidNotice(
+  t: Dict,
+  orderNo: string,
+  id: string,
+): Notice {
+  return {
+    kind: "shop_order_paid",
+    category: "transactional",
+    title: fmt(t.notifShopPaidTitle, { no: orderNo }),
+    body: noticeBody(t.notifShopPaidBody),
+    href: `/shop/orders/${id}`,
+    dedupeKey: `shop_paid:${id}`,
+  };
+}
+
+export function shopOrderShippedNotice(
+  t: Dict,
+  orderNo: string,
+  id: string,
+  carrier: string | null,
+  tracking: string | null,
+): Notice {
+  return {
+    kind: "shop_order_shipped",
+    category: "transactional",
+    title: fmt(t.notifShopShippedTitle, { no: orderNo }),
+    body: noticeBody(
+      t.notifShopShippedBody,
+      [
+        carrier ? ([t.shopCarrier, carrier] as const) : null,
+        tracking ? ([t.shopTracking, tracking] as const) : null,
+      ].filter((r): r is readonly [string, string] => !!r),
+    ),
+    href: `/shop/orders/${id}`,
+    dedupeKey: `shop_shipped:${id}`,
+  };
+}
+
+export function shopOrderCancelledNotice(
+  t: Dict,
+  orderNo: string,
+  id: string,
+): Notice {
+  return {
+    kind: "shop_order_cancelled",
+    category: "transactional",
+    title: fmt(t.notifShopCancelledTitle, { no: orderNo }),
+    body: noticeBody(t.notifShopCancelledBody),
+    href: `/shop/orders/${id}`,
+    dedupeKey: `shop_cancelled:${id}`,
+  };
+}
+
+export function shopPaymentReviewNotice(t: Dict, orderNo: string): Notice {
+  return {
+    kind: "shop_payment_review",
+    category: "transactional",
+    title: fmt(t.notifShopReviewTitle, { no: orderNo }),
+    body: noticeBody(t.notifShopReviewBody),
+    href: "/admin/shop/orders",
+    dedupeKey: `shop_review:${orderNo}`,
+  };
+}
+
 export function streakLastCallNotice(
   t: Dict,
   streak: number,

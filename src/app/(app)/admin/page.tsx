@@ -9,6 +9,7 @@ import {
   Split,
   FlaskConical,
   ReceiptText,
+  ShoppingBag,
   Stethoscope,
   Timer,
   ToggleLeft,
@@ -70,6 +71,13 @@ export default async function AdminHome({ searchParams }: PageProps<"/admin">) {
             {fmt(t.adminLeadsOpen, { n: leads })}
           </span>
         ) : null}
+      </Link>
+      <Link
+        href="/admin/shop"
+        className="card hover:bg-tint-primary flex items-center gap-3"
+      >
+        <ShoppingBag className="text-primary-strong size-6" aria-hidden />
+        <span className="font-semibold">{t.adminShopTitle}</span>
       </Link>
       <Link
         href="/admin/biomarkers"
