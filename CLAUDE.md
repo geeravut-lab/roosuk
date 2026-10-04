@@ -54,6 +54,17 @@ Teal `#0A8FA3` (primary) · Mint `#2DD4A7` (secondary) · Sky Blue `#1E90FF` (ch
 - The paywall A/B shows the same plans and prices in both versions (order and wording only); every funnel event carries `pw_a`/`pw_b`.
 - Open Food Facts (barcode) and Gemini audio are not reachable/free in every environment: the barcode path is tested against a local stub (`OPEN_FOOD_FACTS_URL`), voice against a synthesised Thai sentence (`e2e/fixtures/voice-th.wav`).
 
+## Phase 3 features (sharing, devices, money)
+
+- **Plan grants:** a family seat or a company seat lifts a person's plan through `withGrant()` (`src/lib/billing/plan.ts`) inside BOTH billing loaders (`profile.server.ts`, `profile-admin.server.ts`) via `grants.server.ts`; the stored `profiles` row is never changed. A family member has Premium only while the owner's **paid** Premium is live (a trial does not extend). Always ask the plan through `tierFor()` / `getBillingProfile()`, never read `plan_tier` raw.
+- **Sharing links and tokens** (Health Passport, wearable ingest tokens): the secret is shown once and only its SHA-256 is stored. A passport is a snapshot of exactly the sections the person ticked; nothing else is read.
+- **Wearables:** each source needs its own consent row (`wearable_sources`); `health_observations` is idempotent by (user, source, external_id); plan decides which types are stored (`PLANS[tier].wearables`). Weight is stored for the person's own record and is never a goal, score or badge.
+- **AI Health Agent:** the model answers in JSON steps (`src/lib/agent/agent.ts`) — one of five fixed tools or a final answer; the final answer goes through `finalizeAnswer` like Ask AI; emergency words never reach a model; log every message and tool use. Add a tool = add it to `TOOLS`, `runTool`, the system prompt, and tests.
+- **Marketplace:** orders are made ONLY by the SQL function `create_shop_order` (prices from the database, stock, credit cap, one transaction). Supplement texts pass `violatesProductClaims` (no disease or weight-loss claims). Product photos live in the private `shop-images` bucket and are served through `/api/shop/img`. Orders are money records: they outlive the account, scrubbed of address and phone.
+- **Admins:** granting/revoking goes through `grant_admin` / `revoke_admin` (only an admin; never yourself; `geeravut@gmail.com` can never be revoked — `src/config/admin.ts` and the SQL hold the same address).
+- **Install as app (PWA):** `public/sw.js` caches only `/offline.html` and one icon — never anything a signed-in person sees. Keep it that way.
+- **Live suite and AI quota:** the sandbox's Gemini key is free-tier (a handful of requests a day). Specs that need a real model skip with a stated reason when the quota is spent; the agent loop itself is unit-tested with a scripted model.
+
 ## Health guardrails (non-negotiable)
 
 - AI never diagnoses. It summarizes, explains trends and helps users prepare for a doctor; doctors decide.
