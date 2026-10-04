@@ -904,7 +904,6 @@ const th = {
     "การคัดกรองข้อความเสี่ยง (ฉุกเฉิน/ทำร้ายตัวเอง) ทำด้วยโค้ดล้วน ไม่ผ่านโมเดล และเกิดก่อนการเรียก AI ทุกครั้ง",
   guardrails_daily_plan:
     "แผนที่ AI เขียนต้องผ่านตรวจ: ครบ 7 วัน ความยาวพอเหมาะ ไม่มีคำเกี่ยวกับยา อาหารเสริม การรักษา ลดน้ำหนัก ไม่ผ่านใช้แม่แบบจากโค้ด\nไม่ส่งชื่อ อีเมล หรือปีเกิดให้โมเดล ส่งเฉพาะหมวดที่ควรปรับ",
-  guardrails_monthly_report: "ยังไม่เปิดใช้ในแอป",
   guardrails_prompt_review:
     "ตรวจคำสั่งเสริมของแอดมินก่อนบันทึก ถ้าไม่แน่ใจหรือตอบไม่ได้จะไม่บันทึก",
   cardTagline: "AI ที่รู้จักสุขภาพของคุณ",
@@ -1205,6 +1204,41 @@ const th = {
   achievementsCta: "ดูความสำเร็จ",
   achievementsCtaHint: "ได้แล้ว {n} จาก {total}",
   navAchievements: "ความสำเร็จ",
+  navReport: "รายงานรายเดือน",
+  reportTitle: "รายงานสุขภาพรายเดือน",
+  reportIntro:
+    "สรุปเดือนของคุณจากข้อมูลที่คุณบันทึกเอง ตัวเลขคำนวณโดยระบบ ไม่ใช่ AI",
+  reportMonthLabel: "เลือกเดือน",
+  reportMonthOpen: "เดือนนี้ยังไม่จบ ตัวเลขจะเพิ่มขึ้นเรื่อย ๆ",
+  reportCheckins: "เช็กอิน {n} วัน จาก {total} วัน",
+  reportCheckinsPrev: "เดือนก่อน {n} วัน",
+  reportScore: "คะแนนเฉลี่ยในวันที่เช็กอิน {n}",
+  reportScoreNone: "ยังไม่มีคะแนน (ไม่มีเช็กอินในเดือนนี้)",
+  reportStreak: "เช็กอินต่อเนื่องนานที่สุด {n} วัน",
+  reportMeals: "บันทึกมื้ออาหาร {n} มื้อ ใน {days} วัน",
+  reportLabs: "เพิ่มผลตรวจ {n} ฉบับ",
+  reportOut: "รายการที่อยู่นอกช่วงทั่วไป: {names} (ควรปรึกษาแพทย์)",
+  reportOutNone: "ไม่มีรายการผลตรวจที่นอกช่วงในเดือนนี้",
+  reportBadges: "ได้เหรียญความสำเร็จ {n} เหรียญ",
+  reportQuiet:
+    "เดือนนี้มีเช็กอินน้อยเกินกว่าจะสรุป (ต้องอย่างน้อย {n} วัน) ไม่เป็นไรนะ เริ่มใหม่ได้ทุกวัน",
+  reportAiTitle: "สรุปโดย AI",
+  reportAiHint:
+    "ให้ AI เขียนสรุปสั้น ๆ จากตัวเลขข้างบน (ใช้สิทธิ์ถาม AI 1 ครั้ง) AI ไม่วินิจฉัยและไม่ตั้งเป้าหมายน้ำหนัก",
+  reportAiCta: "ให้ AI สรุปเดือนนี้",
+  reportAiBusy: "กำลังเขียนสรุป…",
+  reportHighlights: "เรื่องดี ๆ ของเดือนนี้",
+  reportNext: "ลองทำต่อ",
+  reportDisclaimer:
+    "สรุปนี้ไม่ใช่การวินิจฉัยหรือคำแนะนำทางการแพทย์ หากกังวลเรื่องสุขภาพ ควรปรึกษาแพทย์",
+  reportAiDelete: "ลบสรุปนี้ (เพื่อให้เขียนใหม่)",
+  reportEmpty: "ยังไม่มีเดือนให้ดู",
+  reportWindow: "แพ็กเกจของคุณดูรายงานย้อนหลังได้ตามช่วง Timeline",
+  err_report_quiet: "เดือนนี้มีเช็กอินน้อยเกินไปที่จะสรุป",
+  flag_monthly_report: "รายงานรายเดือน",
+  eventName_report_generated: "ให้ AI สรุปรายงานรายเดือน",
+  guardrails_monthly_report:
+    "ตัวเลขทั้งหมดคำนวณโดยโค้ดจากข้อมูลของผู้ใช้เอง AI ได้รับเฉพาะตัวเลขสรุปและชื่อรายการผลตรวจที่นอกช่วง (ไม่มีค่าตรวจ)\nข้อความผ่านตัวตรวจคำต้องห้าม (วินิจฉัย ขนาดยา หยุดยา) และตัวตรวจเรื่องน้ำหนัก/รูปร่าง/แคลอรี ไม่ผ่านจะไม่แสดงและคืนสิทธิ์\nให้เหรียญและถ้อยคำชื่นชมเรื่องความสม่ำเสมอ ไม่มีเป้าหมายน้ำหนัก ไม่เปรียบเทียบกับคนอื่น\nมี disclaimer ทุกครั้ง บันทึกการสนทนาเพื่อ audit",
 } as const;
 
 export type Dict = { [K in keyof typeof th]: string };
@@ -2128,7 +2162,6 @@ const en = {
     "Screening for risky messages (emergency / self-harm) is done by code only, not by a model, and always happens before any AI call.",
   guardrails_daily_plan:
     "An AI-written plan must pass validation: 7 days, sensible length, no words about medicine, supplements, treatment or weight loss; otherwise the code template is used.\nNo name, e-mail or birth year is sent to the model — only the areas to improve.",
-  guardrails_monthly_report: "Not in use in the app yet.",
   guardrails_prompt_review:
     "Reviews an admin's addition before it is saved; if unsure or unable to answer, nothing is saved.",
   cardTagline: "The AI that knows your health",
@@ -2431,6 +2464,42 @@ const en = {
   achievementsCta: "View achievements",
   achievementsCtaHint: "{n} of {total} earned",
   navAchievements: "Achievements",
+  navReport: "Monthly report",
+  reportTitle: "Monthly health report",
+  reportIntro:
+    "Your month from what you logged. The numbers are computed by the app, not by AI.",
+  reportMonthLabel: "Choose a month",
+  reportMonthOpen: "This month is not over yet; the numbers will grow.",
+  reportCheckins: "{n} check-in days of {total}",
+  reportCheckinsPrev: "Last month: {n} days",
+  reportScore: "Average score on check-in days: {n}",
+  reportScoreNone: "No score yet (no check-ins this month)",
+  reportStreak: "Longest streak: {n} days",
+  reportMeals: "{n} meals logged on {days} days",
+  reportLabs: "{n} lab reports added",
+  reportOut: "Outside the general range: {names} (worth talking to a doctor)",
+  reportOutNone: "No lab values outside the range this month",
+  reportBadges: "{n} badges earned",
+  reportQuiet:
+    "Too few check-in days to write a recap (at least {n}). That is fine — you can start any day.",
+  reportAiTitle: "AI recap",
+  reportAiHint:
+    "Let AI write a short recap from the figures above (uses one AI allowance). It never diagnoses or sets weight goals.",
+  reportAiCta: "Write the AI recap",
+  reportAiBusy: "Writing…",
+  reportHighlights: "Highlights",
+  reportNext: "Next small steps",
+  reportDisclaimer:
+    "This recap is not a diagnosis or medical advice. If you are worried about your health, talk to a doctor.",
+  reportAiDelete: "Delete this recap (to have it written again)",
+  reportEmpty: "No months to show yet.",
+  reportWindow:
+    "Your plan shows reports within the same window as the timeline.",
+  err_report_quiet: "Too few check-in days this month to write a recap.",
+  flag_monthly_report: "Monthly report",
+  eventName_report_generated: "Generated the AI monthly recap",
+  guardrails_monthly_report:
+    "Every figure is computed by code from the user's own data. The AI only gets summary counts and the NAMES of out-of-range lab tests (no values).\nThe text passes the forbidden-statement check (diagnosis, doses, stopping medicine) and a weight/body-shape/calorie check; if it fails nothing is shown and the allowance is refunded.\nPraises consistency only: no weight goals, no comparison with other people.\nA disclaimer every time; the conversation is logged for audit.",
 } satisfies Dict;
 
 export const dict: Record<Lang, Dict> = { th, en };

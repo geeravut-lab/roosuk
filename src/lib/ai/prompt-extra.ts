@@ -20,6 +20,7 @@ export const EDITABLE_TASKS = [
   "lab_explain",
   "chat",
   "daily_plan",
+  "monthly_report",
 ] as const satisfies readonly TaskKind[];
 export type EditableTask = (typeof EDITABLE_TASKS)[number];
 

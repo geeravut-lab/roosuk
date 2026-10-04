@@ -3,6 +3,7 @@ import { foodPrompt } from "@/lib/food/food";
 import { explainSystemPrompt } from "@/lib/lab/explain";
 import { labPrompt } from "@/lib/lab/lab";
 import { chatSystemPrompt } from "@/lib/ask/context";
+import { reportSystemPrompt } from "@/lib/report/monthly";
 import { computeQuiz, planPrompt } from "@/lib/quiz/quiz";
 import type { TaskKind } from "./types";
 
@@ -68,6 +69,12 @@ export function builtinPrompt(task: TaskKind): BuiltinPrompt | null {
       const p = planPrompt(SAMPLE_QUIZ, "th");
       return { system: p.system, input: p.prompt };
     }
+    case "monthly_report":
+      return {
+        system: reportSystemPrompt("th"),
+        input:
+          "The month's figures computed by the app: check-in days, average score, streak, meals logged, lab reports, names of out-of-range lab tests (no values).",
+      };
     default:
       return null;
   }

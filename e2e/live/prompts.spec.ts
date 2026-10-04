@@ -138,7 +138,7 @@ test("admins see the built-in prompts and guardrails, and additions are screened
   // tasks not in use and the reviewer itself are listed but cannot be extended
   await expect(
     ap.getByRole("listitem").filter({
-      has: ap.getByRole("heading", { name: "รายงานสุขภาพรายเดือน" }),
+      has: ap.getByRole("heading", { name: "AI Health Agent" }),
     }),
   ).toContainText("ยังไม่เปิดใช้ในแอป");
   await expect(

@@ -3,6 +3,7 @@ import {
   Bell,
   Camera,
   ChartLine,
+  FileChartColumn,
   Crown,
   House,
   MessageCircleHeart,
@@ -33,6 +34,12 @@ export const NAV: readonly NavItem[] = [
   { href: "/timeline", label: "navTimeline", icon: ChartLine, group: "daily" },
   { href: "/scan", label: "navScan", icon: Camera, group: "daily" },
   { href: "/ask", label: "navAsk", icon: MessageCircleHeart, group: "daily" },
+  {
+    href: "/report",
+    label: "navReport",
+    icon: FileChartColumn,
+    group: "daily",
+  },
   {
     href: "/achievements",
     label: "navAchievements",

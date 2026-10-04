@@ -192,13 +192,7 @@ describe("what the admin page shows", () => {
     expect(builtinPrompt("food_scan")!.input).toMatch(/catalog|Catalog/);
   });
   it("the reviewer itself and tasks not in use cannot be extended", () => {
-    for (const t of [
-      "prompt_review",
-      "agent",
-      "quick",
-      "safety",
-      "monthly_report",
-    ])
+    for (const t of ["prompt_review", "agent", "quick", "safety"])
       expect(isEditableTask(t), t).toBe(false);
     expect(isEditableTask("chat")).toBe(true);
     expect(isEditableTask("__proto__")).toBe(false);
