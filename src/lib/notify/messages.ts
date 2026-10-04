@@ -1,7 +1,7 @@
 import { fmt, type Dict, type Lang } from "@/lib/i18n/dict";
 import { formatDate } from "@/lib/i18n/format";
 import { noticeBody, type Notice } from "./notice";
-import type { ReminderKind } from "./rules";
+import type { CheckupKind, ReminderKind } from "./rules";
 
 /** Every notice is written in the RECIPIENT's language, not the language of whoever triggered it. */
 
@@ -135,5 +135,55 @@ export function leadNewNotice(
     body: noticeBody(interest, [[t.notifLabelContact, method]]),
     href: "/admin/leads",
     dedupeKey: `lead:${leadId}`,
+  };
+}
+
+export function monthlyReportReadyNotice(
+  t: Dict,
+  month: string,
+  monthLabel: string,
+): Notice {
+  return {
+    kind: "monthly_report_ready",
+    category: "reminder",
+    title: fmt(t.notifReportTitle, { month: monthLabel }),
+    body: noticeBody(t.notifReportBody),
+    href: `/report?month=${month}`,
+    dedupeKey: `report:${month}`,
+  };
+}
+
+export function streakLastCallNotice(
+  t: Dict,
+  streak: number,
+  today: string,
+): Notice {
+  return {
+    kind: "streak_last_call",
+    category: "reminder",
+    title: fmt(t.notifLastCallTitle, { n: streak }),
+    body: noticeBody(t.notifLastCallBody),
+    href: "/today/checkin",
+    dedupeKey: `streaklast:${today}`,
+  };
+}
+
+export function checkupReminderNotice(
+  t: Dict,
+  lang: Lang,
+  kind: CheckupKind,
+  labDate: string,
+): Notice {
+  const when = formatDate(lang, labDate);
+  return {
+    kind: kind === "annual" ? "checkup_annual" : "checkup_recheck",
+    category: "reminder",
+    title: kind === "annual" ? t.notifAnnualTitle : t.notifRecheckTitle,
+    body: noticeBody(
+      kind === "annual" ? t.notifAnnualBody : t.notifRecheckBody,
+      [[t.notifLabelLastLab, when]],
+    ),
+    href: "/checkup-interest",
+    dedupeKey: `checkup:${kind}:${labDate}`,
   };
 }

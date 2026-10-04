@@ -1,4 +1,5 @@
 import { daysBetween, bangkokDate } from "@/lib/health/dates";
+import { previousMonth } from "@/lib/report/monthly";
 
 /**
  * automation_rules: the table says WHETHER a rule runs and with which numbers;
@@ -92,5 +93,58 @@ export function expiryStage(
   if (daysLeft === null) return null;
   if (daysLeft === second) return "second";
   if (daysLeft === first) return "first";
+  return null;
+}
+
+/**
+ * "Your monthly report is ready": from `day` of the month for a few days (so a
+ * missed run still catches up; the per-user dedupe key makes it once), the month
+ * to announce is the one that just ended.
+ */
+export function reportMonthToAnnounce(
+  today: string,
+  day: number,
+): string | null {
+  const dom = Number(today.slice(8, 10));
+  return dom >= day && dom <= day + 3 ? previousMonth(today.slice(0, 7)) : null;
+}
+
+/** The late "last call": only for someone with a streak worth saving, not yet checked in, after the hour. */
+export function streakLastCall(a: {
+  bangkokHour: number;
+  hour: number;
+  checkedToday: boolean;
+  streak: number;
+  minStreak: number;
+}): boolean {
+  return (
+    !a.checkedToday &&
+    a.bangkokHour >= a.hour &&
+    a.streak > 0 &&
+    a.streak >= a.minStreak
+  );
+}
+
+export type CheckupKind = "annual" | "recheck";
+
+/**
+ * When to suggest talking to a doctor about a check-up, from the LATEST
+ * confirmed lab report only: a year has passed ("annual"), or some values were
+ * outside the general range and `recheckDays` have passed ("recheck"). The
+ * date of that report is the anchor, so each report is nudged about once.
+ */
+export function checkupReminder(a: {
+  today: string;
+  latestLabDate: string;
+  hadOutOfRange: boolean;
+  annualMonths: number;
+  recheckDays: number;
+}): CheckupKind | null {
+  const age = daysBetween(a.latestLabDate, a.today);
+  if (age < 0) return null;
+  if (a.annualMonths > 0 && age >= Math.round(a.annualMonths * 30.4))
+    return "annual";
+  if (a.hadOutOfRange && a.recheckDays > 0 && age >= a.recheckDays)
+    return "recheck";
   return null;
 }

@@ -17,20 +17,29 @@ import {
 } from "./deliver";
 import {
   checkinReminderNotice,
+  checkupReminderNotice,
+  monthlyReportReadyNotice,
   planExpiringNotice,
+  streakLastCallNotice,
   trialEndingNotice,
 } from "./messages";
 import { safeHref, type Notice } from "./notice";
 import {
   bangkokHour,
   checkinReminderKind,
+  checkupReminder,
   daysUntil,
   expiryStage,
   parseRules,
+  reportMonthToAnnounce,
   ruleEnabled,
   ruleNumber,
+  streakLastCall,
   type RuleSet,
 } from "./rules";
+import { featureEnabled } from "@/lib/flags/server";
+import { MIN_CHECKIN_DAYS, monthBounds } from "@/lib/report/monthly";
+import { parseStoredLabItems } from "@/lib/lab/lab";
 
 /**
  * Notifications, server side. The one writer of notices: a feature calls
@@ -153,9 +162,51 @@ const CANDIDATE_LIMIT = 1000;
 
 interface TickCtx {
   now: Date;
+  /** Tests only: act for these people alone (everyone else is left untouched). */
+  onlyUsers?: ReadonlySet<string>;
   today: string;
   rules: RuleSet;
   overBudget(): boolean;
+}
+
+/** Only people who turned reminders on AND have LINE linked (the same audience for every reminder rule). */
+async function reminderUserIds(only?: ReadonlySet<string>): Promise<string[]> {
+  const db = createAdminClient();
+  const { data: prefs } = await db
+    .from("notification_prefs")
+    .select("user_id")
+    .eq("line_reminders", true)
+    .limit(CANDIDATE_LIMIT)
+    .returns<{ user_id: string }[]>();
+  const wanted = (prefs ?? []).map((p) => p.user_id);
+  if (wanted.length === 0) return [];
+  const { data: links } = await db
+    .from("line_links")
+    .select("user_id")
+    .in("user_id", wanted)
+    .returns<{ user_id: string }[]>();
+  return (links ?? [])
+    .map((l) => l.user_id)
+    .filter((id) => !only || only.has(id));
+}
+
+/** Check-in dates of each user over the last 60 days. */
+async function checkinDatesByUser(
+  ids: string[],
+  today: string,
+): Promise<Map<string, string[]>> {
+  const { data: rows } = await createAdminClient()
+    .from("daily_checkins")
+    .select("user_id, checkin_date")
+    .in("user_id", ids)
+    .gte("checkin_date", addDays(today, -60))
+    .returns<{ user_id: string; checkin_date: string }[]>();
+  const byUser = new Map<string, string[]>();
+  for (const r of rows ?? [])
+    (byUser.get(r.user_id) ?? byUser.set(r.user_id, []).get(r.user_id)!).push(
+      r.checkin_date,
+    );
+  return byUser;
 }
 
 async function checkinReminders(c: TickCtx): Promise<number> {
@@ -168,36 +219,10 @@ async function checkinReminders(c: TickCtx): Promise<number> {
     3,
     365,
   );
-  const db = createAdminClient();
-
-  // Only people who turned reminders on AND have LINE linked.
-  const { data: prefs } = await db
-    .from("notification_prefs")
-    .select("user_id")
-    .eq("line_reminders", true)
-    .limit(CANDIDATE_LIMIT)
-    .returns<{ user_id: string }[]>();
-  const wanted = (prefs ?? []).map((p) => p.user_id);
-  if (wanted.length === 0) return 0;
-  const { data: links } = await db
-    .from("line_links")
-    .select("user_id")
-    .in("user_id", wanted)
-    .returns<{ user_id: string }[]>();
-  const ids = (links ?? []).map((l) => l.user_id);
+  const ids = await reminderUserIds(c.onlyUsers);
   if (ids.length === 0) return 0;
 
-  const { data: rows } = await db
-    .from("daily_checkins")
-    .select("user_id, checkin_date")
-    .in("user_id", ids)
-    .gte("checkin_date", addDays(c.today, -60))
-    .returns<{ user_id: string; checkin_date: string }[]>();
-  const byUser = new Map<string, string[]>();
-  for (const r of rows ?? [])
-    (byUser.get(r.user_id) ?? byUser.set(r.user_id, []).get(r.user_id)!).push(
-      r.checkin_date,
-    );
+  const byUser = await checkinDatesByUser(ids, c.today);
 
   let n = 0;
   for (const id of ids) {
@@ -218,6 +243,127 @@ async function checkinReminders(c: TickCtx): Promise<number> {
       dedupeKey: `checkin:${c.today}`,
     };
     if (await notifyUser(id, notice)) n++;
+  }
+  return n;
+}
+
+/** A late "last call" for people with a long streak who still have not checked in. */
+async function streakLastCalls(c: TickCtx): Promise<number> {
+  const hour = ruleNumber(c.rules, "streak_at_risk", "hour", 21, 23);
+  if (bangkokHour(c.now) < hour) return 0;
+  const minStreak = ruleNumber(c.rules, "streak_at_risk", "min_streak", 7, 365);
+  const ids = await reminderUserIds(c.onlyUsers);
+  if (ids.length === 0) return 0;
+  const byUser = await checkinDatesByUser(ids, c.today);
+  let n = 0;
+  for (const id of ids) {
+    if (c.overBudget()) break;
+    const streak = computeStreak(byUser.get(id) ?? [], c.today);
+    if (
+      !streakLastCall({
+        bangkokHour: bangkokHour(c.now),
+        hour,
+        checkedToday: streak.checkedToday,
+        streak: streak.current,
+        minStreak,
+      })
+    )
+      continue;
+    const { t } = await dictFor(id);
+    if (await notifyUser(id, streakLastCallNotice(t, streak.current, c.today)))
+      n++;
+  }
+  return n;
+}
+
+/** "Your report for last month is ready", to everyone with enough check-in days to have one. */
+async function monthlyReportNotices(c: TickCtx): Promise<number> {
+  if (!(await featureEnabled("monthly_report"))) return 0;
+  const day = Math.max(
+    1,
+    ruleNumber(c.rules, "monthly_report_ready", "day", 2, 28),
+  );
+  const month = reportMonthToAnnounce(c.today, day);
+  if (!month) return 0;
+  const { from, to } = monthBounds(month);
+  const { data } = await createAdminClient()
+    .from("daily_checkins")
+    .select("user_id")
+    .gte("checkin_date", from)
+    .lte("checkin_date", to)
+    .limit(20_000)
+    .returns<{ user_id: string }[]>();
+  const days = new Map<string, number>();
+  for (const r of data ?? [])
+    days.set(r.user_id, (days.get(r.user_id) ?? 0) + 1);
+  let n = 0;
+  for (const [id, count] of days) {
+    if (c.overBudget()) break;
+    if (c.onlyUsers && !c.onlyUsers.has(id)) continue;
+    if (count < MIN_CHECKIN_DAYS) continue;
+    const { t, lang } = await dictFor(id);
+    const label = new Intl.DateTimeFormat(
+      lang === "th" ? "th-TH-u-ca-buddhist" : "en-GB",
+      {
+        timeZone: "UTC",
+        month: "long",
+        year: "numeric",
+      },
+    ).format(new Date(`${month}-01T00:00:00Z`));
+    if (await notifyUser(id, monthlyReportReadyNotice(t, month, label))) n++;
+  }
+  return n;
+}
+
+/** A yearly check-up / re-check suggestion from each person's latest saved lab report. */
+async function checkupReminders(c: TickCtx): Promise<number> {
+  const annualMonths = ruleNumber(
+    c.rules,
+    "checkup_reminder",
+    "annual_months",
+    12,
+    60,
+  );
+  const recheckDays = ruleNumber(
+    c.rules,
+    "checkup_reminder",
+    "recheck_days",
+    90,
+    730,
+  );
+  const ids = await reminderUserIds(c.onlyUsers);
+  if (ids.length === 0) return 0;
+  const { data } = await createAdminClient()
+    .from("lab_reports")
+    .select("user_id, collected_on, items")
+    .in("user_id", ids)
+    .eq("status", "confirmed")
+    .not("collected_on", "is", null)
+    .order("collected_on", { ascending: false })
+    .limit(CANDIDATE_LIMIT * 3)
+    .returns<{ user_id: string; collected_on: string; items: unknown }[]>();
+  const latest = new Map<string, { collected_on: string; items: unknown }>();
+  for (const r of data ?? [])
+    if (!latest.has(r.user_id)) latest.set(r.user_id, r);
+  let n = 0;
+  for (const [id, r] of latest) {
+    if (c.overBudget()) break;
+    const items = parseStoredLabItems(r.items);
+    const kind = checkupReminder({
+      today: c.today,
+      latestLabDate: r.collected_on,
+      hadOutOfRange: items.some(
+        (i) => i.status === "watch" || i.status === "abnormal",
+      ),
+      annualMonths,
+      recheckDays,
+    });
+    if (!kind) continue;
+    const { t, lang } = await dictFor(id);
+    if (
+      await notifyUser(id, checkupReminderNotice(t, lang, kind, r.collected_on))
+    )
+      n++;
   }
   return n;
 }
@@ -430,7 +576,11 @@ export interface TickSummary {
  * the queue is sent. Each rule records its result so a rule that quietly stops
  * finding anything is visible; -1 means "switched off", 0 "ran, found nothing".
  */
-export async function runTick(now = new Date()): Promise<TickSummary> {
+export async function runTick(
+  now = new Date(),
+  /** Tests only: run just these rules, for just these people, and send nothing to LINE. */
+  only?: { rules: readonly string[]; users: readonly string[] },
+): Promise<TickSummary> {
   const db = createAdminClient();
   const started = Date.now();
   const { data: tick } = await db.from("cron_ticks").insert({}).select("id");
@@ -450,12 +600,16 @@ export async function runTick(now = new Date()): Promise<TickSummary> {
 
   const ctx: TickCtx = {
     now,
+    onlyUsers: only ? new Set(only.users) : undefined,
     today: bangkokDate(now),
     rules,
     overBudget: () => Date.now() - started > TICK_BUDGET_MS,
   };
   const steps: [string, () => Promise<number>][] = [
     ["checkin_reminder", () => checkinReminders(ctx)],
+    ["streak_at_risk", () => streakLastCalls(ctx)],
+    ["monthly_report_ready", () => monthlyReportNotices(ctx)],
+    ["checkup_reminder", () => checkupReminders(ctx)],
     ["trial_ending", () => expiryNotices(ctx, "trial_ending")],
     ["plan_expiring", () => expiryNotices(ctx, "plan_expiring")],
     ["queue_expire", () => expireQueue(ctx)],
@@ -469,6 +623,7 @@ export async function runTick(now = new Date()): Promise<TickSummary> {
       stoppedEarlyAt = key;
       break;
     }
+    if (only && !only.rules.includes(key)) continue;
     if (!ruleEnabled(rules, key)) {
       summary[key] = -1;
       continue;
@@ -486,7 +641,14 @@ export async function runTick(now = new Date()): Promise<TickSummary> {
       .eq("key", key);
   }
 
-  const line = await deliverQueued(lineDeps(now), DELIVER_BATCH);
+  const line = only
+    ? ({
+        sent: 0,
+        failed: 0,
+        skipped: 0,
+        blocked: 0,
+      } as unknown as DeliverSummary)
+    : await deliverQueued(lineDeps(now), DELIVER_BATCH);
   const result: TickSummary = {
     rules: summary,
     line,

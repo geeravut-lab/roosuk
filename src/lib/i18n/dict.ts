@@ -1298,6 +1298,20 @@ const th = {
   err_manual_url:
     "ลิงก์ไม่ถูกต้อง ต้องขึ้นต้นด้วย https:// เป็นที่อยู่เว็บจริง และไม่มีช่องว่างหรือรหัสผ่านในลิงก์",
   manualUnavailable: "ยังไม่พร้อมใช้งาน",
+  notifReportTitle: "รายงานสุขภาพเดือน {month} พร้อมแล้ว",
+  notifReportBody: "ดูสรุปเดือนของคุณและให้ AI เขียนสรุปสั้น ๆ ได้",
+  notifLastCallTitle: "ความต่อเนื่อง {n} วันของคุณกำลังจะขาด",
+  notifLastCallBody: "เช็กอินตอนนี้ก่อนหมดวัน ใช้เวลาไม่ถึงนาที",
+  notifAnnualTitle: "ถึงเวลาคิดเรื่องตรวจสุขภาพประจำปี",
+  notifAnnualBody:
+    "ผลตรวจครั้งล่าสุดผ่านมาประมาณหนึ่งปีแล้ว ลองพูดคุยกับแพทย์เรื่องการตรวจประจำปี",
+  notifRecheckTitle: "ถึงเวลาพิจารณาตรวจซ้ำ",
+  notifRecheckBody:
+    "ผลตรวจครั้งล่าสุดมีบางรายการนอกช่วงทั่วไป ปรึกษาแพทย์ว่าควรตรวจซ้ำเมื่อไร (ไม่ใช่การวินิจฉัย)",
+  notifLabelLastLab: "ผลตรวจล่าสุด",
+  adminRuleParam_day: "วันที่ของเดือนที่เริ่มแจ้ง (1–28)",
+  adminRuleParam_annual_months: "ตรวจประจำปี: ผ่านกี่เดือนนับจากผลตรวจล่าสุด",
+  adminRuleParam_recheck_days: "ตรวจซ้ำ: ผ่านกี่วัน (เมื่อมีรายการนอกช่วง)",
 } as const;
 
 export type Dict = { [K in keyof typeof th]: string };
@@ -2620,6 +2634,23 @@ const en = {
   err_manual_url:
     "That link is not valid. It must start with https://, be a real web address, and contain no spaces or credentials.",
   manualUnavailable: "not available yet",
+  notifReportTitle: "Your {month} health report is ready",
+  notifReportBody:
+    "See your month at a glance, and have AI write a short recap.",
+  notifLastCallTitle: "Your {n}-day streak is about to end",
+  notifLastCallBody: "Check in before the day ends — it takes under a minute.",
+  notifAnnualTitle: "Time to think about your yearly check-up",
+  notifAnnualBody:
+    "Your last results are about a year old. Consider talking to a doctor about a yearly check-up.",
+  notifRecheckTitle: "Time to consider a re-check",
+  notifRecheckBody:
+    "Some values in your last results were outside the general range. Ask a doctor when to re-check (this is not a diagnosis).",
+  notifLabelLastLab: "Last results",
+  adminRuleParam_day: "Day of the month to start announcing (1–28)",
+  adminRuleParam_annual_months:
+    "Yearly check-up: months since the last results",
+  adminRuleParam_recheck_days:
+    "Re-check: days since the last results (when some were outside range)",
 } satisfies Dict;
 
 export const dict: Record<Lang, Dict> = { th, en };
