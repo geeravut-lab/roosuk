@@ -153,7 +153,9 @@ export default async function MealPage({
                   {fmt(t.foodKcal, { kcal: it.per_serving.kcal })} ·{" "}
                   {it.source === "catalog"
                     ? t.foodSourceCatalog
-                    : t.foodSourceAi}
+                    : it.source === "barcode"
+                      ? t.foodSourceBarcode
+                      : t.foodSourceAi}
                 </p>
                 {it.confidence < 0.5 ? (
                   <p className="text-sm font-medium">{t.foodLowConfidence}</p>

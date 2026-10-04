@@ -8,6 +8,8 @@ const executablePath =
   (existsSync(SANDBOX_CHROMIUM) ? SANDBOX_CHROMIUM : undefined);
 
 const PORT = 3100;
+// A short Thai sentence spoken by a speech synthesiser; the fake microphone plays it in a loop.
+const FAKE_AUDIO = `${process.cwd()}/e2e/fixtures/voice-th.wav`;
 
 // Node's built-in fetch ignores HTTPS_PROXY unless asked; the sandbox needs it to reach Supabase.
 // (Harmless elsewhere. Workers and the web server inherit it.)
@@ -35,7 +37,17 @@ export default defineConfig({
   },
   use: {
     baseURL: `http://localhost:${PORT}`,
-    launchOptions: { executablePath },
+    launchOptions: {
+      executablePath,
+      // A fake camera and microphone that never ask for permission (the barcode and voice specs open them).
+      args: [
+        "--use-fake-ui-for-media-stream",
+        "--use-fake-device-for-media-stream",
+        ...(existsSync(FAKE_AUDIO)
+          ? [`--use-file-for-fake-audio-capture=${FAKE_AUDIO}`]
+          : []),
+      ],
+    },
   },
   projects: [
     {

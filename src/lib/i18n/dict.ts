@@ -1456,6 +1456,27 @@ const th = {
   challengeJoinHint: "เข้าร่วมได้ภายใน 2 วันแรก และได้ครั้งละ 1 ชาเลนจ์ต่อรหัส",
   challengeDone: "สำเร็จแล้ว",
   challengeEnded: "หมดเวลา ({have}/{target})",
+  foodSourceBarcode:
+    "ตัวเลขจากฐานข้อมูลสินค้า (Open Food Facts) ตรวจเทียบกับฉลากด้วยนะ",
+  barcodeTitle: "สแกนบาร์โค้ดสินค้า",
+  barcodeHint:
+    "สำหรับอาหารบรรจุหีบห่อ ใช้เลขบาร์โค้ด (EAN/UPC) บนฉลาก ไม่ใช้โควตา AI",
+  barcodeNumber: "เลขบาร์โค้ด",
+  barcodeLookup: "ค้นหาสินค้า",
+  barcodeLooking: "กำลังค้นหา…",
+  barcodeCamera: "สแกนด้วยกล้อง",
+  barcodeCameraStop: "ปิดกล้อง",
+  barcodeCameraHint: "เล็งกล้องไปที่บาร์โค้ด ให้เห็นทั้งแถบ",
+  barcodeCameraDenied: "เปิดกล้องไม่ได้ พิมพ์เลขบาร์โค้ดแทนได้",
+  barcodeFound: "อ่านได้ {code}",
+  err_barcode_invalid:
+    "เลขบาร์โค้ดไม่ถูกต้อง (ต้องเป็นตัวเลข 8, 12, 13 หรือ 14 หลักและเลขตรวจสอบถูกต้อง)",
+  err_barcode_not_found: "ไม่พบสินค้านี้ในฐานข้อมูล ลองถ่ายรูปอาหารแทนได้",
+  err_barcode_no_nutrition:
+    "พบสินค้าแต่ไม่มีข้อมูลโภชนาการ ลองถ่ายรูปอาหารแทนได้",
+  err_barcode_unavailable: "ตอนนี้ค้นหาบาร์โค้ดไม่ได้ ลองใหม่ภายหลัง",
+  flag_barcode_scan: "สแกนบาร์โค้ด",
+  eventName_barcode_scanned: "สแกนบาร์โค้ดสินค้า",
 } as const;
 
 export type Dict = { [K in keyof typeof th]: string };
@@ -2952,6 +2973,31 @@ const en = {
     "Join within the first 2 days; one person per friend challenge.",
   challengeDone: "Completed",
   challengeEnded: "Ended ({have}/{target})",
+  foodSourceBarcode:
+    "From the product database (Open Food Facts) — check it against the label",
+  barcodeTitle: "Scan a product barcode",
+  barcodeHint:
+    "For packaged food: the barcode number (EAN/UPC) on the label. Uses no AI allowance.",
+  barcodeNumber: "Barcode number",
+  barcodeLookup: "Look up",
+  barcodeLooking: "Looking up…",
+  barcodeCamera: "Scan with the camera",
+  barcodeCameraStop: "Close the camera",
+  barcodeCameraHint:
+    "Point the camera at the barcode so the whole strip is visible.",
+  barcodeCameraDenied:
+    "Could not open the camera — you can type the number instead.",
+  barcodeFound: "Read {code}",
+  err_barcode_invalid:
+    "That barcode number is not valid (8, 12, 13 or 14 digits with a correct check digit).",
+  err_barcode_not_found:
+    "This product is not in the database. You can photograph the food instead.",
+  err_barcode_no_nutrition:
+    "The product is there but has no nutrition data. You can photograph the food instead.",
+  err_barcode_unavailable:
+    "Barcode lookup is not available right now. Please try again later.",
+  flag_barcode_scan: "Barcode scan",
+  eventName_barcode_scanned: "Scanned a product barcode",
 } satisfies Dict;
 
 export const dict: Record<Lang, Dict> = { th, en };

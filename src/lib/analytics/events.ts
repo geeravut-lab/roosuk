@@ -20,6 +20,7 @@ export const EVENTS = [
   "report_generated",
   "vault_uploaded",
   "insight_explained",
+  "barcode_scanned",
   "ask_sent",
   "checkin_done",
   "lead_created",

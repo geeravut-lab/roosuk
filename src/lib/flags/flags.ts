@@ -10,6 +10,7 @@ export const FEATURE_FLAGS = [
   "monthly_report",
   "health_vault",
   "insights",
+  "barcode_scan",
   "health_agent",
   "wearables",
   "family",

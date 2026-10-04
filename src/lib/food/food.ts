@@ -51,8 +51,8 @@ export interface MealItem {
   name: string;
   catalog_key: string | null;
   servings: number;
-  /** "catalog" = numbers from our table; "ai" = the model's own estimate. */
-  source: "catalog" | "ai";
+  /** "catalog" = numbers from our table; "ai" = the model's own estimate; "barcode" = printed-label data from a product database. */
+  source: "catalog" | "ai" | "barcode";
   /** 0–1 as reported by the model. */
   confidence: number;
   per_serving: Nutrients;
@@ -214,7 +214,7 @@ export function parseStoredItems(value: unknown): MealItem[] {
       name: z.string(),
       catalog_key: z.string().nullable(),
       servings: z.number(),
-      source: z.enum(["catalog", "ai"]),
+      source: z.enum(["catalog", "ai", "barcode"]),
       confidence: z.number(),
       per_serving: z.object({
         kcal: z.number(),
