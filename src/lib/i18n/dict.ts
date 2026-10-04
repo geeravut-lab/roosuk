@@ -1136,6 +1136,36 @@ const th = {
   terms_s4_title: "แพ็กเกจและการชำระเงิน",
   terms_s4_body:
     "รายละเอียดแพ็กเกจ ราคา และเงื่อนไขการใช้งานจะแสดงในหน้าแพ็กเกจก่อนที่คุณจะชำระเงิน",
+  chartNoData: "ยังไม่มีข้อมูลในช่วงนี้",
+  chartShowNumbers: "ดูเป็นตัวเลข",
+  chartColDate: "วันที่",
+  chartColValue: "ค่า",
+  chartColStatus: "สถานะ",
+  timelineRangeLabel: "ช่วงเวลา",
+  timelineRange_7: "7 วัน",
+  timelineRange_30: "30 วัน",
+  timelineRange_90: "90 วัน",
+  timelineRange_365: "1 ปี",
+  timelineScoreChartTitle: "คะแนนรายวัน",
+  timelineScoreChartHint: "ช่วงที่ไม่ได้เช็กอินจะเว้นว่างไว้ ไม่เดาค่าให้",
+  timelineKcalChartTitle: "พลังงานจากมื้อที่บันทึก (kcal ต่อวัน)",
+  timelineKcalChartHint:
+    "รวมเฉพาะมื้อที่คุณบันทึก จึงไม่ใช่ปริมาณที่กินจริงทั้งวัน และไม่มีเป้าหมายให้ทำตาม",
+  timelineMarkerTitle: "แนวโน้มผลตรวจ",
+  timelineMarkerHint:
+    "เลือกรายการที่เคยตรวจตั้งแต่ 2 ครั้งขึ้นไป แถบเขียวคือช่วงอ้างอิงของแอป ○ ปกติ ◆ ควรติดตาม ▲ ผิดปกติ",
+  timelineMarkerNone:
+    "เมื่อมีผลตรวจรายการเดียวกันตั้งแต่ 2 ครั้ง กราฟแนวโน้มจะแสดงที่นี่",
+  timelineMarkerPick: "รายการตรวจ",
+  timelineFilterLabel: "แสดง",
+  timelineFilter_all: "ทั้งหมด",
+  timelineFilter_checkin: "เช็กอิน",
+  timelineFilter_meal: "มื้ออาหาร",
+  timelineFilter_lab: "ผลตรวจ",
+  timelineFilter_body: "สแกนร่างกาย",
+  timelineWindowCapped: "ช่วงเวลานี้ถูกจำกัดตามแพ็กเกจของคุณ",
+  timelineListNone: "ไม่มีรายการในช่วงนี้",
+  timelineScoreUnit: "คะแนน",
 } as const;
 
 export type Dict = { [K in keyof typeof th]: string };
@@ -2291,6 +2321,37 @@ const en = {
   terms_s4_title: "Plans and payment",
   terms_s4_body:
     "Plan details, prices and conditions are shown on the plans page before you pay.",
+  chartNoData: "No data in this period yet.",
+  chartShowNumbers: "Show as numbers",
+  chartColDate: "Date",
+  chartColValue: "Value",
+  chartColStatus: "Status",
+  timelineRangeLabel: "Period",
+  timelineRange_7: "7 days",
+  timelineRange_30: "30 days",
+  timelineRange_90: "90 days",
+  timelineRange_365: "1 year",
+  timelineScoreChartTitle: "Daily score",
+  timelineScoreChartHint:
+    "Days without a check-in are left blank, never guessed.",
+  timelineKcalChartTitle: "Energy from logged meals (kcal per day)",
+  timelineKcalChartHint:
+    "Only meals you logged, so not everything you ate, and there is no target to hit.",
+  timelineMarkerTitle: "Lab trends",
+  timelineMarkerHint:
+    "Pick a test you have had at least twice. The green band is the app's reference range. ○ normal ◆ watch ▲ abnormal",
+  timelineMarkerNone:
+    "Once you have two results of the same test, its trend appears here.",
+  timelineMarkerPick: "Test",
+  timelineFilterLabel: "Show",
+  timelineFilter_all: "Everything",
+  timelineFilter_checkin: "Check-ins",
+  timelineFilter_meal: "Meals",
+  timelineFilter_lab: "Lab results",
+  timelineFilter_body: "Body scans",
+  timelineWindowCapped: "This period is limited by your plan.",
+  timelineListNone: "Nothing in this period.",
+  timelineScoreUnit: "points",
 } satisfies Dict;
 
 export const dict: Record<Lang, Dict> = { th, en };
