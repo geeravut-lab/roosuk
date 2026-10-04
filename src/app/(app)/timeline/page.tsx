@@ -5,12 +5,14 @@ import { requireUser } from "@/lib/auth/server";
 import { getBillingProfile } from "@/lib/billing/profile.server";
 import { resolvePlan } from "@/lib/billing/plan";
 import { addDays, bangkokDate } from "@/lib/health/dates";
+import { parseStoredItems } from "@/lib/food/food";
 import { loadCheckins } from "@/lib/health/server";
 import { dailyScores } from "@/lib/health/view";
 import type { Dict } from "@/lib/i18n/dict";
 import { fmt } from "@/lib/i18n/dict";
 import { formatDate } from "@/lib/i18n/format";
 import { getLang, getT } from "@/lib/i18n/server";
+import { createClient } from "@/lib/supabase/server";
 
 export async function generateMetadata(): Promise<Metadata> {
   return { title: (await getT()).navTimeline };
@@ -28,11 +30,22 @@ export default async function TimelinePage() {
   const user = await requireUser();
   const now = new Date();
   const today = bangkokDate(now);
-  const [t, lang, billing, rows] = await Promise.all([
+  const supabase = await createClient();
+  const [t, lang, billing, rows, { data: mealRows }] = await Promise.all([
     getT(),
     getLang(),
     getBillingProfile(user.id),
     loadCheckins(today),
+    supabase
+      .from("meal_logs")
+      .select("id, meal_date, kcal, items")
+      .eq("status", "confirmed")
+      .order("meal_date", { ascending: false })
+      .order("created_at", { ascending: false })
+      .limit(60)
+      .returns<
+        { id: string; meal_date: string; kcal: number; items: unknown }[]
+      >(),
   ]);
 
   const tier = billing ? resolvePlan(billing, now).tier : "free";
@@ -40,6 +53,9 @@ export default async function TimelinePage() {
   // Months → days (30 per month) is close enough for a visibility window.
   const cutoff = months === "unlimited" ? null : addDays(today, -30 * months);
   const visible = cutoff ? rows.filter((r) => r.checkin_date >= cutoff) : rows;
+  const meals = (mealRows ?? []).filter(
+    (m) => !cutoff || m.meal_date >= cutoff,
+  );
   const hidden = rows.length - visible.length;
 
   const scores = new Map(dailyScores(visible).map((s) => [s.date, s.score]));
@@ -86,6 +102,38 @@ export default async function TimelinePage() {
             : fmt(t.timelineWindow, { n: months })}
         </p>
       </section>
+
+      {meals.length > 0 ? (
+        <section className="space-y-3" aria-labelledby="meals-h">
+          <h2 id="meals-h" className="font-semibold">
+            {t.timelineMealsTitle}
+          </h2>
+          <ul className="space-y-2">
+            {meals.map((m) => (
+              <li key={m.id}>
+                <Link
+                  href={`/scan/food/${m.id}`}
+                  className="card hover:bg-tint-primary block space-y-1"
+                >
+                  <span className="flex items-baseline justify-between gap-3">
+                    <span className="font-semibold">
+                      {formatDate(lang, m.meal_date)}
+                    </span>
+                    <span className="text-primary-strong font-bold">
+                      {fmt(t.foodKcal, { kcal: m.kcal })}
+                    </span>
+                  </span>
+                  <span className="text-muted block text-sm">
+                    {parseStoredItems(m.items)
+                      .map((i) => i.name)
+                      .join(" · ")}
+                  </span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
 
       <section className="space-y-3" aria-labelledby="list-h">
         <h2 id="list-h" className="font-semibold">

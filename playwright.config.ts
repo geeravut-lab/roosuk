@@ -16,6 +16,8 @@ process.env.NODE_USE_ENV_PROXY ??= "1";
 export default defineConfig({
   testDir: "e2e",
   fullyParallel: true,
+  // The live specs share one Supabase project (platform_settings, ai_settings…), so they must not run side by side.
+  workers: process.env.E2E_LIVE === "1" ? 1 : undefined,
   reporter: [["list"]],
   // Run `npm run build` first. ENABLE_UI_PREVIEW exposes /preview/* (the real
   // AppShell without a backend); it must never be set on Netlify.

@@ -1,7 +1,7 @@
 import { randomBytes } from "node:crypto";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import AxeBuilder from "@axe-core/playwright";
-import { expect, test, type Page } from "@playwright/test";
+import { expect as baseExpect, test, type Page } from "@playwright/test";
 import { lineSyntheticEmail } from "../../src/lib/line/login";
 
 /**
@@ -10,6 +10,9 @@ import { lineSyntheticEmail } from "../../src/lib/line/login";
  * deletes them afterwards (rows cascade), and restores any flag it toggles.
  * Never run it against a project that holds real users' data.
  */
+// Every step crosses the network to Supabase (and the sandbox proxy): wait longer than the 5 s default.
+const expect = baseExpect.configure({ timeout: 20_000 });
+
 const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;

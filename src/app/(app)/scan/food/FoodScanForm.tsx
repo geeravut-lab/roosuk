@@ -1,0 +1,91 @@
+"use client";
+
+import { useActionState, useEffect, useRef, useState } from "react";
+import { Camera } from "lucide-react";
+import { scanFoodAction, type ScanState } from "@/app/actions/food";
+import { shrinkImage } from "@/lib/food/resize";
+import { errorText } from "@/lib/i18n/dict";
+import { useI18n } from "@/lib/i18n/provider";
+
+const initial: ScanState = {};
+
+export function FoodScanForm() {
+  const { t } = useI18n();
+  const [state, action, pending] = useActionState(scanFoodAction, initial);
+  const input = useRef<HTMLInputElement>(null);
+  const [preview, setPreview] = useState<string | null>(null);
+
+  useEffect(
+    () => () => {
+      if (preview) URL.revokeObjectURL(preview);
+    },
+    [preview],
+  );
+
+  async function onPick(e: React.ChangeEvent<HTMLInputElement>) {
+    const picked = e.target.files?.[0];
+    if (!picked) return;
+    const small = await shrinkImage(picked);
+    // Swap the (possibly 8 MB) original for the shrunken copy in the same input.
+    const dt = new DataTransfer();
+    dt.items.add(small);
+    if (input.current) input.current.files = dt.files;
+    setPreview(URL.createObjectURL(small));
+  }
+
+  return (
+    <form action={action} className="space-y-4">
+      <input
+        ref={input}
+        id="photo"
+        name="photo"
+        type="file"
+        accept="image/jpeg,image/png,image/webp"
+        className="sr-only"
+        onChange={onPick}
+        required
+      />
+
+      {preview ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={preview}
+          alt={t.foodPreviewAlt}
+          className="mx-auto max-h-80 w-full rounded-2xl object-contain"
+        />
+      ) : null}
+
+      <label
+        htmlFor="photo"
+        className="btn btn-secondary w-full cursor-pointer has-[:focus-visible]:outline-2"
+      >
+        <Camera className="size-5" aria-hidden />
+        {preview ? t.foodChooseAnother : t.foodChoose}
+      </label>
+
+      {state.error ? (
+        <p
+          role="alert"
+          className="bg-tint-primary rounded-xl px-3 py-2 text-sm font-medium"
+        >
+          {errorText(state.error, t)}
+        </p>
+      ) : null}
+
+      {preview ? (
+        <button
+          type="submit"
+          disabled={pending}
+          className="btn btn-primary w-full"
+        >
+          {pending ? t.foodAnalyzing : t.foodAnalyze}
+        </button>
+      ) : null}
+      <p role="status" className="sr-only">
+        {pending ? t.foodAnalyzing : ""}
+      </p>
+
+      <p className="text-muted text-sm">{t.foodPrivacy}</p>
+    </form>
+  );
+}

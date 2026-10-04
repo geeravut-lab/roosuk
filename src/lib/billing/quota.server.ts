@@ -3,6 +3,7 @@ import type { MeteredFeature } from "@/config/plans";
 import { loadPlatformSettings } from "@/lib/settings/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import type { BillingProfile } from "./plan";
+import { bangkokMonthStart } from "./period";
 import { consumeQuota, type QuotaDecision, type QuotaDeps } from "./quota";
 
 const deps: QuotaDeps = {
@@ -37,4 +38,25 @@ export function checkAndConsume(
   feature: MeteredFeature,
 ): Promise<QuotaDecision> {
   return consumeQuota(userId, feature, deps);
+}
+
+/**
+ * Give back one use of `feature` for the current month — for when the AI call
+ * failed on our side or delivered nothing. Best-effort: a failure here is
+ * logged, never thrown (the user's answer matters more than the counter).
+ */
+export async function refundUsage(
+  userId: string,
+  feature: MeteredFeature,
+): Promise<void> {
+  try {
+    const { error } = await createAdminClient().rpc("refund_usage", {
+      p_user: userId,
+      p_feature: feature,
+      p_month: bangkokMonthStart(new Date()),
+    });
+    if (error) console.error("[quota] refund_usage failed:", error.message);
+  } catch (err) {
+    console.error("[quota] refund_usage failed:", err);
+  }
 }
