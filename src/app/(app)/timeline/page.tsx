@@ -142,9 +142,11 @@ export default async function TimelinePage({
   const hidden = rows.length - allVisible.length;
   const visible = allVisible.filter((r) => inShown(r.checkin_date));
   const meals = (mealRows ?? []).filter((m) => inShown(m.meal_date));
-  const labs = (labRows ?? []).filter((r) => inShown(r.collected_on));
+  // Lab reports and body scans are infrequent: they follow the plan's window, not the day-by-day period chips.
+  const inPlan = (date: string) => !planCutoff || date >= planCutoff;
+  const labs = (labRows ?? []).filter((r) => inPlan(r.collected_on));
   const bodies = (bodyRows ?? []).filter((b) =>
-    inShown(bangkokDate(new Date(b.created_at))),
+    inPlan(bangkokDate(new Date(b.created_at))),
   );
 
   const scores = new Map(dailyScores(visible).map((s) => [s.date, s.score]));

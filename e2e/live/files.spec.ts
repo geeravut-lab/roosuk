@@ -174,6 +174,7 @@ test("keep the original: asked every time, consent-gated, sealed at rest, owner-
   });
   await page
     .locator("main form")
+    .first()
     .evaluate((f: HTMLFormElement) => (f.noValidate = true));
   await page.getByRole("button", { name: "วิเคราะห์อาหาร" }).click();
   await expect(

@@ -220,8 +220,9 @@ test("unknown test → counted without values → admin draft (not used) → doc
     .getByRole("checkbox", { name: "แพทย์ตรวจและรับรองช่วงค่านี้แล้ว" })
     .check();
   await extra.getByRole("button", { name: "รับรองและเริ่มใช้" }).click();
+  // the status chip itself (the edit note under it also says "รับรองแล้ว", so the bare word proves nothing)
   await expect(ap.getByRole("listitem").filter({ hasText: KEY })).toContainText(
-    "รับรองแล้ว",
+    "รับรองแล้ว (ใช้ตัดสินค่าจริง)",
   );
   const approved = (
     await d

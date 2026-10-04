@@ -47,6 +47,13 @@ Teal `#0A8FA3` (primary) · Mint `#2DD4A7` (secondary) · Sky Blue `#1E90FF` (ch
 - Plans and AI quotas: defaults in `src/config/plans.ts`, real values (prices, trial days, fair-use caps, quota overrides) in `platform_settings`, parsed by `src/lib/billing/settings.ts`. **Every AI call must first pass `checkAndConsume(userId, feature)`** (`src/lib/billing/quota.server.ts`) — it resolves the current plan (live paid plan → trial = Premium → Free-lite), applies the quota and fair-use cap and counts the use atomically in SQL (`consume_usage`); it fails closed and counts "unlimited" plans too. Plan/trial columns on `profiles` are written only with the service role.
 - Database changes go in `supabase/migrations/` as SQL (`YYYYMMDDHHMMSS_name.sql`); every user-data table needs RLS plus tests in `supabase/tests/` (they run in `npm test` against in-memory Postgres — extend them with each migration). Revoke default grants and grant back only what is needed; give users column-level `update` grants only.
 
+## Rewards, challenges and experiments
+
+- Credit is a baht **ledger** (`reward_ledger`, insert-only; balance = sum), written only by SECURITY DEFINER functions / the service role. Amounts and per-use limits are the admin's (`/admin/rewards`, `platform_settings`); never hard-code a reward number. Credit is spent when a transfer is _reported_ and refunded when rejected (`consume_payment_credit` / `refund_payment_credit`).
+- Challenges and badges reward **showing up** (check-in days, logging), never weight, body shape or calories; copy is tested for that.
+- The paywall A/B shows the same plans and prices in both versions (order and wording only); every funnel event carries `pw_a`/`pw_b`.
+- Open Food Facts (barcode) and Gemini audio are not reachable/free in every environment: the barcode path is tested against a local stub (`OPEN_FOOD_FACTS_URL`), voice against a synthesised Thai sentence (`e2e/fixtures/voice-th.wav`).
+
 ## Health guardrails (non-negotiable)
 
 - AI never diagnoses. It summarizes, explains trends and helps users prepare for a doctor; doctors decide.

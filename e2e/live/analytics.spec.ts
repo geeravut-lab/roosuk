@@ -113,8 +113,9 @@ test("a session writes signup, active and paywall events; the dashboard reads th
   expect(now.filter((e) => e === "active")).toHaveLength(1);
   expect(now.filter((e) => e === "signup")).toHaveLength(1);
 
-  // the events hold no content
-  for (const e of await eventsOf(user.id)) expect(e.detail).toBeNull();
+  // the events hold no content: a detail is at most a short tag (the paywall version, pw_a / pw_b)
+  for (const e of await eventsOf(user.id))
+    expect(e.detail === null || /^pw_[ab]$/.test(e.detail)).toBe(true);
 
   // a normal user cannot open the dashboard
   const denied = await page.goto("/admin/analytics");
