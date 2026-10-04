@@ -20,3 +20,6 @@ node docs/manual/lib/build-pdf.mjs user    # content/user.mjs + shots -> out/*.p
 Same with `record-admin.mjs` / `admin`. Content (Thai text, steps, relations) lives in
 `content/<name>.mjs`; the layout and brand theme in `lib/build-pdf.mjs`; the phone browser, test
 users and highlight/masking helpers in `lib/recorder.mjs`. Screenshots mask e-mail addresses.
+
+Page footers are drawn by Chromium outside the page, so Noto Sans Thai must also be installed on
+the machine that builds: `mkdir -p ~/.fonts && cp src/assets/fonts/NotoSansThai-*.ttf ~/.fonts && fc-cache -f`.

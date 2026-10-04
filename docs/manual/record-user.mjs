@@ -251,8 +251,9 @@ async function onboarding(S) {
   await snap("08-signup-form", {
     highlight: [p.getByLabel("อีเมล"), p.getByLabel("รหัสผ่าน")],
   });
+  await p.getByLabel("อีเมล").fill(email); // the shot masked the field
   await p.getByRole("button", { name: "สมัครสมาชิก", exact: true }).click();
-  await p.waitForURL(/\/consent/, { waitUntil: "commit" });
+  await p.waitForURL(/\/consent/, { waitUntil: "commit", timeout: 60_000 });
   await settle(p);
   const { data: list } = await admin.auth.admin.listUsers({
     page: 1,
@@ -2588,7 +2589,7 @@ register("settings", async (S) => {
   const out = btn(page, "ออกจากระบบ");
   await shot("303-settings-signout", { scrollTo: out, highlight: out });
   await out.click();
-  await page.waitForURL((u) => u.pathname === "/", { waitUntil: "commit" });
+  await page.waitForURL((u) => u.pathname === "/", { waitUntil: "commit", timeout: 60_000 });
   await settle(page);
   await shot("304-signed-out-landing", {
     highlight: link(page, "เข้าสู่ระบบ"),
@@ -2601,8 +2602,10 @@ register("settings", async (S) => {
   await shot("305-signin-form", {
     highlight: [page.getByLabel("อีเมล"), page.getByLabel("รหัสผ่าน")],
   });
+  // the screenshot masked the e-mail in the field: type the real one again
+  await page.getByLabel("อีเมล").fill(M.email);
   await page.getByRole("button", { name: "เข้าสู่ระบบ", exact: true }).click();
-  await page.waitForURL(/\/today/, { waitUntil: "commit" });
+  await page.waitForURL(/\/today/, { waitUntil: "commit", timeout: 60_000 });
   await settle(page);
   await shot("306-signin-today", {});
 });
@@ -2623,7 +2626,7 @@ register("delete-account", async (S) => {
     highlight: d.page.getByRole("button", { name: "ลบบัญชีถาวร" }),
   });
   await d.page.getByRole("button", { name: "ลบบัญชีถาวร" }).click();
-  await d.page.waitForURL((u) => u.pathname === "/", { waitUntil: "commit" });
+  await d.page.waitForURL((u) => u.pathname === "/", { waitUntil: "commit", timeout: 60_000 });
   await settle(d.page);
   await d.snap("309-delete-done", {
     highlight: d.page.getByRole("status").first(),

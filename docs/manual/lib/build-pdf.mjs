@@ -155,9 +155,6 @@ const browser = await chromium.launch({
 const page = await browser.newPage();
 await page.goto(pathToFileURL(htmlPath).href);
 await page.evaluate(() => document.fonts.ready);
-const footFont = readFileSync(
-  join(ROOT, "src/assets/fonts/NotoSansThai-Regular.ttf"),
-).toString("base64");
 const pdf = join(outDir, doc.file);
 await page.pdf({
   path: pdf,
@@ -168,7 +165,7 @@ await page.pdf({
   tagged: true,
   margin: { top: "16mm", bottom: "18mm", left: "14mm", right: "14mm" },
   headerTemplate: "<span></span>",
-  footerTemplate: `<style>@font-face{font-family:"FootThai";src:url("data:font/ttf;base64,${footFont}")}</style><div style="width:100%;font-size:8pt;line-height:1.8;color:#07707F;padding:0 14mm;display:flex;justify-content:space-between;font-family:FootThai,sans-serif"><span>${esc(doc.footer ?? "")}</span><span><span class="pageNumber"></span> / <span class="totalPages"></span></span></div>`,
+  footerTemplate: `<div style="width:100%;font-size:8pt;line-height:1.8;color:#07707F;padding:0 14mm;display:flex;justify-content:space-between;font-family:'Noto Sans Thai',sans-serif"><span>${esc(doc.footer ?? "")}</span><span><span class="pageNumber"></span> / <span class="totalPages"></span></span></div>`,
 });
 await browser.close();
 console.log("wrote", pdf);
