@@ -28,7 +28,11 @@ const NON_TEXT = /tts|image|embedding|live|audio|robotics|computer-use/i;
  * but which tier it is can only be confirmed in Google AI Studio.
  */
 export function buildGoogleParams(req: AiRequest, model: string) {
-  const media = [...(req.images ?? []), ...(req.documents ?? [])].map((m) => ({
+  const media = [
+    ...(req.images ?? []),
+    ...(req.documents ?? []),
+    ...(req.audio ?? []),
+  ].map((m) => ({
     inlineData: { mimeType: m.mediaType, data: m.data },
   }));
   return {

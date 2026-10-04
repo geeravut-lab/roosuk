@@ -14,6 +14,8 @@ type Params = Anthropic.MessageCreateParamsNonStreaming;
 
 /** Pure: our request → Anthropic's (images and PDFs go first, then the instruction). */
 export function buildAnthropicParams(req: AiRequest, model: string): Params {
+  if (req.audio?.length)
+    throw new AiError("unsupported", "this provider takes no audio");
   const content: Anthropic.ContentBlockParam[] = [
     ...(req.images ?? []).map((m): Anthropic.ContentBlockParam => ({
       type: "image",

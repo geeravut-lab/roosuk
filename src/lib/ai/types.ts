@@ -19,6 +19,7 @@ export const TASK_KINDS = [
   "daily_plan",
   "monthly_report",
   "prompt_review",
+  "voice_transcribe",
 ] as const;
 export type TaskKind = (typeof TASK_KINDS)[number];
 
@@ -41,6 +42,8 @@ export interface AiRequest {
   images?: AiMedia[];
   /** PDFs (mediaType application/pdf). */
   documents?: AiMedia[];
+  /** Speech to transcribe (audio/wav). Only some providers take audio. */
+  audio?: AiMedia[];
   /** JSON Schema the answer must follow; the adapter enforces it natively. */
   jsonSchema?: Record<string, unknown>;
   maxTokens?: number;

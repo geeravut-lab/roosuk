@@ -1477,6 +1477,23 @@ const th = {
   err_barcode_unavailable: "ตอนนี้ค้นหาบาร์โค้ดไม่ได้ ลองใหม่ภายหลัง",
   flag_barcode_scan: "สแกนบาร์โค้ด",
   eventName_barcode_scanned: "สแกนบาร์โค้ดสินค้า",
+  feature_voice: "พิมพ์ด้วยเสียง",
+  aiTask_voice_transcribe: "ถอดเสียงพูดเป็นข้อความ",
+  guardrails_voice_transcribe:
+    "เสียงถูกถอดเป็นข้อความเท่านั้น ไม่ถูกเก็บ ข้อความที่ได้ใส่ในช่องให้ผู้ใช้ตรวจ/แก้ก่อนส่งเสมอ ไม่มีการสั่งงานด้วยเสียงโดยตรง\nจำกัดความยาวไม่เกิน 40 วินาที ตรวจรูปแบบไฟล์เสียงจากไบต์จริง ใช้โควตา และคืนสิทธิ์เมื่อถอดเสียงไม่ได้",
+  err_voice_audio: "ไฟล์เสียงไม่ถูกต้อง",
+  err_voice_long: "เสียงยาวเกินไป (ไม่เกิน 40 วินาที)",
+  err_voice_short: "เสียงสั้นเกินไป",
+  err_voice_nospeech: "ฟังไม่ได้ยินเสียงพูด ลองพูดใหม่ให้ชัดขึ้น",
+  eventName_voice_used: "พิมพ์ด้วยเสียง",
+  voiceStart: "พูดแทนการพิมพ์",
+  voiceStop: "หยุดพูด",
+  voiceListening: "กำลังฟัง… พูดได้เลย (ไม่เกิน 30 วินาที)",
+  voiceWorking: "กำลังถอดเสียง…",
+  voiceDenied: "เปิดไมโครโฟนไม่ได้ พิมพ์แทนได้",
+  voiceUnsupported: "เบราว์เซอร์นี้ยังไม่รองรับการอัดเสียง",
+  voiceDone: "ถอดเสียงแล้ว ตรวจและแก้ข้อความก่อนส่งนะ",
+  voiceHint: "เสียงไม่ถูกเก็บไว้ ใช้สิทธิ์พิมพ์ด้วยเสียง 1 ครั้ง",
 } as const;
 
 export type Dict = { [K in keyof typeof th]: string };
@@ -2998,6 +3015,24 @@ const en = {
     "Barcode lookup is not available right now. Please try again later.",
   flag_barcode_scan: "Barcode scan",
   eventName_barcode_scanned: "Scanned a product barcode",
+  feature_voice: "Voice typing",
+  aiTask_voice_transcribe: "Speech to text",
+  guardrails_voice_transcribe:
+    "The audio is only turned into text and is not kept. The text goes into the box for the person to check and edit before sending; nothing is run by voice directly.\nLimited to 40 seconds, the audio format is checked from the real bytes, an allowance is used and refunded if nothing could be transcribed.",
+  err_voice_audio: "That audio is not valid.",
+  err_voice_long: "The recording is too long (up to 40 seconds).",
+  err_voice_short: "The recording is too short.",
+  err_voice_nospeech:
+    "No speech was heard. Please try again, a little clearer.",
+  eventName_voice_used: "Used voice typing",
+  voiceStart: "Speak instead of typing",
+  voiceStop: "Stop",
+  voiceListening: "Listening… speak now (up to 30 seconds)",
+  voiceWorking: "Turning it into text…",
+  voiceDenied: "Could not open the microphone — you can type instead.",
+  voiceUnsupported: "This browser cannot record audio.",
+  voiceDone: "Done. Please check the text before sending.",
+  voiceHint: "The audio is not kept. Uses one voice-typing allowance.",
 } satisfies Dict;
 
 export const dict: Record<Lang, Dict> = { th, en };

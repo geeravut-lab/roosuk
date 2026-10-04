@@ -1,17 +1,26 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useRef } from "react";
 import { askAction, type AskState } from "@/app/actions/ask";
 import { MAX_MESSAGE_CHARS } from "@/lib/ask/limits";
 import { errorText } from "@/lib/i18n/dict";
 import { useI18n } from "@/lib/i18n/provider";
 import { Spinner } from "@/components/Spinner";
+import { VoiceInput } from "@/components/VoiceInput";
 
 const initial: AskState = {};
 
 export function AskForm() {
   const { t } = useI18n();
   const [state, action, pending] = useActionState(askAction, initial);
+  const box = useRef<HTMLTextAreaElement>(null);
+  // The words go into the box, after anything already typed; the person checks them and presses send.
+  const addText = (text: string) => {
+    const el = box.current;
+    if (!el) return;
+    el.value = el.value.trim() ? `${el.value.trim()} ${text}` : text;
+    el.focus();
+  };
 
   return (
     // `key` remounts the form after a successful answer, which clears the box; a failure keeps the text.
@@ -20,6 +29,7 @@ export function AskForm() {
         {t.askPlaceholder}
       </label>
       <textarea
+        ref={box}
         id="message"
         name="message"
         rows={3}
@@ -29,6 +39,7 @@ export function AskForm() {
         placeholder={t.askPlaceholder}
         className="field py-2"
       />
+      <VoiceInput onText={addText} />
       {state.error ? (
         <p
           role="alert"

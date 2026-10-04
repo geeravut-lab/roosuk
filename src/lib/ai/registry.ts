@@ -28,7 +28,7 @@ import {
 export interface ProviderInfo {
   envKey: string;
   label: string;
-  capabilities: { images: boolean; pdf: boolean };
+  capabilities: { images: boolean; pdf: boolean; audio: boolean };
   models: Record<TaskKind, string>;
 }
 
@@ -41,7 +41,7 @@ export const PROVIDERS: Record<ProviderId, ProviderInfo> = {
   anthropic: {
     envKey: "ANTHROPIC_API_KEY",
     label: "Anthropic Claude",
-    capabilities: { images: true, pdf: true },
+    capabilities: { images: true, pdf: true, audio: false },
     models: {
       food_scan: HAIKU,
       body_scan: SONNET,
@@ -54,12 +54,13 @@ export const PROVIDERS: Record<ProviderId, ProviderInfo> = {
       daily_plan: HAIKU,
       monthly_report: SONNET,
       prompt_review: HAIKU,
+      voice_transcribe: HAIKU, // never used: this provider takes no audio
     },
   },
   google: {
     envKey: "GOOGLE_AI_API_KEY",
     label: "Google Gemini",
-    capabilities: { images: true, pdf: true },
+    capabilities: { images: true, pdf: true, audio: true },
     models: {
       food_scan: FLASH,
       body_scan: FLASH,
@@ -72,6 +73,7 @@ export const PROVIDERS: Record<ProviderId, ProviderInfo> = {
       daily_plan: FLASH_LITE,
       monthly_report: FLASH,
       prompt_review: FLASH_LITE,
+      voice_transcribe: FLASH_LITE,
     },
   },
 };
@@ -92,6 +94,8 @@ export const TASK_ROUTES: Record<
   daily_plan: { primary: "anthropic", fallback: "google" },
   monthly_report: { primary: "anthropic", fallback: "google" },
   prompt_review: { primary: "anthropic", fallback: "google" },
+  // Speech: Gemini Flash-Lite takes audio at a fraction of a cent a minute; Anthropic takes none, so no fallback.
+  voice_transcribe: { primary: "google", fallback: null },
 };
 
 export function isProviderId(v: unknown): v is ProviderId {

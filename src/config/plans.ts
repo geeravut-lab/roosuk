@@ -21,6 +21,7 @@ export const METERED_FEATURES = [
   "foodSnap",
   "labImport",
   "bodyScan",
+  "voice",
 ] as const;
 export type MeteredFeature = (typeof METERED_FEATURES)[number];
 
@@ -52,6 +53,7 @@ export const PLANS: Record<PlanId, Plan> = {
       foodSnap: monthly(3),
       labImport: monthly(1),
       bodyScan: monthly(1),
+      voice: monthly(5),
     },
     timelineHistoryMonths: 1,
     vaultMaxFiles: 5,
@@ -67,6 +69,7 @@ export const PLANS: Record<PlanId, Plan> = {
       foodSnap: monthly(15),
       labImport: monthly(3),
       bodyScan: monthly(4),
+      voice: monthly(30),
     },
     timelineHistoryMonths: 3,
     vaultMaxFiles: 20,
@@ -82,6 +85,7 @@ export const PLANS: Record<PlanId, Plan> = {
       foodSnap: unlimited,
       labImport: unlimited,
       bodyScan: unlimited,
+      voice: unlimited,
     },
     timelineHistoryMonths: "unlimited",
     vaultMaxFiles: "unlimited",
