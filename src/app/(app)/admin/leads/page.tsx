@@ -5,6 +5,7 @@ import { fmt } from "@/lib/i18n/dict";
 import { formatDateTime } from "@/lib/i18n/format";
 import { getLang, getT } from "@/lib/i18n/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { SubmitButton } from "@/components/SubmitButton";
 
 export async function generateMetadata(): Promise<Metadata> {
   return { title: (await getT()).adminLeadsTitle };
@@ -127,12 +128,9 @@ export default async function AdminLeadsPage() {
                   />
                 </div>
               </div>
-              <button
-                type="submit"
-                className="btn btn-secondary w-full sm:w-auto"
-              >
+              <SubmitButton className="btn btn-secondary w-full sm:w-auto">
                 {t.save}
-              </button>
+              </SubmitButton>
             </form>
           </li>
         ))}

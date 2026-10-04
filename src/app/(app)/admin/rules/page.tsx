@@ -8,6 +8,7 @@ import { formatDateTime } from "@/lib/i18n/format";
 import { getLang, getT } from "@/lib/i18n/server";
 import { bangkokDate } from "@/lib/health/dates";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { SubmitButton } from "@/components/SubmitButton";
 
 export async function generateMetadata(): Promise<Metadata> {
   return { title: (await getT()).adminRulesTitle };
@@ -159,9 +160,7 @@ export default async function AdminRulesPage() {
             <span>{t.adminLineResume}</span>
           </label>
         ) : null}
-        <button type="submit" className="btn btn-primary">
-          {t.save}
-        </button>
+        <SubmitButton className="btn btn-primary">{t.save}</SubmitButton>
       </form>
 
       <ul className="space-y-4">
@@ -210,9 +209,9 @@ export default async function AdminRulesPage() {
                   </div>
                 ))}
               </div>
-              <button type="submit" className="btn btn-secondary">
+              <SubmitButton className="btn btn-secondary">
                 {t.save}
-              </button>
+              </SubmitButton>
             </form>
           </li>
         ))}

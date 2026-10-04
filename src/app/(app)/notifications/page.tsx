@@ -6,6 +6,7 @@ import { formatDateTime } from "@/lib/i18n/format";
 import { getLang, getT } from "@/lib/i18n/server";
 import { parseNoticeBody, safeHref } from "@/lib/notify/notice";
 import { createClient } from "@/lib/supabase/server";
+import { SubmitButton } from "@/components/SubmitButton";
 
 export async function generateMetadata(): Promise<Metadata> {
   return { title: (await getT()).notificationsTitle };
@@ -45,9 +46,9 @@ export default async function NotificationsPage() {
         </h1>
         {unread > 0 ? (
           <form action={markAllReadAction}>
-            <button type="submit" className="btn btn-secondary">
+            <SubmitButton className="btn btn-secondary">
               {t.notificationsMarkAll}
-            </button>
+            </SubmitButton>
           </form>
         ) : null}
       </div>

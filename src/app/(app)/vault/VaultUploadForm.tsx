@@ -7,6 +7,7 @@ import { errorText } from "@/lib/i18n/dict";
 import { useI18n } from "@/lib/i18n/provider";
 import { VAULT_CATEGORIES, categoryKey } from "@/lib/vault/vault";
 import { useFormAction } from "@/lib/use-form-action";
+import { Spinner } from "@/components/Spinner";
 
 const initial: VaultState = {};
 
@@ -104,6 +105,7 @@ export function VaultUploadForm({ today }: { today: string }) {
         disabled={pending}
         className="btn btn-primary w-full"
       >
+        {pending ? <Spinner /> : null}
         {pending ? t.vaultSaving : t.vaultSave}
       </button>
     </form>

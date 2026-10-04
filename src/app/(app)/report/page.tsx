@@ -18,6 +18,7 @@ import {
   loadMonthlyStats,
   loadNarrative,
 } from "@/lib/report/server";
+import { SubmitButton } from "@/components/SubmitButton";
 
 export async function generateMetadata(): Promise<Metadata> {
   return { title: (await getT()).reportTitle };
@@ -173,9 +174,9 @@ export default async function ReportPage({
             <p className="text-muted text-xs">{t.reportDisclaimer}</p>
             <form action={deleteReportAction}>
               <input type="hidden" name="month" value={month} />
-              <button type="submit" className="btn btn-ghost w-full">
+              <SubmitButton className="btn btn-ghost w-full">
                 {t.reportAiDelete}
-              </button>
+              </SubmitButton>
             </form>
           </>
         ) : quiet ? (

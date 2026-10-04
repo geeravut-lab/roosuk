@@ -18,6 +18,7 @@ import {
 } from "@/config/nav";
 import { fmt } from "@/lib/i18n/dict";
 import { useI18n } from "@/lib/i18n/provider";
+import { SubmitButton } from "@/components/SubmitButton";
 
 interface AppShellProps {
   children: ReactNode;
@@ -119,10 +120,10 @@ export function AppShell({
 
   const signOut = (
     <form action={signOutAction}>
-      <button type="submit" className={`${linkBase} ${linkIdle} w-full`}>
+      <SubmitButton className={`${linkBase} ${linkIdle} w-full`}>
         <LogOut className="size-5 shrink-0" aria-hidden />
         <span className="truncate">{t.authSignOut}</span>
-      </button>
+      </SubmitButton>
     </form>
   );
 

@@ -5,6 +5,7 @@ import { askAction, type AskState } from "@/app/actions/ask";
 import { MAX_MESSAGE_CHARS } from "@/lib/ask/limits";
 import { errorText } from "@/lib/i18n/dict";
 import { useI18n } from "@/lib/i18n/provider";
+import { Spinner } from "@/components/Spinner";
 
 const initial: AskState = {};
 
@@ -41,6 +42,7 @@ export function AskForm() {
         disabled={pending}
         className="btn btn-primary w-full"
       >
+        {pending ? <Spinner /> : null}
         {pending ? t.askThinking : t.askSend}
       </button>
       <p role="status" className="sr-only">

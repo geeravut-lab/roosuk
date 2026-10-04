@@ -16,6 +16,7 @@ import {
   type HealthProfile,
 } from "@/lib/profile/profile";
 import { createClient } from "@/lib/supabase/server";
+import { SubmitButton } from "@/components/SubmitButton";
 
 export async function generateMetadata(): Promise<Metadata> {
   return { title: (await getT()).profileTitle };
@@ -147,9 +148,7 @@ export default async function ProfilePage({
         />
 
         <p className="text-muted text-sm">{t.profilePrivacy}</p>
-        <button type="submit" className="btn btn-primary w-full">
-          {t.save}
-        </button>
+        <SubmitButton className="btn btn-primary w-full">{t.save}</SubmitButton>
       </form>
     </div>
   );

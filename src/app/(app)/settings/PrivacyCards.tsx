@@ -10,6 +10,7 @@ import {
 import { DELETE_PHRASES, isDeletePhrase } from "@/lib/privacy/privacy";
 import { errorText, fmt } from "@/lib/i18n/dict";
 import { useI18n } from "@/lib/i18n/provider";
+import { Spinner } from "@/components/Spinner";
 
 /** "Download my data": the file is made on the server and saved by the browser — no copy stays on the server. */
 export function ExportButton() {
@@ -51,6 +52,7 @@ export function ExportButton() {
           })
         }
       >
+        {pending ? <Spinner /> : null}
         <Download className="size-5" aria-hidden />
         {pending ? t.exportBusy : t.exportBtn}
       </button>
@@ -138,6 +140,7 @@ export function DeleteAccount({
           disabled={pending || !isDeletePhrase(typed)}
           className="btn bg-danger border-danger border-2 text-white"
         >
+          {pending ? <Spinner /> : null}
           {t.deleteConfirm}
         </button>
         <button

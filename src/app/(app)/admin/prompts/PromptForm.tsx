@@ -9,6 +9,7 @@ import { PROMPT_EXTRA_MAX, type PromptReason } from "@/lib/ai/prompt-extra";
 import { fmt, type Dict } from "@/lib/i18n/dict";
 import { useI18n } from "@/lib/i18n/provider";
 import { useFormAction } from "@/lib/use-form-action";
+import { Spinner } from "@/components/Spinner";
 
 const initial: PromptSaveState = {};
 
@@ -100,6 +101,7 @@ export function PromptForm({
           disabled={pending || !dirty}
           className="btn btn-primary"
         >
+          {pending ? <Spinner /> : null}
           {pending ? t.promptChecking : t.promptSave}
         </button>
         <button

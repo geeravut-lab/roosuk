@@ -6,6 +6,7 @@ import { DATA_REGION } from "@/config/data-region";
 import { errorText } from "@/lib/i18n/dict";
 import { useI18n } from "@/lib/i18n/provider";
 import { useFormAction } from "@/lib/use-form-action";
+import { Spinner } from "@/components/Spinner";
 
 const initial: ConsentState = {};
 
@@ -73,6 +74,7 @@ export function ConsentForm({ next }: { next: string }) {
         disabled={pending}
         className="btn btn-primary w-full"
       >
+        {pending ? <Spinner /> : null}
         {t.consentSubmit}
       </button>
     </form>

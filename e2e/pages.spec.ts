@@ -185,3 +185,58 @@ test.describe("dark mode", () => {
     });
   }
 });
+
+test.describe("progress feedback", () => {
+  test("a slow page change shows the spinner at once, ignores a second press, and clears on arrival", async ({
+    page,
+  }) => {
+    await page.goto("/");
+    let hits = 0;
+    await page.route("**/auth**", async (route) => {
+      const h = route.request().headers();
+      if (h["rsc"] && !h["next-router-prefetch"]) hits++; // the page itself, not a prefetch
+      await new Promise((r) => setTimeout(r, 1800));
+      await route.continue();
+    });
+    const link = page.getByRole("link", { name: "เข้าสู่ระบบ" }).first();
+    await link.click({ noWaitAfter: true });
+    await expect(
+      page.getByRole("status").filter({ hasText: "กำลังโหลด" }),
+    ).toBeVisible();
+    await link.click({ force: true, noWaitAfter: true }).catch(() => undefined); // impatient second press
+    await expect(page).toHaveURL(/\/auth/);
+    await expect(
+      page.getByRole("status").filter({ hasText: "กำลังโหลด" }),
+    ).toHaveCount(0);
+    expect(hits).toBe(1); // one navigation, however many times it was pressed
+  });
+
+  test("a fast page change never flashes the spinner", async ({ page }) => {
+    await page.goto("/");
+    await page.getByRole("link", { name: "เข้าสู่ระบบ" }).first().click();
+    await expect(page).toHaveURL(/\/auth/);
+    await expect(
+      page.getByRole("status").filter({ hasText: "กำลังโหลด" }),
+    ).toHaveCount(0);
+  });
+
+  test("changing the language shows a spinner on the pressed button until the page has switched", async ({
+    page,
+  }) => {
+    await page.goto("/");
+    await page.route("**/*", async (route) => {
+      if (route.request().method() === "POST")
+        await new Promise((r) => setTimeout(r, 1500));
+      await route.continue();
+    });
+    await page.getByRole("button", { name: "English" }).click();
+    await expect(page.getByRole("button", { name: "English" })).toBeDisabled();
+    await expect(
+      page.getByRole("button", { name: "English" }).locator("svg.animate-spin"),
+    ).toBeVisible();
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText(
+      "The AI that knows your health",
+    );
+    await expect(page.locator("svg.animate-spin")).toHaveCount(0);
+  });
+});

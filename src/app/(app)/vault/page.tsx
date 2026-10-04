@@ -16,6 +16,7 @@ import { getLang, getT } from "@/lib/i18n/server";
 import { createClient } from "@/lib/supabase/server";
 import { categoryKey, vaultFull, type VaultCategory } from "@/lib/vault/vault";
 import { VaultUploadForm } from "./VaultUploadForm";
+import { SubmitButton } from "@/components/SubmitButton";
 
 export async function generateMetadata(): Promise<Metadata> {
   return { title: (await getT()).vaultTitle };
@@ -179,9 +180,9 @@ export default async function VaultPage() {
                   </a>
                   <form action={deleteVaultFileAction}>
                     <input type="hidden" name="id" value={f.id} />
-                    <button type="submit" className="btn btn-ghost">
+                    <SubmitButton className="btn btn-ghost">
                       {t.vaultDelete}
-                    </button>
+                    </SubmitButton>
                   </form>
                 </div>
               </li>

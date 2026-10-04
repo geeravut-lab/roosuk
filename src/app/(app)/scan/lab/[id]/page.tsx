@@ -30,6 +30,7 @@ import {
   sortBySeverity,
 } from "@/lib/lab/lab";
 import { createClient } from "@/lib/supabase/server";
+import { SubmitButton } from "@/components/SubmitButton";
 
 export async function generateMetadata(): Promise<Metadata> {
   return { title: (await getT()).labReviewTitle };
@@ -82,9 +83,9 @@ export default async function LabReportPage({
       <SourceFileCard t={t} file={report.source_file}>
         <form action={deleteLabFileAction}>
           <input type="hidden" name="reportId" value={report.id} />
-          <button type="submit" className="btn btn-ghost w-full">
+          <SubmitButton className="btn btn-ghost w-full">
             {t.sourceFileDelete}
-          </button>
+          </SubmitButton>
         </form>
       </SourceFileCard>
     </>
@@ -176,16 +177,16 @@ export default async function LabReportPage({
           </ul>
 
           <p className="text-muted text-sm">{t.labDisclaimer}</p>
-          <button type="submit" className="btn btn-primary w-full">
+          <SubmitButton className="btn btn-primary w-full">
             {t.labConfirm}
-          </button>
+          </SubmitButton>
         </form>
 
         <form action={deleteLabReportAction}>
           <input type="hidden" name="reportId" value={report.id} />
-          <button type="submit" className="btn btn-ghost w-full">
+          <SubmitButton className="btn btn-ghost w-full">
             {t.labDiscard}
-          </button>
+          </SubmitButton>
         </form>
       </div>
     );
@@ -264,9 +265,9 @@ export default async function LabReportPage({
         <form action={reassessLabReportAction} className="card space-y-2">
           <input type="hidden" name="reportId" value={report.id} />
           <p className="text-muted text-sm">{t.labReassessHint}</p>
-          <button type="submit" className="btn btn-secondary w-full">
+          <SubmitButton className="btn btn-secondary w-full">
             {t.labReassess}
-          </button>
+          </SubmitButton>
         </form>
       ) : null}
 
@@ -369,9 +370,9 @@ export default async function LabReportPage({
       </Link>
       <form action={deleteLabReportAction}>
         <input type="hidden" name="reportId" value={report.id} />
-        <button type="submit" className="btn btn-ghost w-full">
+        <SubmitButton className="btn btn-ghost w-full">
           {t.labDelete}
-        </button>
+        </SubmitButton>
       </form>
     </div>
   );

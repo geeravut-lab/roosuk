@@ -4,6 +4,7 @@ import { reportPaymentAction, type FormState } from "@/app/actions/payments";
 import { errorText } from "@/lib/i18n/dict";
 import { useI18n } from "@/lib/i18n/provider";
 import { useFormAction } from "@/lib/use-form-action";
+import { Spinner } from "@/components/Spinner";
 
 const initial: FormState = {};
 
@@ -48,6 +49,7 @@ export function ReportForm({ paymentId }: { paymentId: string }) {
         disabled={pending}
         className="btn btn-primary w-full"
       >
+        {pending ? <Spinner /> : null}
         {t.payReportBtn}
       </button>
     </form>

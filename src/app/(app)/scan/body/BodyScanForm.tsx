@@ -8,6 +8,7 @@ import { errorText } from "@/lib/i18n/dict";
 import { useI18n } from "@/lib/i18n/provider";
 import type { KeepMode } from "@/lib/files/types";
 import { useFormAction } from "@/lib/use-form-action";
+import { Spinner } from "@/components/Spinner";
 
 const initial: BodyScanState = {};
 
@@ -114,6 +115,7 @@ export function BodyScanForm({
         disabled={pending}
         className="btn btn-primary w-full"
       >
+        {pending ? <Spinner /> : null}
         {pending ? t.bodyAnalyzing : t.bodyAnalyze}
       </button>
       <p role="status" className="sr-only">

@@ -1288,6 +1288,7 @@ const th = {
   theme_light: "สว่าง",
   theme_dark: "มืด",
   settingsTheme: "ธีมสี (จำไว้ในเครื่องนี้)",
+  loadingPage: "กำลังโหลด…",
 } as const;
 
 export type Dict = { [K in keyof typeof th]: string };
@@ -2600,6 +2601,7 @@ const en = {
   theme_light: "Light",
   theme_dark: "Dark",
   settingsTheme: "Colour theme (remembered on this device)",
+  loadingPage: "Loading…",
 } satisfies Dict;
 
 export const dict: Record<Lang, Dict> = { th, en };

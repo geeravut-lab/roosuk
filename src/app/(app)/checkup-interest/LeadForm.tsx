@@ -6,6 +6,7 @@ import { INTERESTS } from "@/lib/leads/leads";
 import { errorText } from "@/lib/i18n/dict";
 import { useI18n } from "@/lib/i18n/provider";
 import { useFormAction } from "@/lib/use-form-action";
+import { Spinner } from "@/components/Spinner";
 
 const initial: LeadState = {};
 
@@ -126,6 +127,7 @@ export function LeadForm({ addFriendUrl }: { addFriendUrl: string | null }) {
         disabled={pending}
         className="btn btn-primary w-full"
       >
+        {pending ? <Spinner /> : null}
         {pending ? t.leadSending : t.leadSubmit}
       </button>
     </form>

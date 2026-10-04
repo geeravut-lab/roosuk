@@ -4,6 +4,7 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { setTheme } from "@/app/actions/theme";
 import { THEMES, type Theme } from "@/lib/theme";
+import { Spinner } from "@/components/Spinner";
 import { useI18n } from "@/lib/i18n/provider";
 
 /** Three-way theme choice, same look as the language switch. */
@@ -41,6 +42,9 @@ export function ThemeSwitch({ current }: { current: Theme }) {
               : "text-muted hover:bg-tint-primary"
           }`}
         >
+          {pending && code === value ? (
+            <Spinner className="mr-1 inline size-3.5" />
+          ) : null}
           {t[`theme_${code}` as const]}
         </button>
       ))}

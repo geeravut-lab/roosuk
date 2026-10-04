@@ -5,6 +5,7 @@ import { FEATURE_FLAGS, isEnabled } from "@/lib/flags/flags";
 import { getFlags } from "@/lib/flags/server";
 import { getT } from "@/lib/i18n/server";
 import { invalidatePlatformSettingsCache } from "@/lib/settings/server";
+import { SubmitButton } from "@/components/SubmitButton";
 
 export async function generateMetadata(): Promise<Metadata> {
   return { title: (await getT()).adminFlagsTitle };
@@ -46,9 +47,9 @@ export default async function FlagsPage() {
               <form action={setFeatureFlagAction}>
                 <input type="hidden" name="flag" value={flag} />
                 <input type="hidden" name="enabled" value={String(!on)} />
-                <button type="submit" className="btn btn-secondary">
+                <SubmitButton className="btn btn-secondary">
                   {on ? t.adminFlagToggleOff : t.adminFlagToggleOn}
-                </button>
+                </SubmitButton>
               </form>
             </li>
           );

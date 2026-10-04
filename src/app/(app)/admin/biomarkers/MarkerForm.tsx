@@ -9,6 +9,7 @@ import {
 import { errorText, fmt } from "@/lib/i18n/dict";
 import { useI18n } from "@/lib/i18n/provider";
 import { useFormAction } from "@/lib/use-form-action";
+import { Spinner } from "@/components/Spinner";
 
 export interface MarkerFields {
   key: string;
@@ -203,6 +204,7 @@ export function MarkerForm({
 
       <div className="flex flex-wrap gap-2">
         <button type="submit" disabled={pending} className="btn btn-primary">
+          {pending ? <Spinner /> : null}
           {t.bmSave}
         </button>
         <button
@@ -211,6 +213,7 @@ export function MarkerForm({
           disabled={suggesting || !(suggestName || f.en || f.th)}
           className="btn btn-secondary"
         >
+          {suggesting ? <Spinner /> : null}
           {suggesting ? t.bmSuggesting : t.bmSuggest}
         </button>
       </div>

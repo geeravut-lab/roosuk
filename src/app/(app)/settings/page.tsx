@@ -21,6 +21,7 @@ import Link from "next/link";
 import { OWNED_TABLES } from "@/config/user-data";
 import { summariseDeletion } from "@/lib/privacy/privacy";
 import { DeleteAccount, ExportButton } from "./PrivacyCards";
+import { SubmitButton } from "@/components/SubmitButton";
 
 export async function generateMetadata(): Promise<Metadata> {
   return { title: (await getT()).settingsTitle };
@@ -193,9 +194,7 @@ export default async function SettingsPage({
                 {t.notifSettingsAddFriend}
               </a>
             ) : null}
-            <button type="submit" className="btn btn-primary">
-              {t.save}
-            </button>
+            <SubmitButton className="btn btn-primary">{t.save}</SubmitButton>
           </form>
         ) : (
           <p className="text-muted text-sm">{t.notifSettingsNotLinked}</p>
@@ -274,9 +273,9 @@ export default async function SettingsPage({
                 <span>{t[`consent_${item.key}` as const]}</span>
               </label>
             ))}
-            <button type="submit" className="btn btn-secondary">
+            <SubmitButton className="btn btn-secondary">
               {t.consentOptionalSave}
-            </button>
+            </SubmitButton>
           </form>
         </section>
       ) : null}
@@ -326,9 +325,9 @@ export default async function SettingsPage({
       </section>
 
       <form action={signOutAction}>
-        <button type="submit" className="btn btn-secondary w-full md:w-auto">
+        <SubmitButton className="btn btn-secondary w-full md:w-auto">
           {t.authSignOut}
-        </button>
+        </SubmitButton>
       </form>
     </div>
   );

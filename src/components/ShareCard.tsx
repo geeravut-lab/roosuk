@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Share2 } from "lucide-react";
 import { useI18n } from "@/lib/i18n/provider";
+import { Spinner } from "@/components/Spinner";
 
 /**
  * A preview of the card and a share button. The preview is the very image that
@@ -80,6 +81,7 @@ export function ShareCard({
         disabled={state === "busy"}
         className="btn btn-secondary w-full"
       >
+        {state === "busy" ? <Spinner /> : null}
         <Share2 className="size-5" aria-hidden />
         {state === "busy" ? t.shareBusy : t.shareBtn}
       </button>

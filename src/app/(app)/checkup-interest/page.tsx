@@ -8,6 +8,7 @@ import { formatDateTime } from "@/lib/i18n/format";
 import { getLang, getT } from "@/lib/i18n/server";
 import { createClient } from "@/lib/supabase/server";
 import { LeadForm } from "./LeadForm";
+import { SubmitButton } from "@/components/SubmitButton";
 
 export async function generateMetadata(): Promise<Metadata> {
   return { title: (await getT()).leadTitle };
@@ -60,9 +61,9 @@ export default async function CheckupInterestPage() {
           </p>
           <form action={withdrawLeadAction}>
             <input type="hidden" name="leadId" value={open.id} />
-            <button type="submit" className="btn btn-ghost w-full">
+            <SubmitButton className="btn btn-ghost w-full">
               {t.leadWithdraw}
-            </button>
+            </SubmitButton>
           </form>
         </section>
       ) : (

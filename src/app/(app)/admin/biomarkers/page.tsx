@@ -10,6 +10,7 @@ import { formatDateTime } from "@/lib/i18n/format";
 import { getLang, getT } from "@/lib/i18n/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { EMPTY_FIELDS, MarkerForm, type MarkerFields } from "./MarkerForm";
+import { SubmitButton } from "@/components/SubmitButton";
 
 export async function generateMetadata(): Promise<Metadata> {
   return { title: (await getT()).adminBiomarkersTitle };
@@ -139,9 +140,9 @@ export default async function AdminBiomarkersPage() {
                 <form action={setUnknownStatusAction}>
                   <input type="hidden" name="name" value={u.normalized_name} />
                   <input type="hidden" name="status" value="ignored" />
-                  <button type="submit" className="btn btn-ghost">
+                  <SubmitButton className="btn btn-ghost">
                     {t.bmIgnore}
-                  </button>
+                  </SubmitButton>
                 </form>
               </li>
             ))}
@@ -168,9 +169,9 @@ export default async function AdminBiomarkersPage() {
                       value={u.normalized_name}
                     />
                     <input type="hidden" name="status" value="new" />
-                    <button type="submit" className="btn btn-ghost">
+                    <SubmitButton className="btn btn-ghost">
                       {t.bmRestore}
-                    </button>
+                    </SubmitButton>
                   </form>
                 </li>
               ))}
@@ -243,16 +244,16 @@ export default async function AdminBiomarkersPage() {
                       />
                       <span>{t.bmDoctor}</span>
                     </label>
-                    <button type="submit" className="btn btn-primary">
+                    <SubmitButton className="btn btn-primary">
                       {t.bmApprove}
-                    </button>
+                    </SubmitButton>
                   </form>
                 ) : (
                   <form action={withdrawExtraAction}>
                     <input type="hidden" name="key" value={r.key} />
-                    <button type="submit" className="btn btn-secondary">
+                    <SubmitButton className="btn btn-secondary">
                       {t.bmWithdraw}
-                    </button>
+                    </SubmitButton>
                   </form>
                 )}
 
@@ -272,9 +273,9 @@ export default async function AdminBiomarkersPage() {
 
                 <form action={deleteExtraAction}>
                   <input type="hidden" name="key" value={r.key} />
-                  <button type="submit" className="btn btn-ghost">
+                  <SubmitButton className="btn btn-ghost">
                     {t.bmDelete}
-                  </button>
+                  </SubmitButton>
                 </form>
               </li>
             ))}

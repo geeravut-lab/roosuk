@@ -4,6 +4,7 @@ import { requireUser } from "@/lib/auth/server";
 import { getT } from "@/lib/i18n/server";
 import { createClient } from "@/lib/supabase/server";
 import { AskForm } from "./AskForm";
+import { SubmitButton } from "@/components/SubmitButton";
 
 export async function generateMetadata(): Promise<Metadata> {
   return { title: (await getT()).askTitle };
@@ -97,9 +98,9 @@ export default async function AskPage() {
       <div className="flex items-center justify-between gap-3">
         <p className="text-muted text-xs">{t.askHistoryNote}</p>
         <form action={newConversationAction}>
-          <button type="submit" className="btn btn-ghost shrink-0">
+          <SubmitButton className="btn btn-ghost shrink-0">
             {t.askNew}
-          </button>
+          </SubmitButton>
         </form>
       </div>
     </div>

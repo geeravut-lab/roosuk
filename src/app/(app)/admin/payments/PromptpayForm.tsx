@@ -5,6 +5,7 @@ import { maskPromptpayId } from "@/lib/billing/promptpay";
 import { errorText, fmt } from "@/lib/i18n/dict";
 import { useI18n } from "@/lib/i18n/provider";
 import { useFormAction } from "@/lib/use-form-action";
+import { Spinner } from "@/components/Spinner";
 
 const initial: FormState = {};
 
@@ -53,6 +54,7 @@ export function PromptpayForm({ current }: { current: string | null }) {
         </p>
       ) : null}
       <button type="submit" disabled={pending} className="btn btn-primary">
+        {pending ? <Spinner /> : null}
         {t.save}
       </button>
     </form>

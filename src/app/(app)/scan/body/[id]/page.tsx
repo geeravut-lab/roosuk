@@ -16,6 +16,7 @@ import { errorText, fmt, type Dict } from "@/lib/i18n/dict";
 import { formatDate } from "@/lib/i18n/format";
 import { getLang, getT } from "@/lib/i18n/server";
 import { createClient } from "@/lib/supabase/server";
+import { SubmitButton } from "@/components/SubmitButton";
 
 export async function generateMetadata(): Promise<Metadata> {
   return { title: (await getT()).bodyResultTitle };
@@ -168,17 +169,17 @@ export default async function BodyResultPage({
           className="field"
         />
         <p className="text-muted text-sm">{t.bodyWeightHint}</p>
-        <button type="submit" className="btn btn-secondary w-full">
+        <SubmitButton className="btn btn-secondary w-full">
           {t.bodySaveWeight}
-        </button>
+        </SubmitButton>
       </form>
 
       <SourceFileCard t={t} file={scan.source_file}>
         <form action={deleteBodyFileAction}>
           <input type="hidden" name="scanId" value={scan.id} />
-          <button type="submit" className="btn btn-ghost w-full">
+          <SubmitButton className="btn btn-ghost w-full">
             {t.sourceFileDelete}
-          </button>
+          </SubmitButton>
         </form>
       </SourceFileCard>
 
@@ -197,9 +198,9 @@ export default async function BodyResultPage({
       </Link>
       <form action={deleteBodyScanAction}>
         <input type="hidden" name="scanId" value={scan.id} />
-        <button type="submit" className="btn btn-ghost w-full">
+        <SubmitButton className="btn btn-ghost w-full">
           {t.bodyDelete}
-        </button>
+        </SubmitButton>
       </form>
     </div>
   );

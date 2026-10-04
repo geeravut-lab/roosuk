@@ -10,6 +10,8 @@ import {
 import { errorText, fmt } from "@/lib/i18n/dict";
 import { useI18n } from "@/lib/i18n/provider";
 import { useFormAction } from "@/lib/use-form-action";
+import { SubmitButton } from "@/components/SubmitButton";
+import { Spinner } from "@/components/Spinner";
 
 const initial: AuthState = {};
 
@@ -132,6 +134,7 @@ export function AuthForm({
           disabled={pending}
           className="btn btn-primary w-full"
         >
+          {pending ? <Spinner /> : null}
           {isSignup ? t.authSubmitSignup : t.authSubmitLogin}
         </button>
       </form>
@@ -155,9 +158,9 @@ export function AuthForm({
       <div className="flex flex-col gap-3">
         <form action={googleSignInAction}>
           <input type="hidden" name="next" value={next} />
-          <button type="submit" className="btn btn-secondary w-full">
+          <SubmitButton className="btn btn-secondary w-full">
             {t.authGoogle}
-          </button>
+          </SubmitButton>
         </form>
         {lineEnabled ? (
           // A plain link, not <Link>: this is a route handler that redirects off-site.

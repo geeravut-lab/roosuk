@@ -5,6 +5,7 @@ import { SCORE_CATEGORIES, type HealthScore } from "@/lib/health/score";
 import type { HabitView } from "@/lib/health/view";
 import { fmt, type Dict, type Lang } from "@/lib/i18n/dict";
 import { formatDate } from "@/lib/i18n/format";
+import { SubmitButton } from "@/components/SubmitButton";
 
 /** Cards of the daily habit loop. Server components: all numbers are computed by code from the check-ins. */
 
@@ -196,13 +197,12 @@ export function ActionsCard({ t, view }: { t: Dict; view: HabitView }) {
                 <form action={toggleActionAction} className="shrink-0">
                   <input type="hidden" name="actionKey" value={a.key} />
                   <input type="hidden" name="done" value={String(!a.done)} />
-                  <button
-                    type="submit"
+                  <SubmitButton
                     className="btn btn-secondary"
                     aria-label={`${a.done ? t.actionUnmark : t.actionMark}: ${label}`}
                   >
                     {a.done ? t.actionUnmark : t.actionMark}
-                  </button>
+                  </SubmitButton>
                 </form>
               )}
             </li>

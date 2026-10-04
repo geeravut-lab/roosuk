@@ -14,6 +14,7 @@ import {
 } from "@/lib/settings/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { PromptpayForm } from "./PromptpayForm";
+import { SubmitButton } from "@/components/SubmitButton";
 
 export async function generateMetadata(): Promise<Metadata> {
   return { title: (await getT()).adminPaymentsTitle };
@@ -124,20 +125,18 @@ export default async function AdminPaymentsPage() {
                   />
                 </div>
                 <div className="grid gap-2 sm:grid-cols-2">
-                  <button
-                    type="submit"
+                  <SubmitButton
                     formAction={confirmPaymentAction}
                     className="btn btn-primary"
                   >
                     {t.adminPaymentConfirm}
-                  </button>
-                  <button
-                    type="submit"
+                  </SubmitButton>
+                  <SubmitButton
                     formAction={rejectPaymentAction}
                     className="btn btn-secondary"
                   >
                     {t.adminPaymentReject}
-                  </button>
+                  </SubmitButton>
                 </div>
               </form>
             </li>

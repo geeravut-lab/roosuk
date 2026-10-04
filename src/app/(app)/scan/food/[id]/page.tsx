@@ -17,6 +17,7 @@ import { SERVING_CHOICES, mealTotals, parseStoredItems } from "@/lib/food/food";
 import { fmt } from "@/lib/i18n/dict";
 import { getLang, getT } from "@/lib/i18n/server";
 import { createClient } from "@/lib/supabase/server";
+import { SubmitButton } from "@/components/SubmitButton";
 
 export async function generateMetadata(): Promise<Metadata> {
   return { title: (await getT()).foodReviewTitle };
@@ -66,9 +67,9 @@ export default async function MealPage({
       <SourceFileCard t={t} file={meal.source_file}>
         <form action={deleteMealFileAction}>
           <input type="hidden" name="mealId" value={meal.id} />
-          <button type="submit" className="btn btn-ghost w-full">
+          <SubmitButton className="btn btn-ghost w-full">
             {t.sourceFileDelete}
-          </button>
+          </SubmitButton>
         </form>
       </SourceFileCard>
     </>
@@ -124,9 +125,9 @@ export default async function MealPage({
         </Link>
         <form action={deleteMealAction}>
           <input type="hidden" name="mealId" value={meal.id} />
-          <button type="submit" className="btn btn-ghost w-full">
+          <SubmitButton className="btn btn-ghost w-full">
             {t.foodDelete}
-          </button>
+          </SubmitButton>
         </form>
       </div>
     );
@@ -197,16 +198,16 @@ export default async function MealPage({
         {sourceFile}
         {summary}
         <p className="text-muted text-sm">{t.foodEstimateNote}</p>
-        <button type="submit" className="btn btn-primary w-full">
+        <SubmitButton className="btn btn-primary w-full">
           {t.foodConfirm}
-        </button>
+        </SubmitButton>
       </form>
 
       <form action={deleteMealAction}>
         <input type="hidden" name="mealId" value={meal.id} />
-        <button type="submit" className="btn btn-ghost w-full">
+        <SubmitButton className="btn btn-ghost w-full">
           {t.foodDiscard}
-        </button>
+        </SubmitButton>
       </form>
     </div>
   );

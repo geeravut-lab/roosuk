@@ -11,6 +11,7 @@ import { startPaymentAction } from "@/app/actions/payments";
 import { quotaText } from "@/lib/billing/format";
 import type { BillingSettings } from "@/lib/billing/settings";
 import { fmt, type Dict } from "@/lib/i18n/dict";
+import { SubmitButton } from "@/components/SubmitButton";
 
 function Yes({ t, on }: { t: Dict; on: boolean }) {
   return on ? (
@@ -128,22 +129,20 @@ export function PlanComparison({
             {id !== "free" ? (
               <form action={startPaymentAction} className="grid gap-2">
                 <input type="hidden" name="tier" value={id} />
-                <button
-                  type="submit"
+                <SubmitButton
                   name="period"
                   value="monthly"
                   className="btn btn-primary w-full"
                 >
                   {fmt(t.subPayMonthly, { price: price(id).monthly })}
-                </button>
-                <button
-                  type="submit"
+                </SubmitButton>
+                <SubmitButton
                   name="period"
                   value="yearly"
                   className="btn btn-secondary w-full"
                 >
                   {fmt(t.subPayYearly, { price: price(id).yearly })}
-                </button>
+                </SubmitButton>
               </form>
             ) : null}
           </li>

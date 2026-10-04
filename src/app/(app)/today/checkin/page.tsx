@@ -13,6 +13,7 @@ import { bangkokDate } from "@/lib/health/dates";
 import { errorText, type Dict } from "@/lib/i18n/dict";
 import { getT } from "@/lib/i18n/server";
 import { createClient } from "@/lib/supabase/server";
+import { SubmitButton } from "@/components/SubmitButton";
 
 export async function generateMetadata(): Promise<Metadata> {
   return { title: (await getT()).checkinTitle };
@@ -126,9 +127,9 @@ export default async function CheckinPage({
           </div>
         ))}
 
-        <button type="submit" className="btn btn-primary w-full">
+        <SubmitButton className="btn btn-primary w-full">
           {existing ? t.checkinUpdate : t.checkinSave}
-        </button>
+        </SubmitButton>
         <Link href="/today" className="btn btn-ghost w-full">
           {t.checkinBack}
         </Link>

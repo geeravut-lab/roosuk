@@ -9,6 +9,7 @@ import {
 import { errorText, fmt, type Dict } from "@/lib/i18n/dict";
 import { useI18n } from "@/lib/i18n/provider";
 import { useFormAction } from "@/lib/use-form-action";
+import { Spinner } from "@/components/Spinner";
 
 export interface TaskView {
   task: string;
@@ -72,6 +73,7 @@ function TestButton({
           })
         }
       >
+        {pending ? <Spinner /> : null}
         {pending ? t.adminAiTesting : t.adminAiTest}
       </button>
       <span
@@ -260,6 +262,7 @@ export function AiForm({
         disabled={pending}
         className="btn btn-primary w-full sm:w-auto"
       >
+        {pending ? <Spinner /> : null}
         {t.save}
       </button>
     </form>

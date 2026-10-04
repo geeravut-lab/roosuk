@@ -9,6 +9,7 @@ import { KeepFileChoice } from "@/components/KeepFileChoice";
 import type { KeepMode } from "@/lib/files/types";
 import { useI18n } from "@/lib/i18n/provider";
 import { useFormAction } from "@/lib/use-form-action";
+import { Spinner } from "@/components/Spinner";
 
 const initial: ScanState = {};
 
@@ -103,6 +104,7 @@ export function FoodScanForm({ keepMode }: { keepMode: KeepMode }) {
           disabled={pending}
           className="btn btn-primary w-full"
         >
+          {pending ? <Spinner /> : null}
           {pending ? t.foodAnalyzing : t.foodAnalyze}
         </button>
       ) : null}

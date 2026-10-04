@@ -7,6 +7,7 @@ import { errorText, type Dict } from "@/lib/i18n/dict";
 import { useI18n } from "@/lib/i18n/provider";
 import { ALCOHOL_VALUES, SMOKING_VALUES } from "@/lib/profile/profile";
 import { useFormAction } from "@/lib/use-form-action";
+import { Spinner } from "@/components/Spinner";
 
 export interface QuizDefaults {
   birth_year: string;
@@ -152,6 +153,7 @@ export function QuizForm({ defaults }: { defaults: QuizDefaults }) {
         disabled={pending}
         className="btn btn-primary w-full"
       >
+        {pending ? <Spinner /> : null}
         {t.quizSubmit}
       </button>
     </form>

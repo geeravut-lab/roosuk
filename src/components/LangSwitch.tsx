@@ -1,9 +1,10 @@
 "use client";
 
-import { useTransition } from "react";
+import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { setLanguage } from "@/app/actions/language";
 import { LANGS, type Lang } from "@/lib/i18n/dict";
+import { Spinner } from "@/components/Spinner";
 import { useI18n } from "@/lib/i18n/provider";
 
 /** Two-button language toggle. Writes a cookie (+ profile when signed in) and refreshes the page. */
@@ -11,9 +12,11 @@ export function LangSwitch({ className = "" }: { className?: string }) {
   const { lang, t } = useI18n();
   const router = useRouter();
   const [pending, startTransition] = useTransition();
+  const [target, setTarget] = useState<Lang | null>(null);
 
   const choose = (next: Lang) => {
     if (next === lang) return;
+    setTarget(next);
     startTransition(async () => {
       await setLanguage(next);
       router.refresh();
@@ -40,6 +43,9 @@ export function LangSwitch({ className = "" }: { className?: string }) {
               : "text-muted hover:bg-tint-primary"
           }`}
         >
+          {pending && target === code ? (
+            <Spinner className="mr-1 inline size-3.5" />
+          ) : null}
           {code === "th" ? t.langThai : t.langEnglish}
         </button>
       ))}
