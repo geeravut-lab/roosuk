@@ -233,6 +233,12 @@ const th = {
   err_oauth_failed: "เข้าสู่ระบบไม่สำเร็จ กรุณาลองใหม่อีกครั้ง",
   err_line_failed: "เข้าสู่ระบบด้วย LINE ไม่สำเร็จ กรุณาลองใหม่อีกครั้ง",
   err_line_unavailable: "ยังไม่เปิดให้เข้าสู่ระบบด้วย LINE",
+  err_line_cancelled:
+    "คุณยกเลิกการเชื่อมต่อกับ LINE หรือ LINE ไม่อนุญาต ลองใหม่อีกครั้งได้",
+  err_line_expired:
+    "คำขอเชื่อมต่อ LINE หมดอายุหรือเบราว์เซอร์ไม่ส่งข้อมูลกลับมา ลองใหม่อีกครั้งในเบราว์เซอร์เดิม",
+  settingsLineLinkedOk: "เชื่อมบัญชี LINE สำเร็จแล้ว",
+  errorReasonCode: "รหัสสาเหตุ: {reason}",
   err_line_already_linked: "บัญชี LINE นี้เชื่อมกับผู้ใช้อื่นอยู่แล้ว",
   err_consent_required: "กรุณายอมรับข้อที่จำเป็นทั้งหมดก่อนเริ่มใช้งาน",
   err_save_failed: "บันทึกไม่สำเร็จ กรุณาลองใหม่อีกครั้ง",
@@ -1282,6 +1288,12 @@ const en = {
   err_oauth_failed: "Sign-in failed. Please try again.",
   err_line_failed: "Sign-in with LINE failed. Please try again.",
   err_line_unavailable: "Sign-in with LINE is not available yet.",
+  err_line_cancelled:
+    "You cancelled the LINE connection, or LINE did not allow it. You can try again.",
+  err_line_expired:
+    "The LINE request expired or the browser did not send its data back. Please try again in the same browser.",
+  settingsLineLinkedOk: "Your LINE account is now linked.",
+  errorReasonCode: "Reason code: {reason}",
   err_line_already_linked:
     "This LINE account is already linked to another user.",
   err_consent_required: "Please accept all required items before you start.",

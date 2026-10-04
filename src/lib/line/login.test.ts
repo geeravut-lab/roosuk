@@ -1,6 +1,7 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   buildLineAuthorizeUrl,
+  fetchLineProfile,
   isLineSyntheticEmail,
   lineSyntheticEmail,
   parseLineCookie,
@@ -62,5 +63,95 @@ describe("LINE login helpers", () => {
     ).toBeNull();
     expect(parseLineCookie("{not json")).toBeNull();
     expect(parseLineCookie(undefined)).toBeNull();
+  });
+});
+
+describe("fetchLineProfile names the step that failed", () => {
+  const params = {
+    code: "c",
+    redirectUri: "https://x.test/cb",
+    channelId: "123",
+    channelSecret: "s",
+    nonce: "n",
+  };
+  const answers = (...rs: { status: number; body: unknown }[]) => {
+    const queue = [...rs];
+    vi.stubGlobal("fetch", async () => {
+      const r = queue.shift()!;
+      return new Response(JSON.stringify(r.body), { status: r.status });
+    });
+  };
+  afterEach(() => vi.unstubAllGlobals());
+
+  it("succeeds with the profile when LINE accepts the code and verifies the token", async () => {
+    answers(
+      { status: 200, body: { id_token: "t" } },
+      { status: 200, body: { sub: "U1", aud: "123", nonce: "n", name: "Eva" } },
+    );
+    expect(await fetchLineProfile(params)).toEqual({
+      ok: true,
+      profile: { sub: "U1", name: "Eva", picture: null },
+    });
+  });
+  it("tells a wrong callback URL / secret apart from a bad code", async () => {
+    answers({
+      status: 400,
+      body: {
+        error: "invalid_grant",
+        error_description: "invalid redirect_uri value",
+      },
+    });
+    expect(await fetchLineProfile(params)).toEqual({
+      ok: false,
+      reason: "token_400_invalid_grant",
+    });
+    answers({ status: 401, body: { error: "invalid_client" } });
+    expect(await fetchLineProfile(params)).toEqual({
+      ok: false,
+      reason: "token_401_invalid_client",
+    });
+  });
+  it("names the other steps", async () => {
+    answers({ status: 200, body: {} });
+    expect(await fetchLineProfile(params)).toEqual({
+      ok: false,
+      reason: "token_no_id_token",
+    });
+    answers(
+      { status: 200, body: { id_token: "t" } },
+      { status: 400, body: { error: "invalid_request" } },
+    );
+    expect(await fetchLineProfile(params)).toEqual({
+      ok: false,
+      reason: "verify_400_invalid_request",
+    });
+    answers(
+      { status: 200, body: { id_token: "t" } },
+      { status: 200, body: { sub: "U1", aud: "999" } },
+    );
+    expect(await fetchLineProfile(params)).toEqual({
+      ok: false,
+      reason: "verify_wrong_channel",
+    });
+    answers(
+      { status: 200, body: { id_token: "t" } },
+      { status: 200, body: { sub: "U1", aud: "123", nonce: "other" } },
+    );
+    expect(await fetchLineProfile(params)).toEqual({
+      ok: false,
+      reason: "verify_nonce",
+    });
+  });
+  it("a network failure is a reason, not a crash, and the reason is always a safe tag", async () => {
+    vi.stubGlobal("fetch", async () => {
+      throw new Error("ECONNRESET at 10.0.0.1 with secret=abc");
+    });
+    expect(await fetchLineProfile(params)).toEqual({
+      ok: false,
+      reason: "token_network",
+    });
+    answers({ status: 400, body: { error: "<script>alert(1)</script>" } });
+    const r = await fetchLineProfile(params);
+    expect(!r.ok && r.reason).toBe("token_400_unknown");
   });
 });

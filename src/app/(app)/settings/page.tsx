@@ -57,6 +57,12 @@ export default async function SettingsPage({
   );
   const { erasedRows, retainedRows } = summariseDeletion(counts);
   const addFriendUrl = process.env.LINE_OA_ADD_FRIEND_URL?.trim();
+  // A short diagnostic tag (letters, digits, underscore) so a failed sign-in step can be named.
+  const rawReason = Array.isArray(params.reason)
+    ? params.reason[0]
+    : params.reason;
+  const reason =
+    rawReason && /^[a-z0-9_]{1,60}$/i.test(rawReason) ? rawReason : null;
 
   const rawError = Array.isArray(params.error) ? params.error[0] : params.error;
   const email = isLineSyntheticEmail(user.email) ? "—" : (user.email ?? "—");
@@ -77,6 +83,19 @@ export default async function SettingsPage({
           className="border-field-border bg-surface rounded-xl border px-3 py-2 text-sm font-medium"
         >
           {errorText(rawError, t)}
+          {reason ? (
+            <span className="text-muted mt-1 block text-xs font-normal">
+              {fmt(t.errorReasonCode, { reason })}
+            </span>
+          ) : null}
+        </p>
+      ) : null}
+      {params.line === "linked" ? (
+        <p
+          role="status"
+          className="bg-tint-secondary rounded-xl px-3 py-2 text-sm font-medium"
+        >
+          {t.settingsLineLinkedOk}
         </p>
       ) : null}
 

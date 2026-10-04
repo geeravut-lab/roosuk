@@ -7,7 +7,7 @@ import {
   signupAction,
   type AuthState,
 } from "@/app/actions/auth";
-import { errorText } from "@/lib/i18n/dict";
+import { errorText, fmt } from "@/lib/i18n/dict";
 import { useI18n } from "@/lib/i18n/provider";
 import { useFormAction } from "@/lib/use-form-action";
 
@@ -18,11 +18,14 @@ export function AuthForm({
   next,
   lineEnabled,
   initialError,
+  initialReason,
 }: {
   initialMode: "login" | "signup";
   next: string;
   lineEnabled: boolean;
   initialError?: string;
+  /** A short tag naming the step that failed (LINE sign-in). */
+  initialReason?: string;
 }) {
   const { t } = useI18n();
   const [mode, setMode] = useState(initialMode);
@@ -60,6 +63,11 @@ export function AuthForm({
           className="border-field-border bg-surface rounded-xl border px-3 py-2 text-sm font-medium"
         >
           {errorText(errorCode, t)}
+          {!state.error && initialReason ? (
+            <span className="text-muted mt-1 block text-xs font-normal">
+              {fmt(t.errorReasonCode, { reason: initialReason })}
+            </span>
+          ) : null}
         </p>
       ) : null}
 

@@ -111,31 +111,99 @@ async function postForm(
   });
 }
 
-/** Exchange the authorization code, then have LINE verify the ID token. Returns null on any failure. */
+export type LineProfileResult =
+  { ok: true; profile: LineProfile } | { ok: false; reason: string };
+
+/** A short, safe tag for an error code coming back from LINE (never its free text). */
+const tag = (v: unknown) =>
+  typeof v === "string" && /^[a-z0-9_]{1,30}$/i.test(v)
+    ? v.toLowerCase()
+    : "unknown";
+
+async function lineError(
+  res: Response,
+): Promise<{ code: string; text: string }> {
+  try {
+    const j = (await res.json()) as {
+      error?: unknown;
+      error_description?: unknown;
+    };
+    return {
+      code: tag(j.error),
+      text:
+        typeof j.error_description === "string"
+          ? j.error_description.slice(0, 200)
+          : "",
+    };
+  } catch {
+    return { code: "unknown", text: "" };
+  }
+}
+
+/**
+ * Exchange the authorization code, then have LINE verify the ID token. On failure
+ * the result says WHICH step failed (`reason`, a short safe tag shown to the user
+ * and logged with LINE's own description) — "it just didn't work" is undebuggable.
+ */
 export async function fetchLineProfile(params: {
   code: string;
   redirectUri: string;
   channelId: string;
   channelSecret: string;
   nonce: string;
-}): Promise<LineProfile | null> {
-  const tokenRes = await postForm(LINE_TOKEN_URL, {
-    grant_type: "authorization_code",
-    code: params.code,
-    redirect_uri: params.redirectUri,
-    client_id: params.channelId,
-    client_secret: params.channelSecret,
-  });
-  if (!tokenRes.ok) return null;
-  const token = (await tokenRes.json()) as { id_token?: string };
-  if (!token.id_token) return null;
+}): Promise<LineProfileResult> {
+  const fail = (reason: string, detail = ""): LineProfileResult => {
+    console.error(
+      `[line] sign-in failed at ${reason}${detail ? `: ${detail}` : ""}`,
+    );
+    return { ok: false, reason };
+  };
 
-  const verifyRes = await postForm(LINE_VERIFY_URL, {
-    id_token: token.id_token,
-    client_id: params.channelId,
-    nonce: params.nonce,
-  });
-  if (!verifyRes.ok) return null;
+  let tokenRes: Response;
+  try {
+    tokenRes = await postForm(LINE_TOKEN_URL, {
+      grant_type: "authorization_code",
+      code: params.code,
+      redirect_uri: params.redirectUri,
+      client_id: params.channelId,
+      client_secret: params.channelSecret,
+    });
+  } catch (err) {
+    return fail(
+      "token_network",
+      String((err as Error)?.message ?? err).slice(0, 120),
+    );
+  }
+  if (!tokenRes.ok) {
+    const e = await lineError(tokenRes);
+    // invalid_grant + "redirect_uri" = the callback URL differs from the one registered in the LINE console;
+    // invalid_client = wrong Channel ID / Channel secret.
+    return fail(
+      `token_${tokenRes.status}_${e.code}`,
+      `${e.code} ${e.text} (redirect_uri=${params.redirectUri})`,
+    );
+  }
+  const token = (await tokenRes.json()) as { id_token?: string };
+  if (!token.id_token)
+    return fail("token_no_id_token", "the openid scope was not granted");
+
+  let verifyRes: Response;
+  try {
+    verifyRes = await postForm(LINE_VERIFY_URL, {
+      id_token: token.id_token,
+      client_id: params.channelId,
+      nonce: params.nonce,
+    });
+  } catch (err) {
+    return fail(
+      "verify_network",
+      String((err as Error)?.message ?? err).slice(0, 120),
+    );
+  }
+  if (!verifyRes.ok) {
+    const e = await lineError(verifyRes);
+    return fail(`verify_${verifyRes.status}_${e.code}`, `${e.code} ${e.text}`);
+  }
   const claims = (await verifyRes.json()) as {
     sub?: string;
     aud?: string;
@@ -143,12 +211,17 @@ export async function fetchLineProfile(params: {
     name?: string;
     picture?: string;
   };
-  if (!claims.sub || claims.aud !== params.channelId) return null;
-  if (claims.nonce !== undefined && claims.nonce !== params.nonce) return null;
+  if (!claims.sub) return fail("verify_no_sub");
+  if (claims.aud !== params.channelId) return fail("verify_wrong_channel");
+  if (claims.nonce !== undefined && claims.nonce !== params.nonce)
+    return fail("verify_nonce");
 
   return {
-    sub: claims.sub,
-    name: claims.name ?? null,
-    picture: claims.picture ?? null,
+    ok: true,
+    profile: {
+      sub: claims.sub,
+      name: claims.name ?? null,
+      picture: claims.picture ?? null,
+    },
   };
 }

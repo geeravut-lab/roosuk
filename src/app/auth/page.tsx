@@ -30,6 +30,10 @@ export default async function AuthPage({ searchParams }: PageProps<"/auth">) {
           next={safeNextPath(first(params.next))}
           lineEnabled={getLineLoginEnv() !== null}
           initialError={first(params.error)}
+          initialReason={(() => {
+            const r = first(params.reason);
+            return r && /^[a-z0-9_]{1,60}$/i.test(r) ? r : undefined;
+          })()}
         />
       </main>
     </div>
