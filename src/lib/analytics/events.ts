@@ -21,6 +21,7 @@ export const EVENTS = [
   "vault_uploaded",
   "passport_created",
   "passport_revoked",
+  "agent_used",
   "insight_explained",
   "barcode_scanned",
   "voice_used",

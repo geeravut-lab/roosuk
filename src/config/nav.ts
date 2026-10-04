@@ -7,6 +7,7 @@ import {
   FolderLock,
   IdCard,
   Smartphone,
+  Bot,
   Watch,
   Gift,
   Trophy,
@@ -40,6 +41,12 @@ export const NAV: readonly NavItem[] = [
   { href: "/timeline", label: "navTimeline", icon: ChartLine, group: "daily" },
   { href: "/scan", label: "navScan", icon: Camera, group: "daily" },
   { href: "/ask", label: "navAsk", icon: MessageCircleHeart, group: "daily" },
+  {
+    href: "/agent",
+    label: "navAgent",
+    icon: Bot,
+    group: "daily",
+  },
   {
     href: "/report",
     label: "navReport",

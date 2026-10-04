@@ -16,6 +16,7 @@ import {
   type QueueRow,
 } from "./deliver";
 import {
+  agentReminderNotice,
   checkinReminderNotice,
   checkupReminderNotice,
   monthlyReportReadyNotice,
@@ -315,6 +316,46 @@ async function monthlyReportNotices(c: TickCtx): Promise<number> {
   return n;
 }
 
+/**
+ * Reminders the person asked the AI Health Agent for: sent once, on their morning
+ * (from the rule's hour, Bangkok time). One that is more than two days stale is closed
+ * without a message — a reminder that arrives a week late is noise, not help.
+ */
+async function agentReminders(c: TickCtx): Promise<number> {
+  if (!(await featureEnabled("health_agent"))) return 0;
+  if (
+    bangkokHour(c.now) < ruleNumber(c.rules, "agent_reminders", "hour", 8, 23)
+  )
+    return 0;
+  const db = createAdminClient();
+  const { data } = await db
+    .from("agent_reminders")
+    .select("id, user_id, remind_on, text")
+    .is("notified_at", null)
+    .lte("remind_on", c.today)
+    .limit(500)
+    .returns<
+      { id: string; user_id: string; remind_on: string; text: string }[]
+    >();
+  let n = 0;
+  for (const r of data ?? []) {
+    if (c.overBudget()) break;
+    if (c.onlyUsers && !c.onlyUsers.has(r.user_id)) continue;
+    const stale = r.remind_on < addDays(c.today, -2);
+    if (!stale) {
+      const { t } = await dictFor(r.user_id);
+      if (!(await notifyUser(r.user_id, agentReminderNotice(t, r.text, r.id))))
+        continue;
+      n++;
+    }
+    await db
+      .from("agent_reminders")
+      .update({ notified_at: c.now.toISOString() })
+      .eq("id", r.id);
+  }
+  return n;
+}
+
 /** A yearly check-up / re-check suggestion from each person's latest saved lab report. */
 async function checkupReminders(c: TickCtx): Promise<number> {
   const annualMonths = ruleNumber(
@@ -610,6 +651,7 @@ export async function runTick(
     ["streak_at_risk", () => streakLastCalls(ctx)],
     ["monthly_report_ready", () => monthlyReportNotices(ctx)],
     ["checkup_reminder", () => checkupReminders(ctx)],
+    ["agent_reminders", () => agentReminders(ctx)],
     ["trial_ending", () => expiryNotices(ctx, "trial_ending")],
     ["plan_expiring", () => expiryNotices(ctx, "plan_expiring")],
     ["queue_expire", () => expireQueue(ctx)],

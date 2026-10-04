@@ -187,4 +187,53 @@ describe.skipIf(!live)("automation rules, live", () => {
     });
     expect(t2.rules.monthly_report_ready).toBe(0);
   }, 120_000);
+  it("agent reminders: sent once on the day (from the rule's hour), a stale one is closed unsent", async () => {
+    const a = await user();
+    const other = await user();
+    const noon = new Date(`${day(0)}T05:00:00Z`); // 12:00 in Bangkok, whatever the real time is
+    const early = new Date(`${day(0)}T00:00:00Z`); // 07:00 in Bangkok: before the rule's hour (8)
+    const rem = (id: string, on: string, text: string) => ({
+      user_id: id,
+      remind_on: on,
+      text,
+    });
+    const { error } = await d
+      .from("agent_reminders")
+      .insert([
+        rem(a, day(0), "Ask the doctor about LDL"),
+        rem(a, day(1), "Not due yet"),
+        rem(a, day(-5), "Far too late to matter"),
+        rem(other, day(0), "Someone else's"),
+      ]);
+    expect(error).toBeNull();
+    const only = { rules: ["agent_reminders"], users: [a] };
+
+    const tooEarly = await runTick(early, only);
+    expect(tooEarly.rules.agent_reminders).toBe(0); // before the hour
+    expect(await inbox(a, "agent_reminder")).toHaveLength(0);
+
+    const t = await runTick(noon, only);
+    expect(t.rules.agent_reminders).toBe(1);
+    const got = await inbox(a, "agent_reminder");
+    expect(got).toHaveLength(1);
+    expect(got[0].href).toBe("/agent");
+    const rows = (
+      await d
+        .from("agent_reminders")
+        .select("text, notified_at")
+        .eq("user_id", a)
+    ).data!;
+    const by = Object.fromEntries(rows.map((r) => [r.text, r.notified_at]));
+    expect(by["Ask the doctor about LDL"]).not.toBeNull();
+    expect(by["Not due yet"]).toBeNull();
+    expect(by["Far too late to matter"]).not.toBeNull(); // closed, but nothing was sent for it
+
+    await runTick(noon, only); // nothing new the second time
+    expect(await inbox(a, "agent_reminder")).toHaveLength(1);
+    // someone who was not named is untouched
+    const o = (
+      await d.from("agent_reminders").select("notified_at").eq("user_id", other)
+    ).data!;
+    expect(o[0].notified_at).toBeNull();
+  }, 120_000);
 });

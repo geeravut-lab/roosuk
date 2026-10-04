@@ -160,6 +160,12 @@ export const OWNED_TABLES: readonly OwnedTable[] = [
     countable: true,
   },
   {
+    table: "agent_reminders",
+    column: "user_id",
+    onDelete: "erased",
+    countable: true,
+  },
+  {
     table: "monthly_reports",
     column: "user_id",
     onDelete: "erased",

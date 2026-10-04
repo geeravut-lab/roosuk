@@ -899,7 +899,8 @@ const th = {
     'อธิบายเฉพาะรายการที่นอกช่วง สถานะถูกกำหนดโดยโค้ด AI เปลี่ยนไม่ได้\nข้อความผ่านตัวตรวจคำต้องห้าม (วินิจฉัย ขนาดยา หยุดยา เป้าหมายน้ำหนัก) ไม่ผ่านจะไม่แสดงเลย\nมีค่า "ผิดปกติ" เมื่อไรจะแนะนำพบแพทย์เสมอ โดยไม่ขึ้นกับที่ AI ตอบ\nมี disclaimer ทุกครั้ง บันทึกการสนทนาเพื่อ audit',
   guardrails_chat:
     "ข้อความฉุกเฉิน/ทำร้ายตัวเองถูกคัดกรองด้วยโค้ดก่อน และไม่ส่งให้โมเดล\nคำตอบผ่านตัวตรวจคำต้องห้าม ไม่ผ่านจะใช้ข้อความมาตรฐานแทน\nความมั่นใจต่ำหรือเร่งด่วน → แนะนำพบแพทย์ และคำตอบมี disclaimer เสมอ\nข้อมูลส่วนตัวมาจากบล็อกบริบทเท่านั้น บันทึกการสนทนาเพื่อ audit จำกัดโควตาต่อแพ็กเกจ",
-  guardrails_agent: "ยังไม่เปิดใช้ในแอป",
+  guardrails_agent:
+    "ใช้เครื่องมือได้เฉพาะ 5 อย่าง (ดูเช็กอิน ผลตรวจ สรุปเดือน ข้อมูลอุปกรณ์ ตั้งเตือน) · ข้อมูลส่วนตัวมาจากผลของเครื่องมือเท่านั้น · คำตอบสุดท้ายผ่านตัวตรวจเดียวกับ “ถาม AI” (ไม่วินิจฉัย ไม่บอกขนาดยา) · ฉุกเฉิน/ทำร้ายตัวเอง ไม่ถึงโมเดล",
   guardrails_quick: "ยังไม่เปิดใช้ในแอป",
   guardrails_safety:
     "การคัดกรองข้อความเสี่ยง (ฉุกเฉิน/ทำร้ายตัวเอง) ทำด้วยโค้ดล้วน ไม่ผ่านโมเดล และเกิดก่อนการเรียก AI ทุกครั้ง",
@@ -1764,6 +1765,36 @@ const th = {
     "ตอนนี้คุณเปิดอยู่ในเบราว์เซอร์ของแอปอื่น (เช่น LINE) ซึ่งติดตั้งไม่ได้ แตะ ⋮ แล้วเลือก “เปิดในเบราว์เซอร์” (Chrome)",
   pwaStep_inapp_2:
     "เมื่อเปิดในเบราว์เซอร์จริงแล้ว เข้าเมนู “ติดตั้งเป็นแอปบนเครื่อง” อีกครั้งเพื่อทำตามขั้นตอน",
+  navAgent: "ผู้ช่วยสุขภาพ AI (Agent)",
+  notifAgentReminderTitle: "เตือนตามที่คุณขอไว้",
+  err_agent_plan: "AI Health Agent สำหรับแพ็กเกจ Premium",
+  agentTitle: "ผู้ช่วยสุขภาพ AI (Agent)",
+  agentIntro:
+    "ผู้ช่วยที่ดูข้อมูลของคุณเองให้ได้ สรุปเดือน เตรียมคำถามไปหาหมอ และตั้งเตือนให้ ไม่วินิจฉัยโรคและไม่แนะนำยา",
+  agentPlanTitle: "สำหรับแพ็กเกจ Premium",
+  agentPlanBody:
+    "AI Health Agent เปิดให้ผู้ใช้ Premium (รวมช่วงทดลองใช้) ส่วนถาม AI ธรรมดายังใช้ได้ทุกแพ็กเกจ",
+  agentEmpty:
+    "ลองถามได้เลย เช่น “สรุปเดือนนี้ให้หน่อย” หรือ “เตรียมคำถามไปหาหมอ”",
+  agentSuggest: "ลองถาม",
+  agentSuggest_month: "สรุปเดือนนี้ให้หน่อย",
+  agentSuggest_doctor: "เตรียมคำถามที่ควรถามหมอจากผลตรวจล่าสุดของฉัน",
+  agentSuggest_remind: "เตือนฉันพรุ่งนี้ให้เช็กอินสุขภาพ",
+  agentPlaceholder: "พิมพ์ข้อความถึงผู้ช่วย…",
+  agentSend: "ส่ง",
+  agentThinking: "กำลังดูข้อมูลและคิดคำตอบ…",
+  agentAction_get_overview: "ดูสรุปการเช็กอิน",
+  agentAction_get_labs: "ดูผลตรวจที่บันทึกไว้",
+  agentAction_get_monthly_summary: "ดูสรุปรายเดือน",
+  agentAction_get_devices: "ดูข้อมูลจากอุปกรณ์",
+  agentAction_set_reminder: "ตั้งเตือนแล้ว",
+  agentRemindersTitle: "เตือนที่รออยู่",
+  agentRemindersNone: "ยังไม่มีเตือนที่รออยู่ ลองบอกผู้ช่วยว่า “เตือนฉัน…”",
+  agentReminderOn: "วันที่ {date}",
+  agentReminderCancel: "ยกเลิก",
+  agentNew: "เริ่มบทสนทนาใหม่",
+  agentHistoryNote:
+    "การสนทนาและสิ่งที่ผู้ช่วยทำ ถูกบันทึกไว้เพื่อให้คุณตรวจสอบได้ และลบได้ในหน้าตั้งค่า",
 } as const;
 
 export type Dict = { [K in keyof typeof th]: string };
@@ -2681,7 +2712,8 @@ const en = {
     'It explains only out-of-range items; statuses are set by code and the AI cannot change them.\nText passes the forbidden-statement check (diagnosis, doses, stopping medicine, weight targets); if it fails, nothing is shown.\nAny "abnormal" value always leads to a see-a-doctor message, whatever the AI says.\nA disclaimer every time; the conversation is logged for audit.',
   guardrails_chat:
     "Emergency and self-harm messages are screened by code first and never reach the model.\nThe answer passes the forbidden-statement check; if it fails, a standard message replaces it.\nLow confidence or urgency leads to see-a-doctor advice, and a disclaimer is always shown.\nPersonal facts come only from the context block; the conversation is logged for audit; quota per plan.",
-  guardrails_agent: "Not in use in the app yet.",
+  guardrails_agent:
+    "Only 5 tools (check-ins, labs, monthly summary, device data, set a reminder) · personal facts come only from tool results · the final answer passes the same checks as Ask AI (no diagnosis, no doses) · emergency and self-harm words never reach the model",
   guardrails_quick: "Not in use in the app yet.",
   guardrails_safety:
     "Screening for risky messages (emergency / self-harm) is done by code only, not by a model, and always happens before any AI call.",
@@ -3581,6 +3613,38 @@ const en = {
     "You are inside another app's browser (such as LINE), which cannot install apps. Tap ⋮ and choose “Open in browser” (Chrome).",
   pwaStep_inapp_2:
     "Once it is open in a real browser, come back to “Install as an app” and follow the steps.",
+  navAgent: "AI health agent",
+  notifAgentReminderTitle: "A reminder you asked for",
+  err_agent_plan: "The AI health agent is a Premium feature.",
+  agentTitle: "AI health agent",
+  agentIntro:
+    "An assistant that can look at your own records, summarise your month, prepare questions for a doctor and set reminders. It never diagnoses and never advises on medicine.",
+  agentPlanTitle: "A Premium feature",
+  agentPlanBody:
+    "The agent is for Premium (including the trial). The ordinary Ask AI works on every plan.",
+  agentEmpty:
+    "Try asking, for example “summarise my month” or “prepare questions for my doctor”.",
+  agentSuggest: "Try",
+  agentSuggest_month: "Summarise my month",
+  agentSuggest_doctor:
+    "Prepare questions for my doctor from my latest lab results",
+  agentSuggest_remind: "Remind me tomorrow to do my health check-in",
+  agentPlaceholder: "Message the agent…",
+  agentSend: "Send",
+  agentThinking: "Looking at your data and thinking…",
+  agentAction_get_overview: "Looked at your check-ins",
+  agentAction_get_labs: "Looked at your saved lab values",
+  agentAction_get_monthly_summary: "Looked at a monthly summary",
+  agentAction_get_devices: "Looked at your device data",
+  agentAction_set_reminder: "Set a reminder",
+  agentRemindersTitle: "Reminders waiting",
+  agentRemindersNone:
+    "No reminders waiting. Try telling the agent “remind me to…”.",
+  agentReminderOn: "on {date}",
+  agentReminderCancel: "Cancel",
+  agentNew: "New conversation",
+  agentHistoryNote:
+    "The conversation and what the agent did are kept so you can check them, and you can erase them in Settings.",
 } satisfies Dict;
 
 export const dict: Record<Lang, Dict> = { th, en };

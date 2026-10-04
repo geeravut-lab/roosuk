@@ -73,20 +73,24 @@ export interface StoredMessage {
   created_at: string;
 }
 
-/** The user's latest chat conversation (service role: caller has verified identity). */
-export async function latestChatConversation(
+/** The user's latest conversation of a kind (service role: caller has verified identity). */
+export async function latestConversation(
   userId: string,
+  kind: "chat" | "agent",
 ): Promise<string | null> {
   const { data } = await createAdminClient()
     .from("ai_conversations")
     .select("id")
     .eq("user_id", userId)
-    .eq("kind", "chat")
+    .eq("kind", kind)
     .order("updated_at", { ascending: false })
     .limit(1)
     .maybeSingle<{ id: string }>();
   return data?.id ?? null;
 }
+
+export const latestChatConversation = (userId: string) =>
+  latestConversation(userId, "chat");
 
 export async function createConversation(
   userId: string,

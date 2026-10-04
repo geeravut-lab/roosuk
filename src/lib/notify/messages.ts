@@ -153,6 +153,17 @@ export function monthlyReportReadyNotice(
   };
 }
 
+export function agentReminderNotice(t: Dict, text: string, id: string): Notice {
+  return {
+    kind: "agent_reminder",
+    category: "reminder",
+    title: t.notifAgentReminderTitle,
+    body: noticeBody(text),
+    href: "/agent",
+    dedupeKey: `agent_reminder:${id}`,
+  };
+}
+
 export function streakLastCallNotice(
   t: Dict,
   streak: number,

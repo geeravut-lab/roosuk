@@ -90,7 +90,7 @@ export const TASK_ROUTES: Record<
   lab_extract: { primary: "anthropic", fallback: "google" },
   lab_explain: { primary: "anthropic", fallback: "google" },
   chat: { primary: "anthropic", fallback: "google" },
-  agent: { primary: "anthropic", fallback: null },
+  agent: { primary: "anthropic", fallback: "google" },
   quick: { primary: "anthropic", fallback: "google" },
   safety: { primary: "anthropic", fallback: null },
   daily_plan: { primary: "anthropic", fallback: "google" },
