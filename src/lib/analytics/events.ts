@@ -15,6 +15,7 @@ export const EVENTS = [
   "subscribed",
   "food_scanned",
   "lab_scanned",
+  "body_scanned",
   "lab_explained",
   "ask_sent",
   "checkin_done",

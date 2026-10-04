@@ -177,6 +177,17 @@ async function seed(d: SupabaseClient, userId: string, tag: string) {
     "lab result",
   );
   await ok(
+    d.from("body_scans").insert({
+      user_id: userId,
+      height_cm: 170,
+      bmi_low: 20.8,
+      bmi_high: 23.5,
+      bmi_band: "healthy",
+      bmi_basis: "estimated",
+    }),
+    "body scan",
+  );
+  await ok(
     d.from("quiz_results").insert({
       user_id: userId,
       answers: { tag },

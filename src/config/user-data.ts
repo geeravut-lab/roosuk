@@ -90,6 +90,12 @@ export const OWNED_TABLES: readonly OwnedTable[] = [
     countable: true,
   },
   {
+    table: "body_scans",
+    column: "user_id",
+    onDelete: "erased",
+    countable: true,
+  },
+  {
     table: "checkup_leads",
     column: "user_id",
     onDelete: "erased",

@@ -32,30 +32,51 @@ export default async function TimelinePage() {
   const now = new Date();
   const today = bangkokDate(now);
   const supabase = await createClient();
-  const [t, lang, billing, rows, { data: mealRows }, { data: labRows }] =
-    await Promise.all([
-      getT(),
-      getLang(),
-      getBillingProfile(user.id),
-      loadCheckins(today),
-      supabase
-        .from("meal_logs")
-        .select("id, meal_date, kcal, items")
-        .eq("status", "confirmed")
-        .order("meal_date", { ascending: false })
-        .order("created_at", { ascending: false })
-        .limit(60)
-        .returns<
-          { id: string; meal_date: string; kcal: number; items: unknown }[]
-        >(),
-      supabase
-        .from("lab_reports")
-        .select("id, collected_on, items")
-        .eq("status", "confirmed")
-        .order("collected_on", { ascending: false })
-        .limit(40)
-        .returns<{ id: string; collected_on: string; items: unknown }[]>(),
-    ]);
+  const [
+    t,
+    lang,
+    billing,
+    rows,
+    { data: mealRows },
+    { data: labRows },
+    { data: bodyRows },
+  ] = await Promise.all([
+    getT(),
+    getLang(),
+    getBillingProfile(user.id),
+    loadCheckins(today),
+    supabase
+      .from("meal_logs")
+      .select("id, meal_date, kcal, items")
+      .eq("status", "confirmed")
+      .order("meal_date", { ascending: false })
+      .order("created_at", { ascending: false })
+      .limit(60)
+      .returns<
+        { id: string; meal_date: string; kcal: number; items: unknown }[]
+      >(),
+    supabase
+      .from("lab_reports")
+      .select("id, collected_on, items")
+      .eq("status", "confirmed")
+      .order("collected_on", { ascending: false })
+      .limit(40)
+      .returns<{ id: string; collected_on: string; items: unknown }[]>(),
+    supabase
+      .from("body_scans")
+      .select("id, created_at, bmi_low, bmi_high, bmi_band")
+      .order("created_at", { ascending: false })
+      .limit(30)
+      .returns<
+        {
+          id: string;
+          created_at: string;
+          bmi_low: number;
+          bmi_high: number;
+          bmi_band: string;
+        }[]
+      >(),
+  ]);
 
   const tier = billing ? resolvePlan(billing, now).tier : "free";
   const months = PLANS[tier].timelineHistoryMonths;
@@ -67,6 +88,9 @@ export default async function TimelinePage() {
   );
   const labs = (labRows ?? []).filter(
     (r) => !cutoff || r.collected_on >= cutoff,
+  );
+  const bodies = (bodyRows ?? []).filter(
+    (b) => !cutoff || bangkokDate(new Date(b.created_at)) >= cutoff,
   );
   const hidden = rows.length - visible.length;
 
@@ -114,6 +138,38 @@ export default async function TimelinePage() {
             : fmt(t.timelineWindow, { n: months })}
         </p>
       </section>
+
+      {bodies.length > 0 ? (
+        <section className="space-y-3" aria-labelledby="body-h">
+          <h2 id="body-h" className="font-semibold">
+            {t.bodyTimelineTitle}
+          </h2>
+          <ul className="space-y-2">
+            {bodies.map((b) => {
+              const lo = Number(b.bmi_low);
+              const hi = Number(b.bmi_high);
+              return (
+                <li key={b.id}>
+                  <Link
+                    href={`/scan/body/${b.id}?from=timeline`}
+                    className="card hover:bg-tint-primary flex items-center justify-between gap-3"
+                  >
+                    <span className="font-medium">
+                      {fmt(t.bodyTimelineRow, {
+                        bmi: lo === hi ? `${lo}` : `${lo}–${hi}`,
+                        band: t[`bodyBand_${b.bmi_band}` as keyof Dict],
+                      })}
+                    </span>
+                    <span className="text-muted text-sm">
+                      {formatDate(lang, b.created_at)}
+                    </span>
+                  </Link>
+                </li>
+              );
+            })}
+          </ul>
+        </section>
+      ) : null}
 
       {labs.length > 0 ? (
         <section className="space-y-3" aria-labelledby="labs-h">

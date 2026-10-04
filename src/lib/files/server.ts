@@ -20,7 +20,7 @@ export const SOURCE_MIMES = [
   "application/pdf",
 ] as const;
 export type SourceMime = (typeof SOURCE_MIMES)[number];
-export type SourceKind = "lab" | "food";
+export type SourceKind = "lab" | "food" | "body";
 
 const masterKey = () => parseMasterKey(process.env.FILE_ENCRYPTION_KEY);
 
@@ -164,7 +164,7 @@ export async function removeSourceFile(
 
 /** The kept file of a report/meal row, for the delete paths. */
 export async function sourceFileOf(
-  table: "lab_reports" | "meal_logs",
+  table: "lab_reports" | "meal_logs" | "body_scans",
   id: string,
   userId: string,
 ): Promise<string | null> {
@@ -207,7 +207,7 @@ export async function sweepOrphanFiles(now: Date): Promise<number> {
     .returns<{ id: string; user_id: string }[]>();
   if (!candidates?.length) return 0;
   const ids = candidates.map((c) => c.id);
-  const [labs, meals] = await Promise.all([
+  const [labs, meals, bodies] = await Promise.all([
     db
       .from("lab_reports")
       .select("source_file_id")
@@ -218,10 +218,16 @@ export async function sweepOrphanFiles(now: Date): Promise<number> {
       .select("source_file_id")
       .in("source_file_id", ids)
       .returns<{ source_file_id: string }[]>(),
+    db
+      .from("body_scans")
+      .select("source_file_id")
+      .in("source_file_id", ids)
+      .returns<{ source_file_id: string }[]>(),
   ]);
   const used = new Set([
     ...(labs.data ?? []).map((r) => r.source_file_id),
     ...(meals.data ?? []).map((r) => r.source_file_id),
+    ...(bodies.data ?? []).map((r) => r.source_file_id),
   ]);
   let swept = 0;
   for (const c of candidates)

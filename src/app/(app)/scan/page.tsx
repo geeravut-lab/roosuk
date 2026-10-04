@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Camera, FlaskConical } from "lucide-react";
+import { Camera, FlaskConical, PersonStanding } from "lucide-react";
 import { featureEnabled } from "@/lib/flags/server";
 import { getT } from "@/lib/i18n/server";
 
@@ -9,10 +9,11 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function ScanPage() {
-  const [t, foodOn, labOn] = await Promise.all([
+  const [t, foodOn, labOn, bodyOn] = await Promise.all([
     getT(),
     featureEnabled("food_scan"),
     featureEnabled("lab_scan"),
+    featureEnabled("body_scan"),
   ]);
   return (
     <div className="space-y-4">
@@ -45,6 +46,21 @@ export default async function ScanPage() {
           <span className="min-w-0">
             <span className="block font-semibold">{t.scanLabTitle}</span>
             <span className="text-muted block text-sm">{t.scanLabDesc}</span>
+          </span>
+        </Link>
+      ) : null}
+
+      {bodyOn ? (
+        <Link
+          href="/scan/body"
+          className="card hover:bg-tint-primary flex items-start gap-3"
+        >
+          <span className="bg-tint-secondary text-primary-strong flex size-11 shrink-0 items-center justify-center rounded-full">
+            <PersonStanding className="size-6" aria-hidden />
+          </span>
+          <span className="min-w-0">
+            <span className="block font-semibold">{t.scanBodyTitle}</span>
+            <span className="text-muted block text-sm">{t.scanBodyDesc}</span>
           </span>
         </Link>
       ) : null}

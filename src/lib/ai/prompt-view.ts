@@ -1,3 +1,4 @@
+import { bodyPrompt } from "@/lib/body/body";
 import { foodPrompt } from "@/lib/food/food";
 import { explainSystemPrompt } from "@/lib/lab/explain";
 import { labPrompt } from "@/lib/lab/lab";
@@ -35,6 +36,16 @@ export function builtinPrompt(task: TaskKind): BuiltinPrompt | null {
   switch (task) {
     case "food_scan": {
       const p = foodPrompt();
+      return { system: p.system, input: p.prompt };
+    }
+    case "body_scan": {
+      const p = bodyPrompt({
+        heightCm: 170,
+        sex: "female",
+        ageBand: "35-39",
+        hasFace: true,
+        hasPalm: true,
+      });
       return { system: p.system, input: p.prompt };
     }
     case "lab_extract": {

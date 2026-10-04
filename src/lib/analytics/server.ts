@@ -17,7 +17,8 @@ export async function trackEvent(
     const { error } = await createAdminClient()
       .from("product_events")
       .insert({ event, user_id: userId, detail: cleanDetail(detail) });
-    if (error && error.code !== "23505")
+    // 23505: a once-only event repeated · 23503: the user was deleted while the page was being sent
+    if (error && error.code !== "23505" && error.code !== "23503")
       console.error("[analytics] could not record", event, error.message);
   } catch (err) {
     console.error("[analytics] could not record", event, err);

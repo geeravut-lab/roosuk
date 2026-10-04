@@ -15,6 +15,7 @@ import type { AiRequest, AiResponse, TaskKind } from "./types";
 /** Tasks that run today and so can take an addition. (`prompt_review` is the reviewer itself and is never editable.) */
 export const EDITABLE_TASKS = [
   "food_scan",
+  "body_scan",
   "lab_extract",
   "lab_explain",
   "chat",

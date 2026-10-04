@@ -20,7 +20,7 @@ export const PDF_MIN = Buffer.from(
 export async function putSourceFile(
   d: SupabaseClient,
   userId: string,
-  kind: "lab" | "food",
+  kind: "lab" | "food" | "body",
   mime: "image/png" | "application/pdf",
   bytes: Buffer,
   createdAt?: string,

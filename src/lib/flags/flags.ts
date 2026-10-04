@@ -6,6 +6,7 @@
 export const FEATURE_FLAGS = [
   "food_scan",
   "lab_scan",
+  "body_scan",
   "health_agent",
   "wearables",
   "family",

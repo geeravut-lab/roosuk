@@ -689,6 +689,88 @@ const th = {
   // ── admin
   adminTitle: "ผู้ดูแลระบบ",
   adminFlagsTitle: "สวิตช์ฟีเจอร์",
+  scanBodyTitle: "สแกนร่างกาย",
+  scanBodyDesc:
+    "ใส่ส่วนสูงแล้วถ่ายรูปเต็มตัว ให้ AI ประเมินน้ำหนักและ BMI โดยประมาณ (เพิ่มรูปหน้าหรือฝ่ามือเพื่อข้อสังเกตเบื้องต้นได้)",
+  bodyIntro:
+    "ใส่ส่วนสูงแล้วถ่ายรูปเต็มตัว AI จะประเมินน้ำหนักและ BMI โดยประมาณ ตัวเลขจากรูปคลาดเคลื่อนได้หลายกิโลกรัม ถ้ามีเครื่องชั่งให้ใส่น้ำหนักจริงด้วย",
+  bodyHeight: "ส่วนสูง (ซม.)",
+  bodyWeight: "น้ำหนักปัจจุบัน (กก.) ไม่บังคับ",
+  bodyWeightHint: "ถ้ามีเครื่องชั่ง ใส่ไว้จะแม่นกว่าการประเมินจากรูปเสมอ",
+  bodyPhotoBody: "รูปเต็มตัว (จำเป็น)",
+  bodyPhotoBodyHint:
+    "ยืนตรง เห็นตั้งแต่หัวถึงเท้า ใส่เสื้อผ้าพอดีตัว แสงสว่างพอ",
+  bodyPhotoFace: "รูปใบหน้า (ไม่บังคับ)",
+  bodyPhotoFaceHint: "ถ่ายตรง ๆ ในที่สว่าง ไม่ใส่แว่นดำหรือหน้ากาก",
+  bodyPhotoPalm: "รูปฝ่ามือ (ไม่บังคับ)",
+  bodyPhotoPalmHint: "กางมือในแสงธรรมชาติ ให้เห็นฝ่ามือชัด",
+  bodyTakePhoto: "ถ่ายรูป",
+  bodyChoosePhoto: "เลือกรูปจากเครื่อง",
+  bodyPhotoChosen: "เลือกรูปแล้ว",
+  bodyPhotoAlt: "ตัวอย่างรูปที่เลือก",
+  bodyAdult: "ฉันอายุ 18 ปีขึ้นไป",
+  bodyAck:
+    "ฉันเข้าใจว่ารูปถูกส่งให้ AI วิเคราะห์ ผลเป็นการประเมินเบื้องต้นจากรูป ไม่ใช่การวินิจฉัย และไม่มีเป้าหมายน้ำหนักใด ๆ",
+  bodyAnalyze: "ประเมินจากรูป",
+  bodyAnalyzing: "กำลังวิเคราะห์… ประมาณ 15 วินาที",
+  bodyPrivacy:
+    "รูปถูกส่งให้ AI วิเคราะห์ ถ้าไม่เลือกเก็บ รูปจะไม่ถูกบันทึก (เก็บได้เฉพาะรูปเต็มตัว รูปหน้าและฝ่ามือไม่เก็บ) ผลนี้ไม่ส่งผลต่อคะแนนสุขภาพหรือสถิติใด ๆ",
+  bodyResultTitle: "ผลสแกนร่างกาย",
+  bodyBmi: "BMI",
+  bodyBmiMeasured: "คำนวณจากน้ำหนักที่คุณกรอก {w} กก. และส่วนสูง {h} ซม.",
+  bodyBmiEstimated: "ประเมินจากรูป (ช่วงโดยประมาณ) และส่วนสูง {h} ซม.",
+  bodyEstWeight: "น้ำหนักที่ AI ประเมินจากรูป: ประมาณ {low}–{high} กก.",
+  bodyEstNote:
+    "ตัวเลขจากรูปคลาดเคลื่อนได้หลายกิโลกรัม ใส่น้ำหนักจริงเพื่อให้ BMI แม่นขึ้น",
+  bodyBandIs: "อยู่ในระดับ: {band}",
+  bodyBandRange: 'ระหว่าง "{a}" ถึง "{b}"',
+  bodyBand_low: "ต่ำกว่าเกณฑ์",
+  bodyBand_healthy: "อยู่ในเกณฑ์",
+  bodyBand_above: "เกินเกณฑ์เล็กน้อย",
+  bodyBand_high: "สูงกว่าเกณฑ์",
+  bodyBand_very_high: "สูงกว่าเกณฑ์มาก",
+  bodyAdvice_low:
+    "BMI ต่ำกว่าเกณฑ์สำหรับคนเอเชีย ลองดูเรื่องมื้ออาหารและการพักผ่อนให้พอ ถ้ากังวลเรื่องน้ำหนักหรือการกิน ปรึกษาแพทย์หรือผู้เชี่ยวชาญได้",
+  bodyAdvice_healthy:
+    "BMI อยู่ในเกณฑ์ที่เหมาะสมสำหรับคนเอเชีย รักษานิสัยดี ๆ ที่ทำอยู่ต่อไป",
+  bodyAdvice_above:
+    "BMI เกินเกณฑ์เล็กน้อย นิสัยเล็ก ๆ ช่วยได้ เช่น เดินหลังมื้ออาหาร นอนให้พอ และกินผักผลไม้ให้ครบ",
+  bodyAdvice_high:
+    "BMI สูงกว่าเกณฑ์ ควรตรวจสุขภาพพื้นฐาน (น้ำตาล ไขมัน ความดัน) และคุยกับแพทย์ ระหว่างนี้เริ่มจากนิสัยเล็ก ๆ เช่น เดินและนอนให้พอ",
+  bodyAdvice_very_high:
+    "BMI สูงกว่าเกณฑ์มาก ควรปรึกษาแพทย์เพื่อตรวจสุขภาพโดยรวม ไม่ต้องรีบทำอะไรเองคนเดียว",
+  bodyAsianNote:
+    "เกณฑ์สำหรับคนเอเชีย: ต่ำกว่า 18.5 ต่ำกว่าเกณฑ์ · 18.5–22.9 อยู่ในเกณฑ์ · 23–24.9 เกินเล็กน้อย · 25 ขึ้นไปสูงกว่าเกณฑ์",
+  bodyNotesTitle: "ข้อสังเกตจากภาพ",
+  bodyNotesCaveat:
+    "ข้อสังเกตจากภาพไม่ใช่ผลตรวจ และไม่ได้แปลว่าปกติหรือผิดปกติ ใช้เป็นเหตุผลให้ลองตรวจจริงเท่านั้น และไม่มีผลต่อคะแนนสุขภาพ",
+  bodyFace_possible: "ใบหน้าดูอ่อนล้าในภาพ ลองดูเรื่องการนอนและความเครียด",
+  bodyFace_none: "ไม่พบข้อสังเกตเด่นจากภาพใบหน้า",
+  bodyFace_unclear: "ภาพใบหน้ายังไม่ชัดพอที่จะดูข้อสังเกต",
+  bodyPalm_possible:
+    "ฝ่ามือดูซีดกว่าปกติเล็กน้อยในภาพ (ขึ้นกับแสงมาก) ถ้าเหนื่อยง่ายหรือเวียนหัวบ่อย ลองตรวจเลือด (CBC) เพื่อดูให้ชัดเจน",
+  bodyPalm_none: "ไม่พบข้อสังเกตเด่นจากภาพฝ่ามือ",
+  bodyPalm_unclear: "ภาพฝ่ามือยังไม่ชัดพอที่จะดูข้อสังเกต",
+  bodySetWeight: "ใส่หรือแก้น้ำหนักจริง (กก.)",
+  bodySaveWeight: "บันทึกน้ำหนัก",
+  bodyClearWeight: "ใช้ค่าประเมินจากรูปแทน",
+  bodyDisclaimer:
+    "ผลนี้เป็นการประเมินเบื้องต้นจากรูปและส่วนสูง ไม่ใช่การวินิจฉัย และไม่ใช่เป้าหมายที่ต้องทำ",
+  bodyDelete: "ลบผลนี้",
+  bodyKeepNote: "รูปเต็มตัวที่เก็บไว้",
+  bodyTimelineTitle: "ร่างกาย",
+  bodyTimelineRow: "BMI {bmi} · {band}",
+  err_body_invalid:
+    "กรุณาใส่ส่วนสูง 120–230 ซม. (และน้ำหนัก 30–250 กก. ถ้าจะใส่)",
+  err_body_ack: "กรุณาติ๊กรับทราบข้อความก่อนสแกน",
+  err_body_adult: "บริการนี้สำหรับผู้ที่อายุ 18 ปีขึ้นไป",
+  err_body_photo_required: "กรุณาเลือกรูปเต็มตัว",
+  err_body_unusable:
+    "ยังประเมินจากรูปนี้ไม่ได้ ลองถ่ายเต็มตัวในที่สว่าง ให้เห็นตั้งแต่หัวถึงเท้า (ไม่หักสิทธิ์ของคุณ)",
+  err_body_minor: "ไม่สามารถประเมินรูปนี้ได้ (ไม่หักสิทธิ์ของคุณ)",
+  feature_bodyScan: "สแกนร่างกาย",
+  flag_body_scan: "สแกนร่างกาย",
+  eventName_body_scanned: "สแกนร่างกาย",
   adminPromptsTitle: "คำสั่งและกฎของ AI",
   adminPromptsHint:
     "ดูคำสั่งหลักและกฎที่โค้ดบังคับของแต่ละงาน (แก้ไม่ได้) และเพิ่มคำสั่งเสริมได้โดยไม่ต้อง deploy ทุกคำสั่งเสริมต้องผ่านการตรวจก่อนบันทึก และอยู่ต่ำกว่ากฎหลักเสมอ",
@@ -1674,6 +1756,92 @@ const en = {
 
   adminTitle: "Admin",
   adminFlagsTitle: "Feature switches",
+  scanBodyTitle: "Scan your body",
+  scanBodyDesc:
+    "Enter your height and take a full-body photo; AI gives a rough weight and BMI (add a face or palm photo for basic observations).",
+  bodyIntro:
+    "Enter your height and take a full-body photo. AI estimates weight and BMI roughly — a photo can be off by several kilograms, so add your real weight if you have a scale.",
+  bodyHeight: "Height (cm)",
+  bodyWeight: "Current weight (kg), optional",
+  bodyWeightHint:
+    "If you have a scale, entering it is always more accurate than a photo estimate.",
+  bodyPhotoBody: "Full-body photo (required)",
+  bodyPhotoBodyHint:
+    "Stand straight, head to feet in view, fitted clothing, good light.",
+  bodyPhotoFace: "Face photo (optional)",
+  bodyPhotoFaceHint: "Straight on, in good light, no sunglasses or mask.",
+  bodyPhotoPalm: "Palm photo (optional)",
+  bodyPhotoPalmHint: "Open hand in natural light, palm clearly in view.",
+  bodyTakePhoto: "Take a photo",
+  bodyChoosePhoto: "Choose from your device",
+  bodyPhotoChosen: "Photo chosen",
+  bodyPhotoAlt: "Preview of the chosen photo",
+  bodyAdult: "I am 18 or older",
+  bodyAck:
+    "I understand the photos are sent to AI, the result is a rough estimate from photos, not a diagnosis, and there are no weight targets.",
+  bodyAnalyze: "Estimate from the photo",
+  bodyAnalyzing: "Analysing… about 15 seconds",
+  bodyPrivacy:
+    "The photos are sent to AI for analysis. Unless you choose to keep one, nothing is stored (only the full-body photo can be kept; face and palm photos never are). This result does not affect your health score or any statistics.",
+  bodyResultTitle: "Body scan result",
+  bodyBmi: "BMI",
+  bodyBmiMeasured:
+    "Calculated from the weight you entered, {w} kg, and your height, {h} cm.",
+  bodyBmiEstimated:
+    "Estimated from the photo (a rough range) and your height, {h} cm.",
+  bodyEstWeight: "Weight AI estimated from the photo: about {low}–{high} kg",
+  bodyEstNote:
+    "A photo estimate can be off by several kilograms — enter your real weight for a more accurate BMI.",
+  bodyBandIs: "Level: {band}",
+  bodyBandRange: 'between "{a}" and "{b}"',
+  bodyBand_low: "Below the range",
+  bodyBand_healthy: "Within the range",
+  bodyBand_above: "Slightly above the range",
+  bodyBand_high: "Above the range",
+  bodyBand_very_high: "Well above the range",
+  bodyAdvice_low:
+    "BMI is below the range for Asian adults. Make sure meals and rest are enough, and talk to a doctor or specialist if you are worried about weight or eating.",
+  bodyAdvice_healthy:
+    "BMI is within the range for Asian adults. Keep up the good habits you already have.",
+  bodyAdvice_above:
+    "BMI is slightly above the range. Small habits help: a walk after meals, enough sleep, and plenty of vegetables and fruit.",
+  bodyAdvice_high:
+    "BMI is above the range. A basic check-up (sugar, fats, blood pressure) and a talk with a doctor are worth it. Meanwhile, start small: walking and enough sleep.",
+  bodyAdvice_very_high:
+    "BMI is well above the range. Please talk to a doctor about an overall check-up — there is no need to rush into anything alone.",
+  bodyAsianNote:
+    "Asian cut-offs: below 18.5 below the range · 18.5–22.9 within · 23–24.9 slightly above · 25 and over above the range.",
+  bodyNotesTitle: "Observations from the photos",
+  bodyNotesCaveat:
+    "Observations from photos are not test results and do not mean normal or abnormal. They are only a reason to get a real test, and never affect your health score.",
+  bodyFace_possible:
+    "The face looks tired in the photo — look at sleep and stress.",
+  bodyFace_none: "Nothing stands out in the face photo.",
+  bodyFace_unclear: "The face photo is not clear enough to look at.",
+  bodyPalm_possible:
+    "The palm looks a little paler than usual in the photo (light matters a lot). If you tire easily or feel dizzy often, a blood test (CBC) will tell you more.",
+  bodyPalm_none: "Nothing stands out in the palm photo.",
+  bodyPalm_unclear: "The palm photo is not clear enough to look at.",
+  bodySetWeight: "Enter or correct your real weight (kg)",
+  bodySaveWeight: "Save weight",
+  bodyClearWeight: "Use the photo estimate instead",
+  bodyDisclaimer:
+    "This is a rough estimate from a photo and your height — not a diagnosis, and not a target to hit.",
+  bodyDelete: "Delete this result",
+  bodyKeepNote: "The full-body photo you kept",
+  bodyTimelineTitle: "Body",
+  bodyTimelineRow: "BMI {bmi} · {band}",
+  err_body_invalid:
+    "Please enter a height of 120–230 cm (and a weight of 30–250 kg if you add one).",
+  err_body_ack: "Please tick the acknowledgement before scanning.",
+  err_body_adult: "This is for people aged 18 or older.",
+  err_body_photo_required: "Please choose a full-body photo.",
+  err_body_unusable:
+    "This photo can’t be assessed. Try a full-body photo in good light, head to feet in view (your allowance is not used).",
+  err_body_minor: "This photo can’t be assessed (your allowance is not used).",
+  feature_bodyScan: "Body scan",
+  flag_body_scan: "Body scan",
+  eventName_body_scanned: "Scanned the body",
   adminPromptsTitle: "AI instructions and guardrails",
   adminPromptsHint:
     "See each task's main instructions and the guardrails the code enforces (read-only), and add extra instructions without a deploy. Every addition is checked before it is saved and always ranks below the main rules.",
