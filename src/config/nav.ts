@@ -4,6 +4,7 @@ import {
   Camera,
   ChartLine,
   FileChartColumn,
+  FolderLock,
   Crown,
   House,
   MessageCircleHeart,
@@ -38,6 +39,12 @@ export const NAV: readonly NavItem[] = [
     href: "/report",
     label: "navReport",
     icon: FileChartColumn,
+    group: "daily",
+  },
+  {
+    href: "/vault",
+    label: "navVault",
+    icon: FolderLock,
     group: "daily",
   },
   {
@@ -97,7 +104,8 @@ export type BackLabelKey =
   | "navScan"
   | "navSubscription"
   | "navAdmin"
-  | "navNotifications";
+  | "navNotifications"
+  | "navVault";
 
 export interface BackTarget {
   href: string;
@@ -131,6 +139,7 @@ const FROM: Record<string, BackTarget> = {
   today: { href: "/today", label: "navToday" },
   notifications: { href: "/notifications", label: "navNotifications" },
   scan: { href: "/scan", label: "navScan" },
+  vault: { href: "/vault", label: "navVault" },
 };
 
 export function backTarget(

@@ -18,6 +18,7 @@ export const EVENTS = [
   "body_scanned",
   "lab_explained",
   "report_generated",
+  "vault_uploaded",
   "ask_sent",
   "checkin_done",
   "lead_created",

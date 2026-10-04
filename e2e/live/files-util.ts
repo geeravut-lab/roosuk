@@ -20,10 +20,11 @@ export const PDF_MIN = Buffer.from(
 export async function putSourceFile(
   d: SupabaseClient,
   userId: string,
-  kind: "lab" | "food" | "body",
+  kind: "lab" | "food" | "body" | "doc",
   mime: "image/png" | "application/pdf",
   bytes: Buffer,
   createdAt?: string,
+  meta?: { title: string; category: string },
 ): Promise<{ id: string; path: string }> {
   const key = parseMasterKey(process.env.FILE_ENCRYPTION_KEY);
   if (!key) throw new Error("FILE_ENCRYPTION_KEY is not set for the suite");
@@ -44,6 +45,7 @@ export async function putSourceFile(
     bytes: bytes.length,
     object_path: path,
     ...(createdAt ? { created_at: createdAt } : {}),
+    ...(meta ? { title: meta.title, category: meta.category } : {}),
   });
   if (ins.error) throw ins.error;
   return { id, path };

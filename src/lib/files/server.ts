@@ -20,7 +20,14 @@ export const SOURCE_MIMES = [
   "application/pdf",
 ] as const;
 export type SourceMime = (typeof SOURCE_MIMES)[number];
-export type SourceKind = "lab" | "food" | "body";
+export type SourceKind = "lab" | "food" | "body" | "doc";
+
+/** What a vault document carries beyond the file itself. */
+export interface DocMeta {
+  title: string;
+  category: string;
+  docDate: string | null;
+}
 
 const masterKey = () => parseMasterKey(process.env.FILE_ENCRYPTION_KEY);
 
@@ -65,6 +72,8 @@ export async function storeSourceFile(input: {
   kind: SourceKind;
   bytes: Uint8Array;
   mime: SourceMime;
+  /** required for kind "doc", never given for the others (the database checks both) */
+  meta?: DocMeta;
 }): Promise<string | null> {
   const key = masterKey();
   if (!key || input.bytes.length < 1 || input.bytes.length > MAX_BYTES)
@@ -91,6 +100,13 @@ export async function storeSourceFile(input: {
       mime: input.mime,
       bytes: input.bytes.length,
       object_path: path,
+      ...(input.meta
+        ? {
+            title: input.meta.title,
+            category: input.meta.category,
+            doc_date: input.meta.docDate,
+          }
+        : {}),
     });
     if (error) {
       await db.storage.from(BUCKET).remove([path]);
@@ -177,6 +193,16 @@ export async function sourceFileOf(
   return data?.source_file_id ?? null;
 }
 
+/** How many vault documents the person has (what the plan limit counts). */
+export async function countVaultDocs(userId: string): Promise<number> {
+  const { count } = await createAdminClient()
+    .from("source_files")
+    .select("id", { count: "exact", head: true })
+    .eq("user_id", userId)
+    .eq("kind", "doc");
+  return count ?? 0;
+}
+
 /** Account deletion: every object under the user's folder, whatever the table says. */
 export async function removeAllUserFiles(userId: string): Promise<number> {
   const db = createAdminClient();
@@ -201,6 +227,7 @@ export async function sweepOrphanFiles(now: Date): Promise<number> {
   const { data: candidates } = await db
     .from("source_files")
     .select("id, user_id")
+    .neq("kind", "doc") // vault documents have no scan behind them: they stay until the person deletes them
     .lt("created_at", cutoff)
     .order("created_at", { ascending: true })
     .limit(200)
