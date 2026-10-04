@@ -3,9 +3,14 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import {
   confirmLabAction,
+  deleteLabFileAction,
   deleteLabReportAction,
   explainLabAction,
 } from "@/app/actions/lab";
+import {
+  SourceFileCard,
+  type SourceFileRef,
+} from "@/components/SourceFileCard";
 import { LabStatusChip } from "@/components/LabStatusChip";
 import { PendingButton } from "@/components/PendingButton";
 import { biomarkerByKey } from "@/config/biomarkers";
@@ -34,7 +39,7 @@ export default async function LabReportPage({
   searchParams,
 }: PageProps<"/scan/lab/[id]">) {
   const { id } = await params;
-  const { error } = await searchParams;
+  const { error, file: fileNote } = await searchParams;
   const user = await requireUser();
   if (!UUID.test(id)) notFound();
 
@@ -45,7 +50,9 @@ export default async function LabReportPage({
     getLang(),
     supabase
       .from("lab_reports")
-      .select("id, status, collected_on, items, explanation")
+      .select(
+        "id, status, collected_on, items, explanation, source_file:source_files(id, mime)",
+      )
       .eq("id", id)
       .eq("user_id", user.id)
       .maybeSingle<{
@@ -54,12 +61,30 @@ export default async function LabReportPage({
         collected_on: string | null;
         items: unknown;
         explanation: unknown;
+        source_file: SourceFileRef | null;
       }>(),
   ]);
   if (!report) notFound();
 
   const items = parseStoredLabItems(report.items);
   const today = bangkokDate(new Date());
+  const sourceFile = (
+    <>
+      {fileNote === "failed" ? (
+        <p role="status" className="bg-tint-warn rounded-xl px-3 py-2 text-sm">
+          {t.sourceFileFailed}
+        </p>
+      ) : null}
+      <SourceFileCard t={t} file={report.source_file}>
+        <form action={deleteLabFileAction}>
+          <input type="hidden" name="reportId" value={report.id} />
+          <button type="submit" className="btn btn-ghost w-full">
+            {t.sourceFileDelete}
+          </button>
+        </form>
+      </SourceFileCard>
+    </>
+  );
 
   if (report.status === "draft") {
     return (
@@ -79,6 +104,8 @@ export default async function LabReportPage({
             {errorText(error, t)}
           </p>
         ) : null}
+
+        {sourceFile}
 
         <form action={confirmLabAction} className="space-y-4">
           <input type="hidden" name="reportId" value={report.id} />
@@ -218,6 +245,8 @@ export default async function LabReportPage({
           {errorText(error, t)}
         </p>
       ) : null}
+
+      {sourceFile}
 
       {explanation ? (
         <section className="card space-y-2" aria-labelledby="explain-h">

@@ -5,11 +5,13 @@ import { FileUp } from "lucide-react";
 import { scanLabAction, type LabScanState } from "@/app/actions/lab";
 import { shrinkImage } from "@/lib/image-resize";
 import { errorText, fmt } from "@/lib/i18n/dict";
+import { KeepFileChoice } from "@/components/KeepFileChoice";
+import type { KeepMode } from "@/lib/files/types";
 import { useI18n } from "@/lib/i18n/provider";
 
 const initial: LabScanState = {};
 
-export function LabScanForm() {
+export function LabScanForm({ keepMode }: { keepMode: KeepMode }) {
   const { t } = useI18n();
   const [state, action, pending] = useActionState(scanLabAction, initial);
   const input = useRef<HTMLInputElement>(null);
@@ -74,6 +76,8 @@ export function LabScanForm() {
         <FileUp className="size-5" aria-hidden />
         {name ? t.labChooseAnother : t.labChoose}
       </label>
+
+      <KeepFileChoice mode={keepMode} />
 
       {state.error ? (
         <p

@@ -21,6 +21,12 @@ import {
 } from "@/lib/food/food";
 import { bangkokDate } from "@/lib/health/dates";
 import type { ErrorKey } from "@/lib/i18n/dict";
+import {
+  canKeepFiles,
+  removeSourceFile,
+  sourceFileOf,
+  storeSourceFile,
+} from "@/lib/files/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 
@@ -43,9 +49,17 @@ export async function scanFoodAction(
   formData: FormData,
 ): Promise<ScanState> {
   let draftId: string;
+  let fileFailed = false;
   try {
     const user = await requireUser();
     await assertFeature("food_scan");
+
+    // Asked for every scan; no answer = no scan (and nothing is kept unless it is "keep").
+    const keep = formData.get("keepFile");
+    if (keep !== "keep" && keep !== "discard")
+      return { error: "err_keep_choice" };
+    if (keep === "keep" && !(await canKeepFiles(user.id)))
+      return { error: "err_keep_unavailable" };
 
     const file = formData.get("photo");
     if (!(file instanceof File) || file.size === 0)
@@ -84,11 +98,24 @@ export async function scanFoodAction(
       return { error: "err_food_not_found" };
     }
 
+    // Only now, with a usable result: store the photo (sealed) if the user said keep.
+    const fileId =
+      keep === "keep"
+        ? await storeSourceFile({
+            userId: user.id,
+            kind: "food",
+            bytes,
+            mime: mediaType,
+          })
+        : null;
+    fileFailed = keep === "keep" && !fileId;
+
     const totals = mealTotals(items);
     const { data, error } = await createAdminClient()
       .from("meal_logs")
       .insert({
         user_id: user.id,
+        source_file_id: fileId,
         meal_date: bangkokDate(new Date()),
         status: "draft",
         items,
@@ -99,12 +126,15 @@ export async function scanFoodAction(
         model: `${result.provider}/${result.model}`.slice(0, 100),
       })
       .select("id");
-    if (error || data?.length !== 1) return { error: "err_save_failed" };
+    if (error || data?.length !== 1) {
+      await removeSourceFile(user.id, fileId);
+      return { error: "err_save_failed" };
+    }
     draftId = data[0].id;
   } catch (err) {
     return { error: toErrorKey(err) };
   }
-  redirect(`/scan/food/${draftId}`);
+  redirect(`/scan/food/${draftId}${fileFailed ? "?file=failed" : ""}`);
 }
 
 /**
@@ -138,7 +168,9 @@ export async function confirmMealAction(formData: FormData): Promise<void> {
   });
   // Dropping every item = discarding the scan.
   if (reviewed.length === 0) {
+    const fileId = await sourceFileOf("meal_logs", id, user.id);
     await db.from("meal_logs").delete().eq("id", id).eq("user_id", user.id);
+    await removeSourceFile(user.id, fileId);
     revalidatePath("/scan");
     redirect("/scan");
   }
@@ -173,6 +205,7 @@ export async function deleteMealAction(formData: FormData): Promise<void> {
   if (typeof id !== "string" || !UUID.test(id))
     throw new AppError("err_invalid_input");
 
+  const fileId = await sourceFileOf("meal_logs", id, user.id);
   const supabase = await createClient();
   const { error } = await supabase
     .from("meal_logs")
@@ -180,7 +213,21 @@ export async function deleteMealAction(formData: FormData): Promise<void> {
     .eq("id", id)
     .eq("user_id", user.id);
   if (error) throw new AppError("err_save_failed");
+  await removeSourceFile(user.id, fileId);
 
   revalidatePath("/timeline");
   redirect("/timeline");
+}
+
+/** Remove just the kept original file; the meal and its numbers stay. */
+export async function deleteMealFileAction(formData: FormData): Promise<void> {
+  const user = await requireUser();
+  const id = formData.get("mealId");
+  if (typeof id !== "string" || !UUID.test(id))
+    throw new AppError("err_invalid_input");
+  const fileId = await sourceFileOf("meal_logs", id, user.id);
+  if (!(await removeSourceFile(user.id, fileId)))
+    throw new AppError("err_save_failed");
+  revalidatePath(`/scan/food/${id}`);
+  redirect(`/scan/food/${id}`);
 }

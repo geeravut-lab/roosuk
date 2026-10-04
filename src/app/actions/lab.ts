@@ -36,6 +36,12 @@ import {
   normalizeLabResult,
   parseStoredLabItems,
 } from "@/lib/lab/lab";
+import {
+  canKeepFiles,
+  removeSourceFile,
+  sourceFileOf,
+  storeSourceFile,
+} from "@/lib/files/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 
@@ -58,9 +64,17 @@ export async function scanLabAction(
   formData: FormData,
 ): Promise<LabScanState> {
   let draftId: string;
+  let fileFailed = false;
   try {
     const user = await requireUser();
     await assertFeature("lab_scan");
+
+    // Asked for every scan; no answer = no scan (and nothing is kept unless it is "keep").
+    const keep = formData.get("keepFile");
+    if (keep !== "keep" && keep !== "discard")
+      return { error: "err_keep_choice" };
+    if (keep === "keep" && !(await canKeepFiles(user.id)))
+      return { error: "err_keep_unavailable" };
 
     const file = formData.get("file");
     if (!(file instanceof File) || file.size === 0)
@@ -102,22 +116,38 @@ export async function scanLabAction(
       return { error: "err_lab_not_found" };
     }
 
+    // Only now, with a usable result: store the file (sealed) if the user said keep.
+    const fileId =
+      keep === "keep"
+        ? await storeSourceFile({
+            userId: user.id,
+            kind: "lab",
+            bytes,
+            mime: pdf ? "application/pdf" : imageType!,
+          })
+        : null;
+    fileFailed = keep === "keep" && !fileId;
+
     const { data: row, error } = await createAdminClient()
       .from("lab_reports")
       .insert({
         user_id: user.id,
+        source_file_id: fileId,
         status: "draft",
         collected_on: parsed.collectedOn,
         items: parsed.items,
         model: `${result.provider}/${result.model}`.slice(0, 100),
       })
       .select("id");
-    if (error || row?.length !== 1) return { error: "err_save_failed" };
+    if (error || row?.length !== 1) {
+      await removeSourceFile(user.id, fileId);
+      return { error: "err_save_failed" };
+    }
     draftId = row[0].id;
   } catch (err) {
     return { error: toErrorKey(err) };
   }
-  redirect(`/scan/lab/${draftId}`);
+  redirect(`/scan/lab/${draftId}${fileFailed ? "?file=failed" : ""}`);
 }
 
 /**
@@ -156,7 +186,9 @@ export async function confirmLabAction(formData: FormData): Promise<void> {
     remove: stored.map((_, i) => formData.get(`remove.${i}`) === "on"),
   });
   if (reviewed.length === 0) {
+    const fileId = await sourceFileOf("lab_reports", id, user.id);
     await db.from("lab_reports").delete().eq("id", id).eq("user_id", user.id);
+    await removeSourceFile(user.id, fileId);
     revalidatePath("/scan");
     redirect("/scan");
   }
@@ -180,6 +212,7 @@ export async function deleteLabReportAction(formData: FormData): Promise<void> {
   if (typeof id !== "string" || !UUID.test(id))
     throw new AppError("err_invalid_input");
 
+  const fileId = await sourceFileOf("lab_reports", id, user.id);
   const supabase = await createClient();
   const { error } = await supabase
     .from("lab_reports")
@@ -187,6 +220,7 @@ export async function deleteLabReportAction(formData: FormData): Promise<void> {
     .eq("id", id)
     .eq("user_id", user.id);
   if (error) throw new AppError("err_save_failed");
+  await removeSourceFile(user.id, fileId);
 
   revalidatePath("/timeline");
   redirect("/timeline");
@@ -283,4 +317,17 @@ export async function explainLabAction(formData: FormData): Promise<void> {
 
   revalidatePath(`/scan/lab/${id}`);
   back();
+}
+
+/** Remove just the kept original file; the report, its values and explanation stay. */
+export async function deleteLabFileAction(formData: FormData): Promise<void> {
+  const user = await requireUser();
+  const id = formData.get("reportId");
+  if (typeof id !== "string" || !UUID.test(id))
+    throw new AppError("err_invalid_input");
+  const fileId = await sourceFileOf("lab_reports", id, user.id);
+  if (!(await removeSourceFile(user.id, fileId)))
+    throw new AppError("err_save_failed");
+  revalidatePath(`/scan/lab/${id}`);
+  redirect(`/scan/lab/${id}`);
 }

@@ -5,11 +5,13 @@ import { Camera, Images } from "lucide-react";
 import { scanFoodAction, type ScanState } from "@/app/actions/food";
 import { shrinkImage } from "@/lib/image-resize";
 import { errorText } from "@/lib/i18n/dict";
+import { KeepFileChoice } from "@/components/KeepFileChoice";
+import type { KeepMode } from "@/lib/files/types";
 import { useI18n } from "@/lib/i18n/provider";
 
 const initial: ScanState = {};
 
-export function FoodScanForm() {
+export function FoodScanForm({ keepMode }: { keepMode: KeepMode }) {
   const { t } = useI18n();
   const [state, action, pending] = useActionState(scanFoodAction, initial);
   const input = useRef<HTMLInputElement>(null);
@@ -82,6 +84,8 @@ export function FoodScanForm() {
           {preview ? t.foodChooseAnother : t.foodChoose}
         </label>
       </div>
+
+      <KeepFileChoice mode={keepMode} />
 
       {state.error ? (
         <p

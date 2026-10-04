@@ -4,6 +4,7 @@ import { getConfiguredSiteUrl } from "@/lib/env";
 import { dict, isLang, type Lang } from "@/lib/i18n/dict";
 import { addDays, bangkokDate } from "@/lib/health/dates";
 import { computeStreak } from "@/lib/health/streak";
+import { sweepOrphanFiles } from "@/lib/files/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { buildLineMessage } from "./flex";
 import {
@@ -311,7 +312,12 @@ async function cleanupOld(c: TickCtx): Promise<number> {
       .lt("created_at", cutoff)
       .select("id"),
   ]);
-  return (a.data?.length ?? 0) + (b.data?.length ?? 0);
+  // Kept files whose report/meal was deleted or never attached.
+  const files = await sweepOrphanFiles(c.now).catch((err) => {
+    console.error("[tick] orphan file sweep failed:", err);
+    return 0;
+  });
+  return (a.data?.length ?? 0) + (b.data?.length ?? 0) + files;
 }
 
 function lineDeps(now: Date): DeliverDeps {

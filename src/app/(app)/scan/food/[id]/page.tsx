@@ -2,7 +2,15 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { CircleCheck } from "lucide-react";
-import { confirmMealAction, deleteMealAction } from "@/app/actions/food";
+import {
+  confirmMealAction,
+  deleteMealAction,
+  deleteMealFileAction,
+} from "@/app/actions/food";
+import {
+  SourceFileCard,
+  type SourceFileRef,
+} from "@/components/SourceFileCard";
 import { requireUser } from "@/lib/auth/server";
 import { SERVING_CHOICES, mealTotals, parseStoredItems } from "@/lib/food/food";
 import { fmt } from "@/lib/i18n/dict";
@@ -17,8 +25,10 @@ const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 export default async function MealPage({
   params,
+  searchParams,
 }: PageProps<"/scan/food/[id]">) {
   const { id } = await params;
+  const { file: fileNote } = await searchParams;
   const user = await requireUser();
   if (!UUID.test(id)) notFound();
 
@@ -28,13 +38,14 @@ export default async function MealPage({
     getT(),
     supabase
       .from("meal_logs")
-      .select("id, status, items")
+      .select("id, status, items, source_file:source_files(id, mime)")
       .eq("id", id)
       .eq("user_id", user.id)
       .maybeSingle<{
         id: string;
         status: "draft" | "confirmed";
         items: unknown;
+        source_file: SourceFileRef | null;
       }>(),
   ]);
   if (!meal) notFound();
@@ -42,6 +53,24 @@ export default async function MealPage({
   const items = parseStoredItems(meal.items);
   const totals = mealTotals(items);
   const draft = meal.status === "draft";
+
+  const sourceFile = (
+    <>
+      {fileNote === "failed" ? (
+        <p role="status" className="bg-tint-warn rounded-xl px-3 py-2 text-sm">
+          {t.sourceFileFailed}
+        </p>
+      ) : null}
+      <SourceFileCard t={t} file={meal.source_file}>
+        <form action={deleteMealFileAction}>
+          <input type="hidden" name="mealId" value={meal.id} />
+          <button type="submit" className="btn btn-ghost w-full">
+            {t.sourceFileDelete}
+          </button>
+        </form>
+      </SourceFileCard>
+    </>
+  );
 
   const summary = (
     <div className="card space-y-1">
@@ -77,6 +106,7 @@ export default async function MealPage({
             </li>
           ))}
         </ul>
+        {sourceFile}
         {summary}
         <p className="text-muted text-sm">{t.foodEstimateNote}</p>
         <Link href="/scan/food" className="btn btn-primary w-full">
@@ -157,6 +187,7 @@ export default async function MealPage({
             </li>
           ))}
         </ul>
+        {sourceFile}
         {summary}
         <p className="text-muted text-sm">{t.foodEstimateNote}</p>
         <button type="submit" className="btn btn-primary w-full">

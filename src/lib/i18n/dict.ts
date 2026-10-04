@@ -146,7 +146,8 @@ const th = {
   exportSkipped: "อ่านไม่ได้บางส่วน: {tables}",
   exportNotIncluded1: "ข้อมูลของบุคคลอื่น — คุณไม่มีสิทธิเข้าถึง",
   exportNotIncluded2: "รหัสผ่าน — ระบบไม่ได้เก็บรหัสผ่านที่อ่านได้",
-  exportNotIncluded3: "รูปอาหารและไฟล์ผลตรวจ — วิเคราะห์แล้วไม่ได้เก็บไว้",
+  exportNotIncluded3:
+    "ไฟล์ต้นฉบับที่คุณเลือกเก็บ (รูป/PDF) — เป็นไฟล์เข้ารหัส ในไฟล์ JSON มีเฉพาะรายการไฟล์ เปิดและบันทึกไฟล์ได้จากหน้าผลนั้น ๆ",
   exportNotIncluded4:
     "บันทึกการเข้าสู่ระบบและที่อยู่ IP — จัดการโดยระบบยืนยันตัวตนของผู้ให้บริการ",
   policyBtn: "อ่านนโยบายความเป็นส่วนตัว (มาตรา 23)",
@@ -435,7 +436,7 @@ const th = {
   foodAnalyze: "วิเคราะห์อาหาร",
   foodAnalyzing: "กำลังวิเคราะห์… ใช้เวลาประมาณ 10 วินาที",
   foodPrivacy:
-    "รูปถูกส่งไปให้ AI วิเคราะห์ แล้วจะไม่ถูกเก็บไว้ สิ่งที่บันทึกคือรายการอาหารและค่าประมาณเท่านั้น",
+    "รูปถูกส่งไปให้ AI วิเคราะห์ ถ้าคุณไม่เลือกเก็บ รูปจะไม่ถูกบันทึกไว้ สิ่งที่บันทึกคือรายการอาหารและค่าประมาณเท่านั้น",
   foodReviewTitle: "ตรวจทานมื้อนี้",
   foodReviewHint: "ปรับปริมาณหรือเอารายการที่ไม่ใช่ออกก่อนบันทึก",
   foodServings: "ปริมาณ (เท่าของหนึ่งหน่วยมาตรฐาน)",
@@ -461,7 +462,24 @@ const th = {
   labAnalyze: "อ่านผลตรวจ",
   labAnalyzing: "กำลังอ่านผลตรวจ… อาจใช้เวลาถึง 30 วินาที",
   labPrivacy:
-    "ไฟล์ถูกส่งไปให้ AI อ่านแล้วจะไม่ถูกเก็บไว้ สิ่งที่บันทึกคือค่าที่คุณตรวจทานแล้วเท่านั้น รองรับ PDF และรูป (ไม่เกิน 3 MB)",
+    "ไฟล์ถูกส่งไปให้ AI อ่าน ถ้าคุณไม่เลือกเก็บ ไฟล์จะไม่ถูกบันทึกไว้ สิ่งที่บันทึกคือค่าที่คุณตรวจทานแล้วเท่านั้น รองรับ PDF และรูป (ไม่เกิน 3 MB)",
+  keepTitle: "เก็บไฟล์ต้นฉบับไว้ดูย้อนหลังไหม?",
+  keepYes: "เก็บไว้ (เข้ารหัสในบัญชีของฉัน)",
+  keepNo: "ไม่เก็บ",
+  keepHint:
+    "ถ้าเก็บ ไฟล์จะถูกเข้ารหัสก่อนบันทึก เปิดดูได้เฉพาะคุณเมื่อล็อกอิน และลบได้ทุกเมื่อ ถ้าไม่เก็บ ไฟล์จะไม่ถูกบันทึกไว้เลย",
+  keepNeedsConsent:
+    "อยากเก็บไฟล์ต้นฉบับไว้ดูย้อนหลัง? เปิดความยินยอมเรื่องรูปภาพและไฟล์ได้ที่หน้าตั้งค่า",
+  keepNeedsConsentLink: "ไปที่ตั้งค่า",
+  sourceFileTitle: "ไฟล์ต้นฉบับ",
+  sourceFileNote: "เข้ารหัสไว้ เปิดดูได้เฉพาะคุณ",
+  sourceFileImageAlt: "ไฟล์ต้นฉบับที่ใช้วิเคราะห์",
+  sourceFileOpenPdf: "เปิดไฟล์ PDF ต้นฉบับ",
+  sourceFileDelete: "ลบไฟล์ต้นฉบับ (ผลที่บันทึกไว้ยังอยู่)",
+  sourceFileFailed: "บันทึกไฟล์ต้นฉบับไม่สำเร็จ แต่ผลการวิเคราะห์ยังอยู่ครบ",
+  err_keep_choice: "กรุณาเลือกว่าจะเก็บไฟล์ต้นฉบับไว้หรือไม่",
+  err_keep_unavailable:
+    "ตอนนี้ยังเก็บไฟล์ต้นฉบับไม่ได้ ต้องเปิดความยินยอมเรื่องรูปภาพและไฟล์ในหน้าตั้งค่าก่อน",
   labReviewTitle: "ตรวจทานผลตรวจ",
   labReviewHint:
     "AI อ่านค่าจากเอกสาร อาจอ่านผิดได้ ตรวจเทียบกับเอกสารจริงแล้วแก้ตัวเลขหรือเอารายการที่ผิดออกก่อนบันทึก",
@@ -912,7 +930,8 @@ const en = {
   exportSkipped: "Some parts could not be read: {tables}",
   exportNotIncluded1: "Other people’s data — you have no right to it",
   exportNotIncluded2: "Passwords — the system holds no readable password",
-  exportNotIncluded3: "Food photos and lab files — analysed and not kept",
+  exportNotIncluded3:
+    "Source files you chose to keep (photos/PDFs) — stored encrypted; this JSON lists them, and you open and save each from its own result page",
   exportNotIncluded4:
     "Sign-in logs and IP addresses — managed by the provider’s authentication service",
   policyBtn: "Read the privacy policy (section 23)",
@@ -1211,7 +1230,7 @@ const en = {
   foodAnalyze: "Analyse food",
   foodAnalyzing: "Analysing… about 10 seconds",
   foodPrivacy:
-    "The photo is sent to AI for analysis and is not kept. Only the food list and estimates are saved.",
+    "The photo is sent to AI for analysis. Unless you choose to keep it, it is not stored — only the food list and estimates are saved.",
   foodReviewTitle: "Review this meal",
   foodReviewHint: "Adjust portions or remove wrong items before saving.",
   foodServings: "Portion (times one standard unit)",
@@ -1237,7 +1256,25 @@ const en = {
   labAnalyze: "Read results",
   labAnalyzing: "Reading your results… this can take up to 30 seconds",
   labPrivacy:
-    "The file is sent to AI to be read and is not kept. Only the values you review are saved. PDF and photos are supported (max 3 MB).",
+    "The file is sent to AI to be read. Unless you choose to keep it, it is not stored — only the values you review are saved. PDF and photos are supported (max 3 MB).",
+  keepTitle: "Keep the original file to look back at?",
+  keepYes: "Keep it (encrypted, in my account)",
+  keepNo: "Don’t keep it",
+  keepHint:
+    "If you keep it, the file is encrypted before it is saved, only you can open it when signed in, and you can delete it any time. If you don’t, the file is not saved at all.",
+  keepNeedsConsent:
+    "Want to keep the original file to look back at? Turn on the photo and file consent in Settings.",
+  keepNeedsConsentLink: "Go to Settings",
+  sourceFileTitle: "Original file",
+  sourceFileNote: "Encrypted — only you can open it",
+  sourceFileImageAlt: "The original file used for the analysis",
+  sourceFileOpenPdf: "Open the original PDF",
+  sourceFileDelete: "Delete the original file (saved results stay)",
+  sourceFileFailed:
+    "The original file could not be saved, but your analysis is complete.",
+  err_keep_choice: "Please choose whether to keep the original file.",
+  err_keep_unavailable:
+    "Keeping the original file isn’t possible right now — turn on the photo and file consent in Settings first.",
   labReviewTitle: "Review your results",
   labReviewHint:
     "AI reads the values from the document and can misread. Compare with the original, fix any numbers or remove wrong rows before saving.",

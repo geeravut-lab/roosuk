@@ -4,6 +4,7 @@ import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import AxeBuilder from "@axe-core/playwright";
 import { expect as baseExpect, test, type Page } from "@playwright/test";
 import { OWNED_TABLES } from "../../src/config/user-data";
+import { BUCKET, PNG_1X1, putSourceFile } from "./files-util";
 import { lineSyntheticEmail } from "../../src/lib/line/login";
 
 /**
@@ -133,9 +134,12 @@ async function seed(d: SupabaseClient, userId: string, tag: string) {
     }),
     "actions",
   );
+  // A kept photo (sealed object in Storage + its row), attached to the meal below.
+  const kept = await putSourceFile(d, userId, "food", "image/png", PNG_1X1);
   await ok(
     d.from("meal_logs").insert({
       user_id: userId,
+      source_file_id: kept.id,
       meal_date: "2026-10-10",
       status: "confirmed",
       confirmed_at: new Date().toISOString(),
@@ -283,6 +287,10 @@ async function count(
 test.afterAll(async () => {
   const d = db();
   for (const id of createdIds) {
+    // sealed test files are not removed by deleting the user: do it, like the app's own deletion does
+    const objs = (await d.storage.from(BUCKET).list(id)).data ?? [];
+    if (objs.length)
+      await d.storage.from(BUCKET).remove(objs.map((o) => `${id}/${o.name}`));
     await d.from("user_subscriptions").delete().eq("user_id", id);
     await d.from("payments").delete().eq("user_id", id);
     await d.auth.admin.deleteUser(id);
@@ -356,6 +364,9 @@ test("export is complete and mine only; optional consent appends; deletion erase
   expect(text).not.toContain(other.id);
   expect(text).not.toContain("privacy-other");
   expect(text).not.toContain("reviewed_by");
+  // kept files: listed (metadata) but never the sealed object's path
+  expect(doc.tables.source_files).toHaveLength(1);
+  expect(text).not.toContain("object_path");
   expect(doc.notIncluded.length).toBeGreaterThan(0);
   await expect(page.getByText(/ดาวน์โหลดแล้ว \(\d+ รายการ\)/)).toBeVisible();
   // the export itself was audited
@@ -422,6 +433,8 @@ test("export is complete and mine only; optional consent appends; deletion erase
   expect((await d.auth.admin.getUserById(me.id)).data.user).toBeNull();
   for (const t of OWNED_TABLES.filter((x) => x.onDelete === "erased"))
     expect(await count(d, t.table, t.column, me.id), t.table).toBe(0);
+  // the sealed files are gone from Storage too (the account's cascade cannot reach them)
+  expect((await d.storage.from(BUCKET).list(me.id)).data ?? []).toHaveLength(0);
   // kept, detached from the person
   const money = (
     await d

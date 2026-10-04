@@ -81,6 +81,14 @@ export const OWNED_TABLES: readonly OwnedTable[] = [
     onDelete: "erased",
     countable: true,
   },
+  // Metadata of the files the user chose to keep; the sealed bytes are in Storage and are removed with the account.
+  {
+    table: "source_files",
+    column: "user_id",
+    omit: ["object_path"],
+    onDelete: "erased",
+    countable: true,
+  },
   {
     table: "ai_messages",
     column: "user_id",

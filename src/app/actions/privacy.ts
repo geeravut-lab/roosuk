@@ -13,6 +13,7 @@ import {
   mergeOptionalConsent,
   summariseDeletion,
 } from "@/lib/privacy/privacy";
+import { removeAllUserFiles } from "@/lib/files/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 
@@ -100,6 +101,15 @@ export async function deleteAccountAction(
     meta: { counts },
   });
   if (auditError) return { error: "err_save_failed" };
+
+  // Kept source files live in Storage, not in a table the account's cascade reaches:
+  // remove them first, and stop here if that fails rather than leave sealed files behind.
+  try {
+    await removeAllUserFiles(user.id);
+  } catch (err) {
+    console.error("[privacy] could not remove kept files:", err);
+    return { error: "err_save_failed" };
+  }
 
   const { error } = await db.auth.admin.deleteUser(user.id);
   if (error) {

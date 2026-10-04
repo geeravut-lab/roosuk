@@ -13,6 +13,11 @@ const PORT = 3100;
 // (Harmless elsewhere. Workers and the web server inherit it.)
 process.env.NODE_USE_ENV_PROXY ??= "1";
 
+// A fixed key for the live suite only: the server under test and the specs that seed sealed
+// files must agree on it. Test data, deleted by the specs — never a real key.
+if (process.env.E2E_LIVE === "1")
+  process.env.FILE_ENCRYPTION_KEY ||= "e2e".padEnd(64, "0");
+
 export default defineConfig({
   testDir: "e2e",
   fullyParallel: true,
