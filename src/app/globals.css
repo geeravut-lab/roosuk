@@ -9,35 +9,97 @@
 :root {
   --background: #f7fbfa;
   --foreground: #1f2a30;
+  --surface: #ffffff;
+  --muted: #5b6b73;
+  --line: #d5e5e2;
+  --field-border: #6e8985;
+  --tint-primary: #e3f4f6;
+  --tint-secondary: #e3f8f2;
+  --tint-warn: #fdf1dc;
+  --tint-danger: #fde8e9;
+  --primary: #0a8fa3;
+  --primary-strong: #07707f;
+  --active: #311fff;
+  --tint-active: #ecebff;
+  --flame: #c2410c;
+  --on-primary: #ffffff;
+  --btn-primary-hover: #ff6a59;
   color-scheme: light;
+}
+
+/* Dark: the person's choice (data-theme) wins; "system" (no attribute) follows the device. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --background: #0e191c;
+    --foreground: #e8f0ef;
+    --surface: #15252a;
+    --muted: #9db0b4;
+    --line: #2b4249;
+    --field-border: #6f9096;
+    --tint-primary: #123740;
+    --tint-secondary: #12372f;
+    --tint-warn: #3b2e12;
+    --tint-danger: #421b1f;
+    --primary: #22b3c8;
+    --primary-strong: #5fd2e2;
+    --active: #a9a3ff;
+    --tint-active: #26235e;
+    --flame: #ff9a62;
+    --on-primary: #0e191c;
+    --btn-primary-hover: #ff8f82;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --background: #0e191c;
+  --foreground: #e8f0ef;
+  --surface: #15252a;
+  --muted: #9db0b4;
+  --line: #2b4249;
+  --field-border: #6f9096;
+  --tint-primary: #123740;
+  --tint-secondary: #12372f;
+  --tint-warn: #3b2e12;
+  --tint-danger: #421b1f;
+  --primary: #22b3c8;
+  --primary-strong: #5fd2e2;
+  --active: #a9a3ff;
+  --tint-active: #26235e;
+  --flame: #ff9a62;
+  --on-primary: #0e191c;
+  --btn-primary-hover: #ff8f82;
+  color-scheme: dark;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
 
-  --color-primary: #0a8fa3;
-  --color-primary-strong: #07707f;
+  --color-primary: var(--primary);
+  --color-primary-strong: var(--primary-strong);
   /* Selected menu item: Blustering Blue (owner request, 7.6:1 on white) */
-  --color-active: #311fff;
-  --color-tint-active: #ecebff;
+  --color-active: var(--active);
+  --color-tint-active: var(--tint-active);
   /* Streak flame: coral is too pale for a 3:1 icon on mint tint, so a deeper warm tone (5:1) */
-  --color-flame: #c2410c;
+  --color-flame: var(--flame);
   /* Lab status chips: dark text on a light tint; the border carries the amber / red meaning */
-  --color-tint-warn: #fdf1dc;
-  --color-tint-danger: #fde8e9;
+  --color-tint-warn: var(--tint-warn);
+  --color-tint-danger: var(--tint-danger);
   --color-secondary: #2dd4a7;
   --color-sky: #1e90ff;
   --color-coral: #ff7a6b;
   --color-warn: #f2a93b;
   --color-danger: #e5484d;
+  /* Dark text that stays dark in dark mode: for text on coral / mint fills (they are light in both themes) */
+  --color-on-accent: #1f2a30;
+  --color-on-primary: var(--on-primary);
 
-  --color-surface: #ffffff;
-  --color-muted: #5b6b73;
-  --color-line: #d5e5e2;
-  --color-field-border: #6e8985;
-  --color-tint-primary: #e3f4f6;
-  --color-tint-secondary: #e3f8f2;
+  --color-surface: var(--surface);
+  --color-muted: var(--muted);
+  --color-line: var(--line);
+  --color-field-border: var(--field-border);
+  --color-tint-primary: var(--tint-primary);
+  --color-tint-secondary: var(--tint-secondary);
 
   --font-sans: var(--font-geist-sans), var(--font-noto-sans-thai), sans-serif;
 }
@@ -62,7 +124,7 @@ body {
     @apply inline-flex min-h-11 items-center justify-center gap-2 rounded-xl px-5 text-base font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-60;
   }
   .btn-primary {
-    @apply bg-coral text-foreground hover:bg-[#ff6a59];
+    @apply bg-coral text-on-accent hover:bg-[var(--btn-primary-hover)];
   }
   .btn-secondary {
     @apply border-primary bg-surface text-primary-strong hover:bg-tint-primary border;

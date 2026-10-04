@@ -36,7 +36,7 @@ export function LangSwitch({ className = "" }: { className?: string }) {
           onClick={() => choose(code)}
           className={`min-h-9 min-w-11 rounded-[10px] px-3 text-sm font-semibold transition-colors ${
             code === lang
-              ? "bg-primary-strong text-white"
+              ? "bg-primary-strong text-on-primary"
               : "text-muted hover:bg-tint-primary"
           }`}
         >

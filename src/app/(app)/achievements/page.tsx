@@ -78,7 +78,7 @@ export default async function AchievementsPage() {
                     <p className="font-semibold">
                       {t[nameKey(a.key)]}
                       {on && isNew(on, today) ? (
-                        <span className="bg-coral text-foreground ml-2 rounded-full px-2 py-0.5 text-xs font-semibold">
+                        <span className="bg-coral text-on-accent ml-2 rounded-full px-2 py-0.5 text-xs font-semibold">
                           {t.achievementsNew}
                         </span>
                       ) : null}

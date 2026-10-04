@@ -63,7 +63,7 @@ export default async function NotificationsPage() {
                 <span className="flex items-baseline justify-between gap-3">
                   <span className="font-semibold">
                     {!r.read_at ? (
-                      <span className="bg-coral text-foreground mr-2 rounded-full px-2 py-0.5 text-xs">
+                      <span className="bg-coral text-on-accent mr-2 rounded-full px-2 py-0.5 text-xs">
                         {t.notificationsUnread}
                       </span>
                     ) : null}

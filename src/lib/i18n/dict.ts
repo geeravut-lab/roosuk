@@ -1283,6 +1283,11 @@ const th = {
   err_vault_too_large: "ไฟล์ใหญ่เกินไป (ไม่เกิน 6 MB)",
   flag_health_vault: "แฟ้มสุขภาพ",
   eventName_vault_uploaded: "เก็บเอกสารเข้าแฟ้มสุขภาพ",
+  themeLabel: "ธีมสี",
+  theme_system: "ตามอุปกรณ์",
+  theme_light: "สว่าง",
+  theme_dark: "มืด",
+  settingsTheme: "ธีมสี (จำไว้ในเครื่องนี้)",
 } as const;
 
 export type Dict = { [K in keyof typeof th]: string };
@@ -2590,6 +2595,11 @@ const en = {
   err_vault_too_large: "The file is too large (up to 6 MB).",
   flag_health_vault: "Health vault",
   eventName_vault_uploaded: "Saved a vault document",
+  themeLabel: "Colour theme",
+  theme_system: "Device",
+  theme_light: "Light",
+  theme_dark: "Dark",
+  settingsTheme: "Colour theme (remembered on this device)",
 } satisfies Dict;
 
 export const dict: Record<Lang, Dict> = { th, en };

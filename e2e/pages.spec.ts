@@ -121,3 +121,67 @@ test.describe("accessibility (axe, WCAG 2.1 A/AA)", () => {
     });
   }
 });
+
+test.describe("dark mode", () => {
+  const luminance = async (page: import("@playwright/test").Page) =>
+    page.evaluate(() => {
+      const [r, g, b] = getComputedStyle(document.body)
+        .backgroundColor.match(/\d+/g)!
+        .map(Number);
+      return (r + g + b) / 3;
+    });
+
+  test("follows the device when no choice was made, and a saved choice wins over the device", async ({
+    page,
+    context,
+    baseURL,
+  }) => {
+    await page.emulateMedia({ colorScheme: "dark" });
+    await page.goto("/");
+    expect(await luminance(page)).toBeLessThan(60); // dark background
+    await expect(page.locator("html")).not.toHaveAttribute("data-theme", /.*/);
+
+    await context.addCookies([
+      { name: "roosuk-theme", value: "light", url: baseURL! },
+    ]);
+    await page.goto("/");
+    await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
+    expect(await luminance(page)).toBeGreaterThan(200); // light even on a dark device
+
+    await page.emulateMedia({ colorScheme: "light" });
+    await context.addCookies([
+      { name: "roosuk-theme", value: "dark", url: baseURL! },
+    ]);
+    await page.goto("/");
+    await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
+    expect(await luminance(page)).toBeLessThan(60); // dark even on a light device
+
+    // a junk cookie is ignored
+    await context.addCookies([
+      { name: "roosuk-theme", value: "<script>", url: baseURL! },
+    ]);
+    await page.goto("/");
+    await expect(page.locator("html")).not.toHaveAttribute("data-theme", /.*/);
+  });
+
+  for (const path of ["/", "/auth", "/privacy", "/preview/today"]) {
+    test(`${path} has no serious or critical violations in dark mode`, async ({
+      page,
+    }) => {
+      await page.emulateMedia({ colorScheme: "dark" });
+      await page.goto(path);
+      const results = await new AxeBuilder({ page })
+        .withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"])
+        .analyze();
+      const serious = results.violations.filter(
+        (v) => v.impact === "serious" || v.impact === "critical",
+      );
+      expect(
+        serious.map(
+          (v) =>
+            `${v.id}: ${v.nodes.map((n) => n.target.join(" ")).join(" | ")}`,
+        ),
+      ).toEqual([]);
+    });
+  }
+});

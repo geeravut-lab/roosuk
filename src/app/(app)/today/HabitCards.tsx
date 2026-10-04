@@ -168,7 +168,7 @@ export function ActionsCard({ t, view }: { t: Dict; view: HabitView }) {
               <span
                 className={`flex size-6 shrink-0 items-center justify-center rounded-full border-2 ${
                   a.done
-                    ? "border-primary-strong bg-primary-strong text-white"
+                    ? "border-primary-strong bg-primary-strong text-on-primary"
                     : "border-field-border"
                 }`}
                 aria-hidden
@@ -254,7 +254,7 @@ export function StreakCard({
             key={d.date}
             className={`flex size-9 items-center justify-center rounded-full border-2 text-xs font-semibold ${
               d.done
-                ? "border-primary-strong bg-primary-strong text-white"
+                ? "border-primary-strong bg-primary-strong text-on-primary"
                 : "border-line text-muted"
             }`}
             aria-label={fmt(d.done ? t.streakDayDone : t.streakDayMissed, {

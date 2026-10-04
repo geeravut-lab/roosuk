@@ -46,7 +46,7 @@ export default async function AdminHome() {
         <ReceiptText className="text-primary-strong size-6" aria-hidden />
         <span className="font-semibold">{t.adminPaymentsTitle}</span>
         {count ? (
-          <span className="bg-coral text-foreground ml-auto rounded-full px-2.5 py-1 text-xs font-semibold">
+          <span className="bg-coral text-on-accent ml-auto rounded-full px-2.5 py-1 text-xs font-semibold">
             {fmt(t.adminPaymentsPending, { n: count })}
           </span>
         ) : null}
@@ -58,7 +58,7 @@ export default async function AdminHome() {
         <Stethoscope className="text-primary-strong size-6" aria-hidden />
         <span className="font-semibold">{t.adminLeadsTitle}</span>
         {leads ? (
-          <span className="bg-coral text-foreground ml-auto rounded-full px-2.5 py-1 text-xs font-semibold">
+          <span className="bg-coral text-on-accent ml-auto rounded-full px-2.5 py-1 text-xs font-semibold">
             {fmt(t.adminLeadsOpen, { n: leads })}
           </span>
         ) : null}
@@ -70,7 +70,7 @@ export default async function AdminHome() {
         <FlaskConical className="text-primary-strong size-6" aria-hidden />
         <span className="font-semibold">{t.adminBiomarkersTitle}</span>
         {unknownLabs ? (
-          <span className="bg-coral text-foreground ml-auto rounded-full px-2.5 py-1 text-xs font-semibold">
+          <span className="bg-coral text-on-accent ml-auto rounded-full px-2.5 py-1 text-xs font-semibold">
             {fmt(t.adminBiomarkersQueue, { n: unknownLabs })}
           </span>
         ) : null}

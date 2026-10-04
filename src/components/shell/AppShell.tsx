@@ -83,7 +83,7 @@ export function AppShell({
         <Icon className="size-5 shrink-0" aria-hidden />
         <span className="truncate">{t[item.label]}</span>
         {item.href === "/notifications" && unreadCount > 0 ? (
-          <span className="bg-coral text-foreground ml-auto rounded-full px-2 py-0.5 text-xs font-semibold">
+          <span className="bg-coral text-on-accent ml-auto rounded-full px-2 py-0.5 text-xs font-semibold">
             <span aria-hidden>{unreadCount > 99 ? "99+" : unreadCount}</span>
             <span className="sr-only">
               {fmt(t.notificationsUnreadCount, { n: unreadCount })}
@@ -192,7 +192,7 @@ export function AppShell({
               {unreadCount > 0 ? (
                 <span
                   aria-hidden
-                  className="bg-coral text-foreground absolute top-1.5 right-1 min-w-5 rounded-full px-1 text-center text-xs font-semibold"
+                  className="bg-coral text-on-accent absolute top-1.5 right-1 min-w-5 rounded-full px-1 text-center text-xs font-semibold"
                 >
                   {unreadCount > 99 ? "99+" : unreadCount}
                 </span>
@@ -231,7 +231,7 @@ export function AppShell({
                     className="text-foreground -mt-5 flex flex-col items-center gap-0.5 pb-1.5 text-xs font-semibold"
                   >
                     <span
-                      className={`bg-coral text-foreground ring-surface flex size-14 items-center justify-center rounded-full shadow-md ring-4 ${
+                      className={`bg-coral text-on-accent ring-surface flex size-14 items-center justify-center rounded-full shadow-md ring-4 ${
                         active
                           ? "outline-active outline-2 outline-offset-2"
                           : ""

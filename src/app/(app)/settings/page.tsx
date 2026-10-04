@@ -1,6 +1,9 @@
 import type { Metadata } from "next";
 import { Check, X } from "lucide-react";
+import { cookies } from "next/headers";
 import { LangSwitch } from "@/components/LangSwitch";
+import { ThemeSwitch } from "@/components/ThemeSwitch";
+import { THEME_COOKIE, parseTheme } from "@/lib/theme";
 import { CONSENT_ITEMS, POLICY_VERSION } from "@/config/legal";
 import { DATA_REGION } from "@/config/data-region";
 import { requireUser } from "@/lib/auth/server";
@@ -110,6 +113,12 @@ export default async function SettingsPage({
         <div>
           <p className="text-muted mb-1 text-sm">{t.settingsLanguage}</p>
           <LangSwitch />
+        </div>
+        <div>
+          <p className="text-muted mb-1 text-sm">{t.settingsTheme}</p>
+          <ThemeSwitch
+            current={parseTheme((await cookies()).get(THEME_COOKIE)?.value)}
+          />
         </div>
       </section>
 
