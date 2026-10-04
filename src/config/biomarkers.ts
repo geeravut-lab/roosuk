@@ -608,13 +608,14 @@ export const BIOMARKERS: readonly Biomarker[] = [
   }),
 ];
 
-const BY_KEY = new Map(BIOMARKERS.map((m) => [m.key, m]));
-
-export function biomarkerByKey(
-  key: string | null | undefined,
-): Biomarker | undefined {
-  return key ? BY_KEY.get(key) : undefined;
-}
+/**
+ * The catalog the app judges with: the table above (reviewed, in code) plus any
+ * APPROVED extras an admin/doctor added in /admin/biomarkers (loaded from the
+ * database by src/lib/lab/catalog.server.ts). Extras can only ADD: a key or alias
+ * that the code table already owns is ignored, so an extra can never change how
+ * a known test is judged.
+ */
+let byKey = new Map(BIOMARKERS.map((m) => [m.key, m]));
 
 /** Lower-case, trimmed, punctuation-light form used to match names printed on reports. */
 export function normalizeName(name: string): string {
@@ -625,13 +626,43 @@ export function normalizeName(name: string): string {
     .trim();
 }
 
-const ALIAS = new Map<string, string>();
-for (const m of BIOMARKERS) {
-  for (const a of [...m.aliases, m.en, m.th])
-    ALIAS.set(normalizeName(a), m.key);
+function buildAliases(list: readonly Biomarker[]): Map<string, string> {
+  const map = new Map<string, string>();
+  for (const m of list)
+    for (const a of [...m.aliases, m.en, m.th])
+      map.set(normalizeName(a), m.key);
+  return map;
+}
+
+let alias = buildAliases(BIOMARKERS);
+
+export function setExtraBiomarkers(extras: readonly Biomarker[]): void {
+  const keys = new Set(BIOMARKERS.map((m) => m.key));
+  const names = buildAliases(BIOMARKERS);
+  const accepted: Biomarker[] = [];
+  for (const m of extras) {
+    if (keys.has(m.key)) continue;
+    const mine = [...m.aliases, m.en, m.th].map(normalizeName);
+    if (mine.some((n) => names.has(n))) continue;
+    accepted.push(m);
+    keys.add(m.key);
+    for (const n of mine) names.set(n, m.key);
+  }
+  byKey = new Map([...BIOMARKERS, ...accepted].map((m) => [m.key, m]));
+  alias = buildAliases([...BIOMARKERS, ...accepted]);
+}
+
+export function allBiomarkers(): readonly Biomarker[] {
+  return [...byKey.values()];
+}
+
+export function biomarkerByKey(
+  key: string | null | undefined,
+): Biomarker | undefined {
+  return key ? byKey.get(key) : undefined;
 }
 
 /** Resolve a printed name to a catalog key — exact alias only, so "Glucose, 2-hr PP" never gets fasting ranges. */
 export function biomarkerKeyForName(name: string): string | null {
-  return ALIAS.get(normalizeName(name)) ?? null;
+  return alias.get(normalizeName(name)) ?? null;
 }

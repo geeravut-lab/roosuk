@@ -6,6 +6,7 @@ import {
   deleteLabFileAction,
   deleteLabReportAction,
   explainLabAction,
+  reassessLabReportAction,
 } from "@/app/actions/lab";
 import {
   SourceFileCard,
@@ -20,6 +21,7 @@ import { bangkokDate } from "@/lib/health/dates";
 import { errorText, fmt } from "@/lib/i18n/dict";
 import { formatDate } from "@/lib/i18n/format";
 import { getLang, getT } from "@/lib/i18n/server";
+import { ensureCatalog } from "@/lib/lab/catalog.server";
 import { parseStoredExplanation } from "@/lib/lab/explain";
 import {
   countOutOfRange,
@@ -40,9 +42,10 @@ export default async function LabReportPage({
   searchParams,
 }: PageProps<"/scan/lab/[id]">) {
   const { id } = await params;
-  const { error, file: fileNote } = await searchParams;
+  const { error, file: fileNote, reassessed } = await searchParams;
   const user = await requireUser();
   if (!UUID.test(id)) notFound();
+  await ensureCatalog();
 
   // The user's own client: RLS only returns their rows.
   const supabase = await createClient();
@@ -248,6 +251,24 @@ export default async function LabReportPage({
       ) : null}
 
       {sourceFile}
+
+      {reassessed === "1" || reassessed === "0" ? (
+        <p
+          role="status"
+          className="bg-tint-secondary rounded-xl px-3 py-2 text-sm font-medium"
+        >
+          {reassessed === "1" ? t.labReassessed1 : t.labReassessed0}
+        </p>
+      ) : null}
+      {items.some((i) => i.status === "unknown") ? (
+        <form action={reassessLabReportAction} className="card space-y-2">
+          <input type="hidden" name="reportId" value={report.id} />
+          <p className="text-muted text-sm">{t.labReassessHint}</p>
+          <button type="submit" className="btn btn-secondary w-full">
+            {t.labReassess}
+          </button>
+        </form>
+      ) : null}
 
       {explanation ? (
         <section className="card space-y-2" aria-labelledby="explain-h">

@@ -1,6 +1,6 @@
 import { z } from "zod";
 import {
-  BIOMARKERS,
+  allBiomarkers,
   biomarkerByKey,
   biomarkerKeyForName,
   type Biomarker,
@@ -195,9 +195,9 @@ export const LAB_SCHEMA = {
 } as const;
 
 export function labPrompt(): { system: string; prompt: string } {
-  const catalog = BIOMARKERS.map((m) => `${m.key} = ${m.en} (${m.unit})`).join(
-    "\n",
-  );
+  const catalog = allBiomarkers()
+    .map((m) => `${m.key} = ${m.en} (${m.unit})`)
+    .join("\n");
   return {
     system:
       "You read laboratory result sheets for a Thai health-habit app. " +

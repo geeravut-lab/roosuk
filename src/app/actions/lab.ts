@@ -31,6 +31,7 @@ import {
   LAB_SCHEMA,
   MAX_FILE_BYTES,
   applyLabReview,
+  assess,
   cleanDate,
   isPdf,
   labPrompt,
@@ -43,6 +44,8 @@ import {
   sourceFileOf,
   storeSourceFile,
 } from "@/lib/files/server";
+import { ensureCatalog } from "@/lib/lab/catalog.server";
+import { biomarkerKeyForName } from "@/config/biomarkers";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 
@@ -69,6 +72,7 @@ export async function scanLabAction(
   try {
     const user = await requireUser();
     await assertFeature("lab_scan");
+    await ensureCatalog();
 
     // Asked for every scan; no answer = no scan (and nothing is kept unless it is "keep").
     const keep = formData.get("keepFile");
@@ -159,6 +163,7 @@ export async function scanLabAction(
  */
 export async function confirmLabAction(formData: FormData): Promise<void> {
   const user = await requireUser();
+  await ensureCatalog();
   const id = formData.get("reportId");
   if (typeof id !== "string" || !UUID.test(id))
     throw new AppError("err_invalid_input");
@@ -203,6 +208,19 @@ export async function confirmLabAction(formData: FormData): Promise<void> {
   });
   if (error || n !== reviewed.length) throw new AppError("err_save_failed");
 
+  // Tests the app could not match to its table: counted by name only (no value, no user) so an
+  // admin can see which ones are worth adding. Best effort — never fails the user's save.
+  const unknown = reviewed.filter((i) => i.marker_key === null);
+  if (unknown.length)
+    await db
+      .rpc("record_unknown_markers", {
+        p_items: unknown.map((i) => ({ name: i.name, unit: i.unit })),
+      })
+      .then(({ error: e }) => {
+        if (e)
+          console.error("[lab] could not record unknown markers:", e.message);
+      });
+
   revalidatePath("/timeline");
   redirect(`/scan/lab/${id}`);
 }
@@ -235,6 +253,7 @@ export async function deleteLabReportAction(formData: FormData): Promise<void> {
  */
 export async function explainLabAction(formData: FormData): Promise<void> {
   const user = await requireUser();
+  await ensureCatalog();
   const id = formData.get("reportId");
   if (typeof id !== "string" || !UUID.test(id))
     throw new AppError("err_invalid_input");
@@ -333,4 +352,75 @@ export async function deleteLabFileAction(formData: FormData): Promise<void> {
     throw new AppError("err_save_failed");
   revalidatePath(`/scan/lab/${id}`);
   redirect(`/scan/lab/${id}`);
+}
+
+/**
+ * "Judge again with today's reference table": a test the app did not know when the
+ * report was saved may be known now (an admin added it). Code only — no AI, no
+ * allowance. An explanation written for the old statuses is dropped when any
+ * status changes, so it never contradicts what is shown.
+ */
+export async function reassessLabReportAction(
+  formData: FormData,
+): Promise<void> {
+  const user = await requireUser();
+  const id = formData.get("reportId");
+  if (typeof id !== "string" || !UUID.test(id))
+    throw new AppError("err_invalid_input");
+  await ensureCatalog();
+
+  const db = createAdminClient();
+  const { data: report } = await db
+    .from("lab_reports")
+    .select("items")
+    .eq("id", id)
+    .eq("user_id", user.id)
+    .eq("status", "confirmed")
+    .maybeSingle<{ items: unknown }>();
+  if (!report) throw new AppError("err_payment_state");
+
+  const before = parseStoredLabItems(report.items);
+  const after = before.map((it) => {
+    const marker_key = it.marker_key ?? biomarkerKeyForName(it.name);
+    return {
+      ...it,
+      marker_key,
+      ...assess(marker_key, it.value, it.unit, it.printed_range),
+    };
+  });
+  const changed = after.filter(
+    (a, i) =>
+      a.marker_key !== before[i].marker_key ||
+      a.status !== before[i].status ||
+      a.basis !== before[i].basis,
+  );
+  if (changed.length) {
+    const { data, error } = await db
+      .from("lab_reports")
+      .update({ items: after, explanation: null, explained_at: null })
+      .eq("id", id)
+      .eq("user_id", user.id)
+      .select("id");
+    if (error || data?.length !== 1) throw new AppError("err_save_failed");
+    for (const a of after) {
+      const old = before[after.indexOf(a)];
+      if (a.marker_key === old.marker_key && a.status === old.status) continue;
+      await db
+        .from("lab_results")
+        .update({
+          marker_key: a.marker_key,
+          value_std: a.value_std,
+          status: a.status,
+        })
+        .eq("report_id", id)
+        .eq("user_id", user.id)
+        .eq("name", a.name)
+        .eq("value", a.value);
+    }
+  }
+  revalidatePath(`/scan/lab/${id}`);
+  revalidatePath("/timeline");
+  redirect(
+    `/scan/lab/${id}${changed.length ? "?reassessed=1" : "?reassessed=0"}`,
+  );
 }

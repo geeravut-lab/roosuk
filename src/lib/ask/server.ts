@@ -8,6 +8,7 @@ import {
   profileForPrompt,
   type HealthProfile,
 } from "@/lib/profile/profile";
+import { ensureCatalog } from "@/lib/lab/catalog.server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { buildContext, type ContextLab } from "./context";
 
@@ -17,6 +18,7 @@ import { buildContext, type ContextLab } from "./context";
  * plain-text context with no identifiers (see buildContext).
  */
 export async function loadChatContext(userId: string): Promise<string> {
+  await ensureCatalog();
   const db = createAdminClient();
   const today = bangkokDate(new Date());
   const [profile, checkins, labs] = await Promise.all([

@@ -162,6 +162,8 @@ export const OWNED_TABLES: readonly OwnedTable[] = [
 export const INTERNAL_USER_REFERENCES: readonly string[] = [
   "ai_settings.updated_by",
   "ai_prompt_versions.created_by",
+  "biomarker_extras.approved_by",
+  "biomarker_extras.created_by",
   "automation_rules.updated_by",
   "notification_settings.updated_by",
   "platform_settings.updated_by",

@@ -233,6 +233,16 @@ const th = {
   err_oauth_failed: "เข้าสู่ระบบไม่สำเร็จ กรุณาลองใหม่อีกครั้ง",
   err_line_failed: "เข้าสู่ระบบด้วย LINE ไม่สำเร็จ กรุณาลองใหม่อีกครั้ง",
   err_line_unavailable: "ยังไม่เปิดให้เข้าสู่ระบบด้วย LINE",
+  err_marker_invalid:
+    "ข้อมูลไม่ครบหรือไม่ถูกต้อง (ชื่อ หน่วย ชื่อเรียกอื่น หรือการแปลงหน่วย)",
+  err_marker_range:
+    "ช่วงค่าไม่สมเหตุสมผล (ต้องมีขอบเขตปกติอย่างน้อยหนึ่งด้าน ค่าต่ำ < ค่าสูง และช่วงเฝ้าระวังต้องกว้างกว่าช่วงปกติ)",
+  err_marker_key_taken: "รหัสนี้ถูกใช้แล้ว (โดยตารางในโค้ดหรือรายการอื่น)",
+  err_marker_alias_taken:
+    "ชื่อเรียกนี้ตรงกับรายการอื่นที่มีอยู่แล้ว ใช้ซ้ำไม่ได้",
+  err_marker_source:
+    "ต้องระบุที่มาของช่วงค่า (เช่น เอกสารอ้างอิงหรือใบตรวจของแล็บ)",
+  err_marker_doctor: "ต้องติ๊กยืนยันว่าแพทย์ตรวจและรับรองช่วงค่านี้แล้ว",
   err_line_cancelled:
     "คุณยกเลิกการเชื่อมต่อกับ LINE หรือ LINE ไม่อนุญาต ลองใหม่อีกครั้งได้",
   err_line_expired:
@@ -695,6 +705,65 @@ const th = {
   // ── admin
   adminTitle: "ผู้ดูแลระบบ",
   adminFlagsTitle: "สวิตช์ฟีเจอร์",
+  adminBiomarkersTitle: "ค่าอ้างอิงแล็บที่เพิ่มเอง",
+  adminBiomarkersHint:
+    "รายการแล็บที่ผู้ใช้สแกนเข้ามาแต่ระบบยังไม่รู้จัก แอดมินหรือแพทย์เพิ่มช่วงค่าได้ที่นี่โดยไม่ต้อง deploy ระบบไม่เรียนรู้เองและไม่ใช้ช่วงค่าที่ยังไม่มีใครรับรอง",
+  adminBiomarkersQueue: "รอพิจารณา {n} รายการ",
+  bmUnknownTitle: "รายการที่ระบบยังไม่รู้จัก",
+  bmUnknownHint:
+    "นับจากรายงานที่ผู้ใช้ยืนยันแล้ว เก็บเฉพาะชื่อที่พิมพ์ในใบตรวจและจำนวนครั้ง ไม่มีค่าตรวจและไม่ระบุตัวผู้ใช้",
+  bmUnknownNone: "ยังไม่มีรายการที่ไม่รู้จัก",
+  bmSeen: "พบ {n} ครั้ง",
+  bmUnitSeen: "หน่วยที่เห็น: {unit}",
+  bmCreate: "สร้างค่าอ้างอิง",
+  bmIgnore: "ละเว้น",
+  bmRestore: "นำกลับมา",
+  bmIgnoredTitle: "ที่ละเว้นไว้",
+  bmExtrasTitle: "ค่าอ้างอิงที่เพิ่มเอง",
+  bmExtrasNone: "ยังไม่มี",
+  bmStatusDraft: "ร่าง (ยังไม่ใช้ตัดสินค่า)",
+  bmStatusApproved: "รับรองแล้ว (ใช้ตัดสินค่าจริง)",
+  bmApprovedAt: "รับรองเมื่อ {when}",
+  bmRange: "ปกติ {normal} · เฝ้าระวัง {watch}",
+  bmOpen: "ไม่จำกัด",
+  bmSourceShown: "ที่มา: {source}",
+  bmFormNew: "เพิ่มรายการใหม่",
+  bmFormEdit: "แก้ไข",
+  bmEditNote: "การแก้ไขรายการที่รับรองแล้วจะถอนการรับรอง ต้องรับรองใหม่",
+  bmFieldKey: "รหัส (ตัวเล็กภาษาอังกฤษ เว้นว่างให้ตั้งจากชื่อ)",
+  bmFieldTh: "ชื่อภาษาไทย",
+  bmFieldEn: "ชื่อภาษาอังกฤษ",
+  bmFieldUnit: "หน่วยของช่วงค่า",
+  bmNormalLo: "ปกติ ตั้งแต่ (เว้นว่าง = ไม่จำกัด)",
+  bmNormalHi: "ปกติ ไม่เกิน (เว้นว่าง = ไม่จำกัด)",
+  bmWatchLo: "เฝ้าระวัง ตั้งแต่ (กว้างกว่าช่วงปกติ)",
+  bmWatchHi: "เฝ้าระวัง ไม่เกิน",
+  bmAliases: "ชื่อที่ใบตรวจพิมพ์ (บรรทัดละชื่อ)",
+  bmConversions:
+    "หน่วยอื่นที่แปลงได้ (บรรทัดละหน่วย เช่น mmol/L = 18.016 คือคูณเลขด้วยค่านี้แล้วได้หน่วยของช่วงค่า)",
+  bmSource: "ที่มาของช่วงค่า (บังคับ)",
+  bmSave: "บันทึกเป็นร่าง",
+  bmSuggest: "ให้ AI ร่างช่วงค่า (ต้องให้แพทย์ตรวจ)",
+  bmSuggesting: "กำลังร่าง…",
+  bmSuggestUnknown:
+    "AI ไม่แน่ใจเกี่ยวกับรายการนี้ จึงไม่เติมให้ (ถูกต้องแล้ว ช่วงที่ผิดแย่กว่าไม่มีช่วง)",
+  bmSuggestUnavailable: "ตอนนี้ขอร่างจาก AI ไม่ได้",
+  bmSuggestKnown: "รายการนี้มีในตารางของระบบอยู่แล้ว",
+  bmSuggestFilled:
+    "เติมร่างจาก AI แล้ว ยังไม่ได้บันทึก ตรวจและแก้ก่อน และต้องใส่ที่มาจากแหล่งที่แพทย์ยอมรับ",
+  bmDraftNote:
+    "ร่างจาก AI ไม่ใช่ข้อมูลทางการแพทย์ที่รับรอง ห้ามรับรองโดยไม่ตรวจกับแหล่งอ้างอิง",
+  bmSaved: "บันทึกเป็นร่างแล้ว (รหัส {key}) ยังไม่ใช้ตัดสินค่าจนกว่าจะรับรอง",
+  bmDoctor: "แพทย์ตรวจและรับรองช่วงค่านี้แล้ว",
+  bmApprove: "รับรองและเริ่มใช้",
+  bmWithdraw: "ถอนการรับรอง",
+  bmDelete: "ลบ",
+  bmEdit: "แก้ไขรายการนี้",
+  labReassess: "ประเมินใหม่ด้วยค่าอ้างอิงล่าสุด",
+  labReassessHint:
+    'ถ้าแอดมินเพิ่มรายการที่เคยขึ้น "ไม่ได้ประเมิน" แล้ว กดเพื่อประเมินรายงานนี้ใหม่ (ไม่ใช้สิทธิ์ AI)',
+  labReassessed1: "ประเมินใหม่แล้ว มีรายการที่เปลี่ยนไป",
+  labReassessed0: "ประเมินใหม่แล้ว ไม่มีรายการที่เปลี่ยนจากเดิม",
   scanBodyTitle: "สแกนร่างกาย",
   scanBodyDesc:
     "ใส่ส่วนสูงแล้วถ่ายรูปเต็มตัว ให้ AI ประเมินน้ำหนักและ BMI โดยประมาณ (เพิ่มรูปหน้าหรือฝ่ามือเพื่อข้อสังเกตเบื้องต้นได้)",
@@ -1288,6 +1357,18 @@ const en = {
   err_oauth_failed: "Sign-in failed. Please try again.",
   err_line_failed: "Sign-in with LINE failed. Please try again.",
   err_line_unavailable: "Sign-in with LINE is not available yet.",
+  err_marker_invalid:
+    "Some details are missing or invalid (names, unit, alternative names or unit conversions).",
+  err_marker_range:
+    "The range does not make sense (at least one normal bound, low < high, and the watch band must be wider than normal).",
+  err_marker_key_taken:
+    "This key is already used (by the code table or another entry).",
+  err_marker_alias_taken:
+    "This name matches another test that already exists and cannot be reused.",
+  err_marker_source:
+    "The source of the range is required (a guideline, or the lab’s own sheet).",
+  err_marker_doctor:
+    "Please tick that a physician checked and approved this range.",
   err_line_cancelled:
     "You cancelled the LINE connection, or LINE did not allow it. You can try again.",
   err_line_expired:
@@ -1768,6 +1849,67 @@ const en = {
 
   adminTitle: "Admin",
   adminFlagsTitle: "Feature switches",
+  adminBiomarkersTitle: "Added lab reference ranges",
+  adminBiomarkersHint:
+    "Lab tests users scanned that the app does not know. An admin or physician can add a range here without a deploy. The app never learns by itself and never uses a range nobody has approved.",
+  adminBiomarkersQueue: "{n} waiting",
+  bmUnknownTitle: "Tests the app does not know yet",
+  bmUnknownHint:
+    "Counted from reports users confirmed: only the printed name and how many times — no values, no user.",
+  bmUnknownNone: "No unknown tests yet.",
+  bmSeen: "seen {n} times",
+  bmUnitSeen: "unit seen: {unit}",
+  bmCreate: "Create a range",
+  bmIgnore: "Ignore",
+  bmRestore: "Bring back",
+  bmIgnoredTitle: "Ignored",
+  bmExtrasTitle: "Added ranges",
+  bmExtrasNone: "None yet.",
+  bmStatusDraft: "Draft (not used to judge values)",
+  bmStatusApproved: "Approved (judges real values)",
+  bmApprovedAt: "Approved {when}",
+  bmRange: "normal {normal} · watch {watch}",
+  bmOpen: "open",
+  bmSourceShown: "Source: {source}",
+  bmFormNew: "Add a test",
+  bmFormEdit: "Edit",
+  bmEditNote:
+    "Editing an approved test withdraws its approval; it must be approved again.",
+  bmFieldKey: "Key (lower-case letters; leave blank to derive from the name)",
+  bmFieldTh: "Thai name",
+  bmFieldEn: "English name",
+  bmFieldUnit: "Unit of the range",
+  bmNormalLo: "Normal from (blank = open)",
+  bmNormalHi: "Normal up to (blank = open)",
+  bmWatchLo: "Watch from (wider than normal)",
+  bmWatchHi: "Watch up to",
+  bmAliases: "Names printed on reports (one per line)",
+  bmConversions:
+    "Other units it can convert from (one per line, e.g. mmol/L = 18.016 — multiply by this to get the range’s unit)",
+  bmSource: "Source of the range (required)",
+  bmSave: "Save as draft",
+  bmSuggest: "Let AI draft the range (a physician must check it)",
+  bmSuggesting: "Drafting…",
+  bmSuggestUnknown:
+    "The AI is not sure about this test, so it filled nothing (correct — a wrong range is worse than none).",
+  bmSuggestUnavailable: "A draft from AI is not available right now.",
+  bmSuggestKnown: "This test is already in the app’s table.",
+  bmSuggestFilled:
+    "AI draft filled in, not saved. Check and edit it, and give a source a physician accepts.",
+  bmDraftNote:
+    "An AI draft is not approved medical data. Never approve without checking a reference.",
+  bmSaved:
+    "Saved as a draft (key {key}). It is not used to judge values until approved.",
+  bmDoctor: "A physician has checked and approved this range",
+  bmApprove: "Approve and start using",
+  bmWithdraw: "Withdraw approval",
+  bmDelete: "Delete",
+  bmEdit: "Edit this test",
+  labReassess: "Judge again with the latest reference table",
+  labReassessHint:
+    'If an admin has added a test that showed "not assessed", tap to judge this report again (no AI allowance used).',
+  labReassessed1: "Judged again — some items changed.",
+  labReassessed0: "Judged again — nothing changed.",
   scanBodyTitle: "Scan your body",
   scanBodyDesc:
     "Enter your height and take a full-body photo; AI gives a rough weight and BMI (add a face or palm photo for basic observations).",
