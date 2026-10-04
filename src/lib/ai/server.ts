@@ -3,7 +3,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { createAnthropicAdapter } from "./adapters/anthropic";
 import { createGoogleAdapter } from "./adapters/google";
 import { apiKeyFor } from "./registry";
-import { runAiWith, type AiEventInput, type RunDeps } from "./run";
+import { errorReason, runAiWith, type AiEventInput, type RunDeps } from "./run";
 import { DEFAULT_AI_SETTINGS, parseAiSettings, type AiSettings } from "./route";
 import {
   AiError,
@@ -135,15 +135,17 @@ export async function testModel(
     return { ok: res.text.trim().length > 0, ms: Date.now() - started };
   } catch (err) {
     const status = (err as { status?: unknown })?.status;
+    const reason = errorReason(err);
+    const base =
+      typeof status === "number"
+        ? String(status)
+        : err instanceof AiError
+          ? err.code
+          : "error";
     return {
       ok: false,
       ms: Date.now() - started,
-      error:
-        typeof status === "number"
-          ? String(status)
-          : err instanceof AiError
-            ? err.code
-            : "error",
+      error: reason ? `${base} ${reason}` : base,
     };
   }
 }

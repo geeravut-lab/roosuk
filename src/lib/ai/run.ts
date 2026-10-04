@@ -52,6 +52,39 @@ export function eventCode(error: unknown): string | null {
   return errorStatus(error) ?? (error as AiError)?.code ?? null;
 }
 
+/**
+ * A provider's machine-readable reason for an error (e.g. UNAUTHENTICATED,
+ * API_KEY_INVALID, CREDENTIALS_MISSING), pulled from the JSON error body that
+ * the SDKs put in `message`. Only upper-case/lower-case identifiers are returned
+ * — never free text, which could echo request details — so it is safe to show
+ * an admin when a "Test" fails with a bare 401/403.
+ */
+export function errorReason(error: unknown): string | null {
+  const message = String((error as { message?: unknown })?.message ?? "");
+  const start = message.indexOf("{");
+  if (start < 0) return null;
+  let body: unknown;
+  try {
+    body = JSON.parse(message.slice(start));
+  } catch {
+    return null;
+  }
+  const err = (body as { error?: Record<string, unknown> })?.error;
+  if (!err || typeof err !== "object") return null;
+  const id = /^[A-Za-z][A-Za-z0-9_]{2,60}$/;
+  const details = Array.isArray(err.details) ? err.details : [];
+  const reason = details
+    .map((d) => (d as { reason?: unknown })?.reason)
+    .find((r): r is string => typeof r === "string" && id.test(r));
+  const status = typeof err.status === "string" && id.test(err.status);
+  const type = typeof err.type === "string" && id.test(err.type);
+  return (
+    [status ? err.status : null, reason ?? (type ? err.type : null)]
+      .filter(Boolean)
+      .join(" / ") || null
+  );
+}
+
 const short = (e: unknown) =>
   String((e as { message?: unknown })?.message ?? e).slice(0, 200);
 

@@ -5,7 +5,7 @@ import {
 } from "./adapters/anthropic";
 import { buildGoogleParams, parseGoogleResponse } from "./adapters/google";
 import { PROVIDERS, TASK_ROUTES, apiKeyFor } from "./registry";
-import { runAiWith, type AiEventInput, type RunDeps } from "./run";
+import { errorReason, runAiWith, type AiEventInput, type RunDeps } from "./run";
 import {
   DEFAULT_AI_SETTINGS,
   parseAiSettings,
@@ -472,5 +472,39 @@ describe("runAiWith", () => {
     });
     expect(events[0]).toMatchObject({ errorCode: "no_api_key" });
     expect(a.anthropic.call).not.toHaveBeenCalled();
+  });
+});
+
+describe("errorReason", () => {
+  const body = (o: unknown) =>
+    new Error(`got status: 401. ${JSON.stringify(o)}`);
+  it("extracts the provider's status and reason identifiers from the JSON error body", () => {
+    expect(
+      errorReason(
+        body({
+          error: {
+            code: 401,
+            message: "secret key AIza123 is bad",
+            status: "UNAUTHENTICATED",
+            details: [{ reason: "CREDENTIALS_MISSING" }],
+          },
+        }),
+      ),
+    ).toBe("UNAUTHENTICATED / CREDENTIALS_MISSING");
+    expect(
+      errorReason(
+        body({ error: { type: "authentication_error", message: "x" } }),
+      ),
+    ).toBe("authentication_error");
+  });
+  it("never returns free text and tolerates anything else", () => {
+    expect(
+      errorReason(
+        body({ error: { status: "bad status with AIza key", message: "m" } }),
+      ),
+    ).toBeNull();
+    expect(errorReason(new Error("plain failure"))).toBeNull();
+    expect(errorReason(new Error("{not json"))).toBeNull();
+    expect(errorReason(undefined)).toBeNull();
   });
 });
