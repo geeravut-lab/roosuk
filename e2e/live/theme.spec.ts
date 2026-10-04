@@ -3,7 +3,7 @@ import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import AxeBuilder from "@axe-core/playwright";
 import { expect as baseExpect, test, type Page } from "@playwright/test";
 import { lineSyntheticEmail } from "../../src/lib/line/login";
-import { BUCKET, PDF_MIN, objectExists, putSourceFile } from "./files-util";
+import { BUCKET } from "./files-util";
 
 /**
  * Live dark mode: the Settings switch saves the choice (a cookie) and every
@@ -14,7 +14,6 @@ const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 const enabled =
   process.env.E2E_LIVE === "1" && !!url && !!anonKey && !!serviceKey;
-const cronSecret = process.env.CRON_SECRET;
 
 const expect = baseExpect.configure({ timeout: 20_000 });
 
