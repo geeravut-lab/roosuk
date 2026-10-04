@@ -467,7 +467,9 @@ try {
     // an admin: More sheet → "ผู้ดูแลระบบ"
     await signInAndConsent(page, admin);
     await page.waitForLoadState("networkidle");
-    await shot("access-2-today");
+    await shot("access-2-today", {
+      highlight: page.getByRole("button", { name: "เพิ่มเติม" }),
+    });
     await page.getByRole("button", { name: "เพิ่มเติม" }).click();
     const link = page
       .getByRole("dialog")
@@ -556,7 +558,10 @@ try {
       scrollTo: q1.getByRole("button", { name: "ยืนยันว่าได้รับเงิน" }),
     });
     await q1.getByRole("button", { name: "ยืนยันว่าได้รับเงิน" }).click();
-    await page.getByText("ไม่มีรายการรอตรวจ").waitFor();
+    await page
+      .locator("#history-h + ul li")
+      .filter({ hasText: "SCB-4821" })
+      .waitFor();
     await page.waitForLoadState("networkidle");
     await shot("payments-8-history", { scrollTo: page.locator("#history-h") });
 
@@ -599,6 +604,9 @@ try {
     });
     await c1.getByRole("button", { name: "บันทึก" }).click();
     await page.waitForLoadState("networkidle");
+    // (the status box can still show the old value right after saving; a reload shows what is stored)
+    await sleep(1500);
+    await go("/admin/leads");
     await shot("leads-4-saved", {
       highlight: page
         .locator("li.card")
@@ -729,10 +737,10 @@ try {
     await go("/admin/paywall");
     await shot("paywall-1-top");
     await shot("paywall-2-results", { scrollTo: page.locator("#pw-res") });
-    await page.getByLabel("ทุกคนเห็น B").check();
+    await page.getByLabel("ทุกคนเห็น B", { exact: true }).check();
     await shot("paywall-3-pick", {
-      highlight: page.getByLabel("ทุกคนเห็น B"),
-      scrollTo: page.getByLabel("ทุกคนเห็น B"),
+      highlight: page.getByLabel("ทุกคนเห็น B", { exact: true }),
+      scrollTo: page.getByLabel("ทุกคนเห็น B", { exact: true }),
     });
     await page.getByRole("button", { name: "บันทึก", exact: true }).click();
     await page
@@ -752,7 +760,7 @@ try {
         .last();
       await r.shot("paywall-5-user-b", { scrollTo: gold });
     });
-    await page.getByLabel("ทุกคนเห็น A").check();
+    await page.getByLabel("ทุกคนเห็น A", { exact: true }).check();
     await page.getByRole("button", { name: "บันทึก", exact: true }).click();
     await page
       .getByRole("status")
@@ -768,7 +776,7 @@ try {
       await r.shot("paywall-6-user-a", { scrollTo: gold });
     });
     // back to the split the owner had
-    await page.getByLabel("แบ่งครึ่ง A/B").check();
+    await page.getByLabel("แบ่งครึ่ง A/B", { exact: true }).check();
     await page.getByRole("button", { name: "บันทึก", exact: true }).click();
     await page
       .getByRole("status")
@@ -825,11 +833,9 @@ try {
     await signInAgain(admin);
     await go("/admin/prompts");
     await shot("prompts-1-top");
-    const card = page
-      .locator("li.card")
-      .filter({
-        has: page.getByRole("heading", { name: "สร้างคำแนะนำรายวัน" }),
-      });
+    const card = page.locator("li.card").filter({
+      has: page.getByRole("heading", { name: "สร้างคำแนะนำรายวัน" }),
+    });
     await card.getByText("คำสั่งหลักของระบบ (อ่านอย่างเดียว)").click();
     await shot("prompts-2-builtin", {
       highlight: card.locator("pre").first(),
@@ -874,20 +880,16 @@ try {
           .gt("id", made.baseline.promptMax)
       ).data ?? [];
     if (saved.length === 0)
-      await d
-        .from("ai_prompt_versions")
-        .insert({
-          task: "daily_plan",
-          body: 'ใช้ภาษาที่อบอุ่น กระชับ และลงท้ายด้วย "ค่ะ" ทุกประโยค (ตัวอย่างสำหรับคู่มือ)',
-          created_by: admin.id,
-          review: { verdict: "ok", reasons: [], model: "manual-demo" },
-        });
-    await go("/admin/prompts");
-    const card2 = page
-      .locator("li.card")
-      .filter({
-        has: page.getByRole("heading", { name: "สร้างคำแนะนำรายวัน" }),
+      await d.from("ai_prompt_versions").insert({
+        task: "daily_plan",
+        body: 'ใช้ภาษาที่อบอุ่น กระชับ และลงท้ายด้วย "ค่ะ" ทุกประโยค (ตัวอย่างสำหรับคู่มือ)',
+        created_by: admin.id,
+        review: { verdict: "ok", reasons: [], model: "manual-demo" },
       });
+    await go("/admin/prompts");
+    const card2 = page.locator("li.card").filter({
+      has: page.getByRole("heading", { name: "สร้างคำแนะนำรายวัน" }),
+    });
     await card2.getByText("ประวัติการแก้ไข").click();
     await shot("prompts-7-saved-history", {
       highlight: card2.getByText("ประวัติการแก้ไข"),
@@ -1150,7 +1152,9 @@ try {
       highlight: page.locator("#photos"),
       scrollTo: page.locator("#photos"),
     });
-    await page.getByRole("button", { name: /เลือกรูป/ }).click();
+    await page
+      .locator("button.btn", { hasText: /เลือกรูป|กำลังอัปโหลด/ })
+      .click();
     await page
       .getByRole("status")
       .filter({ hasText: "อัปโหลดแล้ว 2 รูป" })

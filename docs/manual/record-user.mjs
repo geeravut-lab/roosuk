@@ -64,6 +64,10 @@ async function chapter(name, fn) {
 // ── tiny page helpers ──────────────────────────────────────────────────────────
 const settle = async (page) => {
   await page.waitForLoadState("networkidle").catch(() => {});
+  await page
+    .getByText("กำลังโหลด…", { exact: true })
+    .waitFor({ state: "hidden", timeout: 10_000 })
+    .catch(() => {});
 };
 const go = async (page, path) => {
   await page.goto(path);
@@ -107,6 +111,7 @@ async function main() {
       color: { dark: "#1F2A30", light: "#FFFFFF" },
     },
   );
+  await installHostRewrite(ctx);
   await ctx.route(/promptpay\.io/, (route) =>
     route.fulfill({ status: 200, contentType: "image/png", body: sampleQr }),
   );
@@ -153,6 +158,7 @@ async function main() {
     M: null,
     B: null,
     F: null,
+    sampleQr,
   };
 
   // The main person is created by really signing up in the onboarding chapter; --quick makes it directly.
@@ -188,6 +194,7 @@ async function onboarding(S) {
     locale: "th-TH",
     baseURL: BASE,
   });
+  await installHostRewrite(fresh);
   await fresh.route(/promptpay\.io/, (r) => r.abort());
   const p = await fresh.newPage();
   p.setDefaultTimeout(15_000);
@@ -285,7 +292,67 @@ async function onboarding(S) {
 }
 
 /** The app runs on localhost here; a manual should show the real address. Text only, applied just before a screenshot. */
+/** Keeps the displayed address "https://roosuk.netlify.app" in every page of a browser context (text only; links are untouched). */
+async function installHostRewrite(c) {
+  await c.addInitScript(
+    ([from, to]) => {
+      const fix = (root) => {
+        const w = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+        for (let n = w.nextNode(); n; n = w.nextNode())
+          if (n.nodeValue.includes(from))
+            n.nodeValue = n.nodeValue.split(from).join(to);
+      };
+      const start = () => {
+        fix(document.body);
+        new MutationObserver((muts) => {
+          for (const m of muts) {
+            if (m.type === "characterData" && m.target.nodeValue.includes(from))
+              m.target.nodeValue = m.target.nodeValue.split(from).join(to);
+            for (const n of m.addedNodes)
+              if (n.nodeType === 1) fix(n);
+              else if (n.nodeType === 3 && n.nodeValue.includes(from))
+                n.nodeValue = n.nodeValue.split(from).join(to);
+          }
+        }).observe(document.body, {
+          childList: true,
+          characterData: true,
+          subtree: true,
+        });
+      };
+      if (document.body) start();
+      else document.addEventListener("DOMContentLoaded", start);
+    },
+    ["http://localhost:3101", "https://roosuk.netlify.app"],
+  );
+}
+
+async function waitIdle(pg) {
+  // the global "loading page" pill and any spinner of a running form must be gone before a shot is taken
+  await pg
+    .getByText("กำลังโหลด…", { exact: true })
+    .waitFor({ state: "hidden", timeout: 10_000 })
+    .catch(() => {});
+  await pg
+    .waitForFunction(() => !document.querySelector(".animate-spin"), null, {
+      timeout: 10_000,
+    })
+    .catch(() => {});
+}
+async function waitImages(pg) {
+  await waitIdle(pg);
+  await pg.evaluate(() => {
+    for (const i of document.images) i.loading = "eager";
+  });
+  await pg
+    .waitForFunction(
+      () => [...document.images].every((i) => i.complete),
+      null,
+      { timeout: 8000 },
+    )
+    .catch(() => {});
+}
 async function rewriteHost(pg) {
+  await waitImages(pg);
   await pg.evaluate(
     ([from, to]) => {
       const w = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
@@ -307,7 +374,10 @@ async function session(S, user, { photos = false } = {}) {
     locale: "th-TH",
     baseURL: BASE,
   });
-  await c.route(/promptpay\.io/, (r) => r.abort());
+  await installHostRewrite(c);
+  await c.route(/promptpay\.io/, (r) =>
+    r.fulfill({ status: 200, contentType: "image/png", body: S.sampleQr }),
+  );
   const pg = await c.newPage();
   pg.setDefaultTimeout(15_000);
   await signInAndConsent(pg, user, { photos });
@@ -447,6 +517,7 @@ async function today(S) {
     highlight: first,
   });
   await first.getByRole("button", { name: /ทำแล้ว/ }).click();
+  await first.getByRole("button", { name: /ยกเลิกการติ๊ก/ }).waitFor();
   await settle(page);
   await shot("31-today-action-done", {
     scrollTo: page.getByRole("heading", { name: "3 สิ่งที่ควรทำวันนี้" }),
@@ -1177,16 +1248,14 @@ register("ask", async (S) => {
     ],
   ];
   for (const [role, content, flag] of msgs) {
-    const r = await admin
-      .from("ai_messages")
-      .insert({
-        conversation_id: cid,
-        user_id: M.id,
-        role,
-        content: content,
-        flag,
-        model: "sample/none",
-      });
+    const r = await admin.from("ai_messages").insert({
+      conversation_id: cid,
+      user_id: M.id,
+      role,
+      content: content,
+      flag,
+      model: "sample/none",
+    });
     if (r.error) throw r.error;
   }
   await go(page, "/ask");
@@ -1237,16 +1306,14 @@ register("agent", async (S) => {
     ],
   ];
   for (const [role, content, flag] of rows) {
-    const r = await admin
-      .from("ai_messages")
-      .insert({
-        conversation_id: cid,
-        user_id: M.id,
-        role,
-        content,
-        flag,
-        model: "sample/none",
-      });
+    const r = await admin.from("ai_messages").insert({
+      conversation_id: cid,
+      user_id: M.id,
+      role,
+      content,
+      flag,
+      model: "sample/none",
+    });
     if (r.error) throw r.error;
   }
   const rem = await admin
@@ -1526,7 +1593,9 @@ register("passport", async (S) => {
   await shot("156-passport-created", {
     highlight: page.getByRole("img", { name: "QR ของลิงก์พาสปอร์ตสุขภาพ" }),
   });
-  const url = (await page.getByTestId("passport-url").innerText()).trim();
+  const url = (await page.getByTestId("passport-url").innerText())
+    .trim()
+    .replace("https://roosuk.netlify.app", BASE);
   await shot("157-passport-link", {
     scrollTo: page.getByTestId("passport-url"),
     highlight: page.getByTestId("passport-url"),
@@ -1539,6 +1608,7 @@ register("passport", async (S) => {
     hasTouch: true,
     locale: "th-TH",
   });
+  await installHostRewrite(doctor);
   const dp = await doctor.newPage();
   dp.setDefaultTimeout(15_000);
   await dp.goto(url);
@@ -1698,6 +1768,942 @@ register("wearables", async (S) => {
     scrollTo: btn(page, "ลบข้อมูลจากอุปกรณ์ทั้งหมดของฉัน"),
     highlight: btn(page, "ลบข้อมูลจากอุปกรณ์ทั้งหมดของฉัน"),
   });
+});
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// helpers for the account chapters
+// ═══════════════════════════════════════════════════════════════════════════════
+const getB = async (S) => (S.B ??= await newUser("คุณใจดี"));
+const openMore = async (page) => {
+  await page.getByRole("button", { name: "เพิ่มเติม", exact: true }).click();
+  await page.getByRole("dialog").waitFor();
+};
+const fromMore = async (S, label, urlRe) => {
+  const { page } = S;
+  await go(page, "/today");
+  await openMore(page);
+  await page.getByRole("dialog").getByRole("link", { name: label }).click();
+  await page.waitForURL(urlRe, { waitUntil: "commit" });
+  await settle(page);
+};
+const setPaidPremium = async (S, userId) => {
+  const r = await S.admin
+    .from("profiles")
+    .update({
+      plan_tier: "premium",
+      plan_expires_at: new Date(Date.now() + 30 * 86_400_000).toISOString(),
+    })
+    .eq("id", userId)
+    .select("id");
+  if (r.error || r.data.length !== 1)
+    throw new Error("could not set the paid plan");
+};
+const endTrial = async (S, userId) => {
+  const r = await S.admin
+    .from("profiles")
+    .update({
+      trial_started_at: new Date(Date.now() - 20 * 86_400_000).toISOString(),
+      trial_ends_at: new Date(Date.now() - 6 * 86_400_000).toISOString(),
+    })
+    .eq("id", userId)
+    .select("id");
+  if (r.error || r.data.length !== 1)
+    throw new Error("could not end the trial");
+};
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// 17. Subscription (trial view, Free-lite view, PromptPay QR)
+// ═══════════════════════════════════════════════════════════════════════════════
+register("subscription", async (S) => {
+  const { page, shot, admin } = S;
+  await go(page, "/today");
+  const trial = page
+    .getByText(/กำลังทดลองใช้ Premium เหลืออีก/)
+    .locator("xpath=ancestor::a[1]");
+  await shot("190-today-trial-banner", { highlight: trial });
+  await trial.click();
+  await page.waitForURL(/\/subscription/, { waitUntil: "commit" });
+  await settle(page);
+  await shot("191-subscription-current", {
+    highlight: page
+      .getByRole("heading", { name: "แพ็กเกจปัจจุบัน" })
+      .locator(".."),
+  });
+  await shot("192-subscription-usage", {
+    scrollTo: page.getByRole("heading", { name: "การใช้ AI ของคุณ" }),
+    highlight: page
+      .getByRole("heading", { name: "การใช้ AI ของคุณ" })
+      .locator(".."),
+  });
+  await shot("193-subscription-plans", {
+    scrollTo: page.getByRole("heading", { name: "เปรียบเทียบแพ็กเกจ" }),
+    highlight: page.getByRole("heading", { name: "เปรียบเทียบแพ็กเกจ" }),
+  });
+  const gold = page
+    .locator("li.card")
+    .filter({ has: page.getByRole("heading", { name: "Gold" }) });
+  await shot("194-subscription-gold", { scrollTo: gold, highlight: gold });
+
+  // someone whose trial has ended (Free-lite), who is about to pay by PromptPay
+  S.F ??= await newUser("คุณทดลองครบ");
+  await endTrial(S, S.F.id);
+  const f = await session(S, S.F);
+  await go(f.page, "/subscription");
+  await f.snap("195-subscription-free", {
+    highlight: f.page
+      .getByRole("heading", { name: "แพ็กเกจปัจจุบัน" })
+      .locator(".."),
+  });
+  const fgold = f.page
+    .locator("li.card")
+    .filter({ has: f.page.getByRole("heading", { name: "Gold" }) });
+  const payBtn = fgold.getByRole("button", { name: /^รายเดือน/ });
+  await f.snap("196-subscription-pay-buttons", {
+    scrollTo: payBtn,
+    highlight: payBtn,
+  });
+  await payBtn.click();
+  await f.page.waitForURL(/\/subscription\/pay\//, { waitUntil: "commit" });
+  await settle(f.page);
+  await f.page.getByRole("img", { name: /QR PromptPay/ }).waitFor();
+  await f.snap("197-pay-qr", {
+    highlight: f.page.getByRole("img", { name: /QR PromptPay/ }),
+  });
+  await f.page.locator("#payerRef").fill("1234");
+  await f.snap("198-pay-reference", {
+    scrollTo: f.page.locator("#payerRef"),
+    highlight: [
+      f.page.locator("#payerRef"),
+      f.page.getByRole("button", { name: "แจ้งโอนแล้ว" }),
+    ],
+  });
+  // The transfer is not reported here (that would page the owner's admins). What the app shows afterwards is set directly.
+  const payId = f.page.url().split("/").pop();
+  const up = await admin
+    .from("payments")
+    .update({
+      status: "review",
+      payer_ref: "1234",
+      reported_at: new Date().toISOString(),
+    })
+    .eq("id", payId)
+    .select("id");
+  if (up.error || up.data.length !== 1)
+    throw new Error("could not mark the payment as reported");
+  await f.page.reload();
+  await settle(f.page);
+  await f.snap("199-pay-review", {
+    highlight: f.page.getByText("ได้รับแจ้งการโอนแล้ว").locator(".."),
+  });
+  await go(f.page, "/subscription");
+  await f.snap("200-subscription-payments", {
+    scrollTo: f.page.getByRole("heading", { name: "รายการชำระเงิน" }),
+    highlight: f.page
+      .getByRole("heading", { name: "รายการชำระเงิน" })
+      .locator(".."),
+  });
+  await f.close();
+});
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// 18. Family (Premium +1)
+// ═══════════════════════════════════════════════════════════════════════════════
+register("family", async (S) => {
+  const { page, shot, admin, M } = S;
+  const B = await getB(S);
+  await setPaidPremium(S, M.id);
+  await admin
+    .from("daily_checkins")
+    .upsert(
+      [0, 1, 2].map((i) => ({
+        user_id: B.id,
+        checkin_date: day(-i),
+        sleep_band: 3,
+        activity_band: 3,
+        energy: 4,
+        mood: 4,
+        nutrition: 4,
+      })),
+    );
+  await fromMore(S, "ครอบครัว", /\/family/);
+  await shot("210-family-open", {
+    highlight: page.getByRole("heading", { name: "ชวนสมาชิก" }).locator(".."),
+  });
+  await btn(page, "สร้างรหัสเชิญ").click();
+  await page.getByTestId("family-code").waitFor();
+  await settle(page);
+  await shot("211-family-code", {
+    highlight: page
+      .getByTestId("family-code")
+      .locator("xpath=ancestor::div[1]"),
+  });
+  const code = (await page.getByTestId("family-code").innerText()).trim();
+  const b = await session(S, B);
+  await go(b.page, "/family");
+  await b.page.locator("#fam-code").fill(code);
+  await b.snap("212-family-join", {
+    highlight: b.page
+      .getByRole("heading", { name: "เข้าร่วมด้วยรหัสเชิญ" })
+      .locator(".."),
+  });
+  await b.page.getByRole("button", { name: "เข้าร่วมครอบครัว" }).click();
+  await b.page.getByText("เข้าร่วมครอบครัวแล้ว").waitFor();
+  await b.snap("213-family-joined", {});
+  // the member chooses what to share
+  await b.page
+    .getByRole("checkbox", { name: /การเช็กอิน: วันนี้เช็กอินแล้วหรือยัง/ })
+    .check();
+  await b.page
+    .getByRole("checkbox", { name: /ฉันยินยอมให้อีกฝ่ายเห็น/ })
+    .check();
+  await b.snap("214-family-share", {
+    scrollTo: b.page.getByRole("heading", {
+      name: "สิ่งที่ฉันแชร์ให้อีกฝ่ายเห็น",
+    }),
+    highlight: b.page
+      .getByRole("heading", { name: "สิ่งที่ฉันแชร์ให้อีกฝ่ายเห็น" })
+      .locator(".."),
+  });
+  await b.page.getByRole("button", { name: "บันทึกการแชร์" }).click();
+  await b.page.getByText("บันทึกการแชร์แล้ว").waitFor();
+  await b.close();
+  await go(page, "/family");
+  await shot("215-family-owner", {
+    highlight: page
+      .getByRole("heading", { name: "สมาชิกครอบครัวของคุณ" })
+      .locator(".."),
+  });
+  await shot("216-family-theirs", {
+    scrollTo: page.getByRole("heading", { name: "สิ่งที่อีกฝ่ายแชร์ให้ฉัน" }),
+    highlight: page
+      .getByRole("heading", { name: "สิ่งที่อีกฝ่ายแชร์ให้ฉัน" })
+      .locator(".."),
+  });
+  await shot("217-family-my-share", {
+    scrollTo: page.getByRole("heading", {
+      name: "สิ่งที่ฉันแชร์ให้อีกฝ่ายเห็น",
+    }),
+    highlight: page
+      .getByRole("heading", { name: "สิ่งที่ฉันแชร์ให้อีกฝ่ายเห็น" })
+      .locator(".."),
+  });
+  await shot("218-family-end", {
+    scrollTo: btn(page, "นำสมาชิกออก"),
+    highlight: btn(page, "นำสมาชิกออก"),
+  });
+});
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// 19. Rewards credit + rewards page + creator
+// ═══════════════════════════════════════════════════════════════════════════════
+const ensureCredit = async (S) => {
+  if (S.credit) return;
+  S.credit = true;
+  const r = await S.admin.from("reward_ledger").insert([
+    {
+      user_id: S.M.id,
+      kind: "challenge_reward",
+      amount_thb: 18,
+      ref: "sample-challenge",
+    },
+    {
+      user_id: S.M.id,
+      kind: "referral_reward",
+      amount_thb: 12,
+      ref: "sample-referral",
+    },
+  ]);
+  if (r.error) throw r.error;
+};
+
+register("rewards", async (S) => {
+  const { page, shot, admin, M } = S;
+  const B = await getB(S);
+  await ensureCredit(S);
+  await fromMore(S, "รางวัลของฉัน", /\/rewards/);
+  await shot("220-rewards-open", {
+    highlight: page.getByRole("heading", { name: "เครดิตสะสม" }).locator(".."),
+  });
+  await shot("221-rewards-invite", {
+    scrollTo: page.getByRole("heading", { name: "ชวนเพื่อน" }),
+    highlight: page.getByRole("heading", { name: "ชวนเพื่อน" }).locator(".."),
+  });
+  const myCode = (await page.locator("p.tracking-widest").first().innerText())
+    .replace("รหัสของคุณ:", "")
+    .trim();
+  // the friend types the code
+  const b = await session(S, B);
+  await go(b.page, "/rewards");
+  await b.page.locator("#ref-code").fill(myCode);
+  await b.snap("222-rewards-friend-code", {
+    scrollTo: b.page.locator("#ref-code"),
+    highlight: b.page
+      .getByRole("heading", { name: "มีรหัสจากเพื่อน?" })
+      .locator(".."),
+  });
+  await b.page.getByRole("button", { name: "ใช้รหัส" }).click();
+  await b.page.getByText(/ใช้รหัสแล้ว เพื่อนของคุณจะได้รางวัล/).waitFor();
+  await b.snap("223-rewards-code-applied", {});
+  await b.close();
+  await go(page, "/rewards");
+  await shot("224-rewards-stats", {
+    scrollTo: page.getByText(/ชวนแล้ว \d+ คน/),
+    highlight: page.getByText(/ชวนแล้ว \d+ คน/),
+  });
+  await shot("225-rewards-history", {
+    scrollTo: page.getByRole("heading", { name: "ประวัติเครดิต" }),
+    highlight: page
+      .getByRole("heading", { name: "ประวัติเครดิต" })
+      .locator(".."),
+  });
+  // a creator (named by an admin) also gets a toolkit
+  const cr = await admin
+    .from("creators")
+    .insert({ user_id: M.id, display_name: "คุณสุขใจ" });
+  if (cr.error) throw cr.error;
+  cleanup.push(async () => admin.from("creators").delete().eq("user_id", M.id));
+  await go(page, "/rewards");
+  await shot("226-rewards-creator-link", {
+    highlight: link(page, "Creator toolkit"),
+  });
+  await link(page, "Creator toolkit").click();
+  await page.waitForURL(/\/creator/, { waitUntil: "commit" });
+  await settle(page);
+  await shot("227-creator-open", {});
+  await shot("228-creator-numbers", {
+    scrollTo: page.getByRole("heading", { name: "ตัวเลขของคุณ" }),
+    highlight: page
+      .getByRole("heading", { name: "ตัวเลขของคุณ" })
+      .locator(".."),
+  });
+  await shot("229-creator-share", {
+    scrollTo: page.getByRole("heading", { name: "ข้อความพร้อมส่ง" }),
+    highlight: page
+      .getByRole("heading", { name: "ข้อความพร้อมส่ง" })
+      .locator(".."),
+  });
+  await admin.from("creators").delete().eq("user_id", M.id);
+});
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// 20. Shop, cart, orders
+// ═══════════════════════════════════════════════════════════════════════════════
+register("shop", async (S) => {
+  const { page, shot, admin, M } = S;
+  await ensureCredit(S);
+  const tag = `mu${Date.now().toString(36)}`;
+  const partner = await admin
+    .from("shop_partners")
+    .insert({ name: `${tag} ร้านพาร์ตเนอร์ตัวอย่าง`, contact: "line:@sample" })
+    .select("id");
+  if (partner.error) throw partner.error;
+  const pid = partner.data[0].id;
+  const defs = [
+    [
+      "แมกนีเซียม 200 มก.",
+      "magnesium",
+      390,
+      450,
+      ["sleep", "stress"],
+      "product-1.png",
+      "เสริมแมกนีเซียมสำหรับผู้ที่ได้รับไม่พอจากอาหาร",
+    ],
+    [
+      "วิตามินดี 3",
+      "vitamin-d",
+      290,
+      null,
+      ["general", "energy"],
+      "product-2.png",
+      "เสริมวิตามินดีสำหรับผู้ที่ได้รับแสงแดดน้อย",
+    ],
+    [
+      "โอเมก้า 3 น้ำมันปลา",
+      "omega3",
+      590,
+      null,
+      ["nutrition", "general"],
+      "product-3.png",
+      "เสริมกรดไขมันโอเมก้า 3 สำหรับผู้ที่กินปลาน้อย",
+    ],
+  ];
+  const { readFileSync: rf } = await import("node:fs");
+  const productIds = [];
+  for (const [name, sku, price, compare, tags, img, summary] of defs) {
+    const pr = await admin
+      .from("shop_products")
+      .insert({
+        sku: `${tag}-${sku}`,
+        partner_id: pid,
+        name_th: name,
+        brand: "ตัวอย่าง",
+        summary_th: summary,
+        description_th: `${summary} (สินค้าตัวอย่างสำหรับคู่มือ)`,
+        ingredients: "สารสำคัญตามที่ระบุบนฉลาก",
+        usage_note: "รับประทานวันละ 1 เม็ด หลังอาหาร",
+        caution:
+          "ผู้ตั้งครรภ์ ให้นมบุตร หรือมีโรคประจำตัว ควรปรึกษาแพทย์หรือเภสัชกรก่อนใช้",
+        fda_no: "00-0-00000-0-0000",
+        serving: "60 เม็ด",
+        price_thb: price,
+        compare_at_thb: compare,
+        stock: 50,
+        focus_tags: tags,
+        active: true,
+      })
+      .select("id");
+    if (pr.error) throw pr.error;
+    const id = pr.data[0].id;
+    productIds.push(id);
+    const bytes = rf(S.fx[img]);
+    const path = `${id}/1.png`;
+    const up = await admin.storage
+      .from("shop-images")
+      .upload(path, bytes, { contentType: "image/png" });
+    if (up.error) throw up.error;
+    const row = await admin
+      .from("shop_product_images")
+      .insert({
+        product_id: id,
+        path,
+        mime: "image/png",
+        bytes: bytes.length,
+        position: 0,
+      });
+    if (row.error) throw row.error;
+  }
+  cleanup.push(async () => {
+    for (const id of productIds) {
+      const objs =
+        (await admin.storage.from("shop-images").list(id)).data ?? [];
+      if (objs.length)
+        await admin.storage
+          .from("shop-images")
+          .remove(objs.map((o) => `${id}/${o.name}`));
+    }
+    await admin.from("shop_orders").delete().eq("user_id", M.id);
+    await admin.from("shop_products").delete().like("sku", `${tag}%`);
+    await admin.from("shop_partners").delete().like("name", `${tag}%`);
+  });
+
+  await fromMore(S, "ร้านค้าอาหารเสริม", /\/shop/);
+  await shot("230-shop-open", { highlight: page.getByText(/เครดิตของคุณ ฿/) });
+  await shot("231-shop-picks", {
+    scrollTo: page.getByRole("heading", { name: "เลือกให้คุณ" }),
+    highlight: page.getByRole("heading", { name: "เลือกให้คุณ" }).locator(".."),
+  });
+  const filter = page.getByRole("navigation", { name: "กรองตามเรื่องที่สนใจ" });
+  await shot("232-shop-filter", { scrollTo: filter, highlight: filter });
+  await filter.getByRole("link", { name: "การนอน" }).click();
+  await page.waitForURL(/tag=sleep/, { waitUntil: "commit" });
+  await settle(page);
+  await shot("233-shop-filtered", {
+    scrollTo: page.getByRole("navigation", { name: "กรองตามเรื่องที่สนใจ" }),
+    highlight: page.getByRole("navigation", { name: "กรองตามเรื่องที่สนใจ" }),
+  });
+  await page
+    .getByRole("list", { name: "ร้านค้าอาหารเสริม" })
+    .getByRole("link", { name: /แมกนีเซียม/ })
+    .click();
+  await page.waitForURL(/\/shop\/[0-9a-f-]{36}/, { waitUntil: "commit" });
+  await settle(page);
+  await shot("234-shop-product", {});
+  await shot("235-shop-product-details", {
+    scrollTo: page.getByText("วิธีรับประทาน"),
+    highlight: page.getByText("คำเตือน").locator(".."),
+  });
+  await page.locator("#qty").fill("2");
+  await shot("236-shop-add", {
+    scrollTo: btn(page, "ใส่ตะกร้า"),
+    highlight: [page.locator("#qty"), btn(page, "ใส่ตะกร้า")],
+  });
+  await btn(page, "ใส่ตะกร้า").click();
+  await page.waitForURL(/\/shop\/cart/, { waitUntil: "commit" });
+  await settle(page);
+  await shot("237-cart", { highlight: page.getByText("ใส่ตะกร้าแล้ว") });
+  await page.locator(".card input[type=number]").first().fill("1");
+  await page.getByRole("button", { name: "อัปเดตจำนวน" }).first().click();
+  await settle(page);
+  await shot("238-cart-updated", {
+    scrollTo: page.getByRole("region", { name: "ยอดที่ต้องชำระ" }),
+    highlight: page.getByRole("region", { name: "ยอดที่ต้องชำระ" }),
+  });
+  await page.getByRole("checkbox", { name: /ใช้เครดิตเป็นส่วนลด/ }).check();
+  await shot("239-cart-credit", {
+    scrollTo: page.getByRole("checkbox", { name: /ใช้เครดิตเป็นส่วนลด/ }),
+    highlight: page
+      .getByRole("checkbox", { name: /ใช้เครดิตเป็นส่วนลด/ })
+      .locator("xpath=ancestor::label[1]"),
+  });
+  await page.locator("#co-name").fill("คุณสุขใจ ตัวอย่าง");
+  await page.locator("#co-phone").fill("0800000000");
+  await page
+    .locator("#co-address")
+    .fill("99/9 ถนนตัวอย่าง แขวงตัวอย่าง เขตตัวอย่าง");
+  await page.locator("#co-province").fill("กรุงเทพมหานคร");
+  await page.locator("#co-postal").fill("10110");
+  await shot("240-cart-address", {
+    scrollTo: page.locator("#co-name"),
+    highlight: page
+      .getByRole("heading", { name: "ที่อยู่จัดส่ง" })
+      .locator(".."),
+  });
+  await shot("241-cart-checkout", {
+    scrollTo: btn(page, "สั่งซื้อและไปชำระเงิน"),
+    highlight: btn(page, "สั่งซื้อและไปชำระเงิน"),
+  });
+  await btn(page, "สั่งซื้อและไปชำระเงิน").click();
+  await page.waitForURL(/\/shop\/orders\/[0-9a-f-]{36}/, {
+    waitUntil: "commit",
+  });
+  await settle(page);
+  await page.getByRole("img", { name: /QR PromptPay/ }).waitFor();
+  await shot("242-order-qr", {
+    highlight: page.getByRole("img", { name: /QR PromptPay/ }),
+  });
+  await page.locator("#payer-ref").fill("1234");
+  await shot("243-order-reference", {
+    scrollTo: page.locator("#payer-ref"),
+    highlight: [page.locator("#payer-ref"), btn(page, "ฉันโอนแล้ว")],
+  });
+  const orderId = page.url().split("/").pop();
+  // (not reported for real: that would page the admins; what the app shows next is set directly)
+  let up = await admin
+    .from("shop_orders")
+    .update({
+      status: "payment_reported",
+      payer_ref: "1234",
+      reported_at: new Date().toISOString(),
+    })
+    .eq("id", orderId)
+    .select("id");
+  if (up.error || up.data.length !== 1) throw new Error("order update failed");
+  await page.reload();
+  await settle(page);
+  await shot("244-order-reported", {
+    highlight: page.getByText(/แจ้งโอนแล้ว ร้านจะตรวจ/),
+  });
+  up = await admin
+    .from("shop_orders")
+    .update({
+      status: "shipped",
+      carrier: "Kerry Express",
+      tracking_no: "KEX0000000001",
+      shipped_at: new Date().toISOString(),
+      paid_at: new Date().toISOString(),
+    })
+    .eq("id", orderId)
+    .select("id");
+  if (up.error || up.data.length !== 1) throw new Error("order update failed");
+  await page.reload();
+  await settle(page);
+  await shot("245-order-shipped", {
+    highlight: page.getByRole("heading", { name: "การจัดส่ง" }).locator(".."),
+  });
+  await link(page, "ออเดอร์ของฉัน").first().click();
+  await page.waitForURL(/\/shop\/orders$/, { waitUntil: "commit" });
+  await settle(page);
+  await shot("246-orders-list", {});
+});
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// 21. Company plan
+// ═══════════════════════════════════════════════════════════════════════════════
+register("company", async (S) => {
+  const { page, shot, admin, M } = S;
+  const letters = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+  const code = Array.from(
+    { length: 8 },
+    () => letters[Math.floor(Math.random() * letters.length)],
+  ).join("");
+  const co = await admin
+    .from("companies")
+    .insert({
+      name: "บริษัท ตัวอย่าง จำกัด",
+      code,
+      seats: 10,
+      tier: "premium",
+      valid_until: day(90),
+      active: true,
+      note: "sample for the user manual",
+    })
+    .select("id");
+  if (co.error) throw co.error;
+  cleanup.push(async () =>
+    admin.from("companies").delete().eq("id", co.data[0].id),
+  );
+  await fromMore(S, "แพ็กเกจองค์กร", /\/company/);
+  await shot("250-company-open", {});
+  await page.locator("#co-code").fill(code);
+  await shot("251-company-code", { highlight: page.locator("#co-code") });
+  await btn(page, "เข้าร่วมองค์กร").click();
+  await page.getByText("เข้าร่วมองค์กรแล้ว").waitFor();
+  await settle(page);
+  await shot("252-company-joined", {
+    highlight: page
+      .getByRole("heading", { name: "องค์กรของคุณ" })
+      .locator(".."),
+  });
+  await shot("253-company-stats", {
+    scrollTo: page.getByRole("heading", { name: "สถิติรวมแบบไม่ระบุตัวตน" }),
+    highlight: page
+      .getByRole("heading", { name: "สถิติรวมแบบไม่ระบุตัวตน" })
+      .locator(".."),
+  });
+  await page
+    .getByRole("checkbox", { name: /ฉันยินยอมให้นับข้อมูลของฉัน/ })
+    .check();
+  await btn(page, "บันทึก").click();
+  await page.getByText("ตอนนี้: นับรวมอยู่").waitFor();
+  await settle(page);
+  await shot("254-company-stats-on", {
+    scrollTo: page.getByText("ตอนนี้: นับรวมอยู่"),
+    highlight: page.getByText("ตอนนี้: นับรวมอยู่"),
+  });
+  await shot("255-company-leave", {
+    scrollTo: btn(page, "ออกจากองค์กร"),
+    highlight: btn(page, "ออกจากองค์กร"),
+  });
+  await btn(page, "ออกจากองค์กร").click();
+  await page.getByText("ออกจากองค์กรแล้ว").waitFor();
+  void M;
+});
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// 22. Achievements
+// ═══════════════════════════════════════════════════════════════════════════════
+register("achievements", async (S) => {
+  const { page, shot } = S;
+  await go(page, "/today");
+  const card = link(page, /ดูความสำเร็จ/, false);
+  await shot("260-today-achievements-card", {
+    scrollTo: card,
+    highlight: card,
+  });
+  await card.click();
+  await page.waitForURL(/\/achievements/, { waitUntil: "commit" });
+  await settle(page);
+  await shot("261-achievements-open", {});
+  await shot("262-achievements-earned", {
+    scrollTo: page.getByText(/ได้เมื่อ/).first(),
+    highlight: page
+      .getByText(/ได้เมื่อ/)
+      .first()
+      .locator("xpath=ancestor::li[1]"),
+  });
+  await shot("263-achievements-locked", {
+    scrollTo: page.locator("progress").first(),
+    highlight: page
+      .locator("progress")
+      .first()
+      .locator("xpath=ancestor::li[1]"),
+  });
+});
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// 23. Notifications
+// ═══════════════════════════════════════════════════════════════════════════════
+register("notifications", async (S) => {
+  const { page, shot, admin, M } = S;
+  const rows = [
+    {
+      kind: "trial_ending",
+      title: "ทดลองใช้ Premium เหลืออีก 3 วัน",
+      body: "เลือกแพ็กเกจเพื่อใช้ต่อได้ไม่สะดุด หรือใช้ Free-lite ต่อก็ได้\nสิ้นสุด: 7 ต.ค. 2569",
+      href: "/subscription",
+    },
+    {
+      kind: "payment_paid",
+      title: "ชำระเงินเรียบร้อย",
+      body: "เปิดสิทธิ์แพ็กเกจ Gold ให้แล้ว\nใช้ได้ถึง: 3 พ.ย. 2569",
+      href: "/subscription",
+    },
+  ].map((r, i) => ({
+    ...r,
+    user_id: M.id,
+    created_at: new Date(Date.now() - i * 3_600_000).toISOString(),
+  }));
+  const r = await admin.from("app_notifications").insert(rows);
+  if (r.error) throw r.error;
+  await go(page, "/today");
+  const bell = page.getByRole("link", { name: /^แจ้งเตือน/ }).first();
+  await shot("270-notifications-bell", { highlight: bell });
+  await bell.click();
+  await page.waitForURL(/\/notifications/, { waitUntil: "commit" });
+  await settle(page);
+  await shot("271-notifications-list", {});
+  await shot("272-notifications-mark-all", {
+    highlight: btn(page, "ทำเครื่องหมายว่าอ่านทั้งหมดแล้ว"),
+  });
+  await page.getByRole("link", { name: /ชำระเงินเรียบร้อย/ }).click();
+  await page.waitForURL(/\/subscription/, { waitUntil: "commit" });
+  await settle(page);
+  await shot("273-notifications-opened", {});
+  await go(page, "/notifications");
+  await btn(page, "ทำเครื่องหมายว่าอ่านทั้งหมดแล้ว").click();
+  await settle(page);
+  await shot("274-notifications-read", {});
+});
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// 24. Install as an app
+// ═══════════════════════════════════════════════════════════════════════════════
+register("install", async (S) => {
+  const { page, shot } = S;
+  await fromMore(S, "ติดตั้งเป็นแอปบนเครื่อง", /\/install/);
+  await shot("280-install-open", {});
+  await shot("281-install-steps", {
+    scrollTo: page.getByRole("heading", { name: "วิธีติดตั้งบนอุปกรณ์อื่น" }),
+    highlight: page
+      .getByRole("heading", { name: "วิธีติดตั้งบนอุปกรณ์อื่น" })
+      .locator(".."),
+  });
+});
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// 25. Settings (account, language, theme, notifications, consent, data rights) + sign-out / sign-in
+// ═══════════════════════════════════════════════════════════════════════════════
+register("settings", async (S) => {
+  const { page, shot, admin, M } = S;
+  await fromMore(S, "ตั้งค่า", /\/settings/);
+  await shot("290-settings-open", {
+    highlight: page.getByRole("heading", { name: "บัญชี" }).locator(".."),
+  });
+  await page
+    .getByRole("group", { name: "ธีมสี" })
+    .getByRole("button", { name: "มืด" })
+    .click();
+  await settle(page);
+  await page.waitForTimeout(500);
+  await shot("291-settings-dark", {
+    highlight: page.getByRole("group", { name: "ธีมสี" }),
+  });
+  await page
+    .getByRole("group", { name: "ธีมสี" })
+    .getByRole("button", { name: "ตามอุปกรณ์" })
+    .click();
+  await settle(page);
+  await page.waitForTimeout(500);
+  const line = page.getByRole("heading", { name: "การเข้าสู่ระบบด้วย LINE" });
+  if (await line.count())
+    await shot("292-settings-line", {
+      scrollTo: line,
+      highlight: line.locator(".."),
+    });
+  else
+    await shot("292-settings-line", {
+      scrollTo: page.getByRole("heading", { name: "การแจ้งเตือนทาง LINE" }),
+      highlight: page
+        .getByRole("heading", { name: "การแจ้งเตือนทาง LINE" })
+        .locator(".."),
+    });
+  const notif = page.getByRole("heading", { name: "การแจ้งเตือนทาง LINE" });
+  await shot("293-settings-notif-unlinked", {
+    scrollTo: notif,
+    highlight: notif.locator(".."),
+  });
+  // once a LINE account is linked, the two switches appear (the link itself needs the real LINE app: a sample link is stored)
+  const ll = await admin
+    .from("line_links")
+    .insert({
+      user_id: M.id,
+      line_sub: `Usample${randomBytes(8).toString("hex")}`,
+      display_name: "คุณสุขใจ",
+    });
+  if (ll.error) throw ll.error;
+  await go(page, "/settings");
+  await page.getByRole("checkbox", { name: /เตือนเช็กอินรายวัน/ }).check();
+  await shot("294-settings-notif-linked", {
+    scrollTo: page.getByRole("heading", { name: "การแจ้งเตือนทาง LINE" }),
+    highlight: page
+      .getByRole("heading", { name: "การแจ้งเตือนทาง LINE" })
+      .locator(".."),
+  });
+  await page
+    .locator("section", {
+      has: page.getByRole("heading", { name: "การแจ้งเตือนทาง LINE" }),
+    })
+    .getByRole("button", { name: "บันทึก" })
+    .click();
+  await page.getByText("บันทึกการตั้งค่าแล้ว").waitFor();
+  await settle(page);
+  await shot("295-settings-notif-saved", {
+    scrollTo: page.getByText("บันทึกการตั้งค่าแล้ว"),
+    highlight: page.getByText("บันทึกการตั้งค่าแล้ว"),
+  });
+  const consent = page.getByRole("heading", { name: "ความยินยอมที่ให้ไว้" });
+  await shot("296-settings-consent", {
+    scrollTo: consent,
+    highlight: consent.locator(".."),
+  });
+  const optional = page.getByRole("heading", {
+    name: "เปลี่ยนความยินยอมที่ไม่บังคับ",
+  });
+  await page
+    .getByRole("checkbox", { name: /ฉันต้องการรับข่าวสารและโปรโมชัน/ })
+    .check();
+  await shot("297-settings-optional", {
+    scrollTo: optional,
+    highlight: optional.locator(".."),
+  });
+  await btn(page, "บันทึกการเปลี่ยนแปลง").click();
+  await page.getByText(/บันทึกความยินยอมแล้ว/).waitFor();
+  await settle(page);
+  await shot("298-settings-optional-saved", {
+    scrollTo: page.getByText(/บันทึกความยินยอมแล้ว/),
+    highlight: page.getByText(/บันทึกความยินยอมแล้ว/),
+  });
+  const rights = page.getByRole("heading", { name: "สิทธิของคุณตามกฎหมาย" });
+  await shot("299-settings-rights", {
+    scrollTo: rights,
+    highlight: rights.locator(".."),
+  });
+  const exp = page.getByRole("button", { name: /ดาวน์โหลดข้อมูลของฉัน/ });
+  const dl = page
+    .waitForEvent("download", { timeout: 30_000 })
+    .catch(() => null);
+  await exp.click();
+  await page.getByText(/ดาวน์โหลดแล้ว \(/).waitFor({ timeout: 30_000 });
+  await dl;
+  await shot("300-settings-exported", {
+    scrollTo: page.getByText(/ดาวน์โหลดแล้ว \(/),
+    highlight: page.getByText(/ดาวน์โหลดแล้ว \(/),
+  });
+  const store = page.getByRole("heading", { name: "ที่เก็บข้อมูลของคุณ" });
+  await shot("301-settings-datastore", {
+    scrollTo: store,
+    highlight: store.locator(".."),
+  });
+  await page.getByRole("button", { name: "ลบบัญชีและข้อมูลทั้งหมด" }).click();
+  await page.locator("#phrase").waitFor();
+  await shot("302-settings-delete-preview", {
+    scrollTo: page.getByRole("heading", {
+      name: "สิ่งที่จะเกิดขึ้นเมื่อลบบัญชี",
+    }),
+    highlight: page
+      .getByRole("heading", { name: "สิ่งที่จะเกิดขึ้นเมื่อลบบัญชี" })
+      .locator(".."),
+  });
+  await page.getByRole("button", { name: "ยกเลิก", exact: true }).click();
+  const out = btn(page, "ออกจากระบบ");
+  await shot("303-settings-signout", { scrollTo: out, highlight: out });
+  await out.click();
+  await page.waitForURL((u) => u.pathname === "/", { waitUntil: "commit" });
+  await settle(page);
+  await shot("304-signed-out-landing", {
+    highlight: link(page, "เข้าสู่ระบบ"),
+  });
+  await link(page, "เข้าสู่ระบบ").click();
+  await page.waitForURL(/\/auth/, { waitUntil: "commit" });
+  await settle(page);
+  await page.getByLabel("อีเมล").fill(M.email);
+  await page.getByLabel("รหัสผ่าน").fill(M.password);
+  await shot("305-signin-form", {
+    highlight: [page.getByLabel("อีเมล"), page.getByLabel("รหัสผ่าน")],
+  });
+  await page.getByRole("button", { name: "เข้าสู่ระบบ", exact: true }).click();
+  await page.waitForURL(/\/today/, { waitUntil: "commit" });
+  await settle(page);
+  await shot("306-signin-today", {});
+});
+
+register("delete-account", async (S) => {
+  const D = await newUser("คุณลบบัญชี");
+  const d = await session(S, D);
+  await go(d.page, "/settings");
+  await d.page.getByRole("button", { name: "ลบบัญชีและข้อมูลทั้งหมด" }).click();
+  await d.page.locator("#phrase").waitFor();
+  await d.snap("307-delete-open", {
+    scrollTo: d.page.locator("#phrase"),
+    highlight: d.page.locator("#phrase").locator(".."),
+  });
+  await d.page.locator("#phrase").fill("ลบบัญชี");
+  await d.snap("308-delete-typed", {
+    scrollTo: d.page.getByRole("button", { name: "ลบบัญชีถาวร" }),
+    highlight: d.page.getByRole("button", { name: "ลบบัญชีถาวร" }),
+  });
+  await d.page.getByRole("button", { name: "ลบบัญชีถาวร" }).click();
+  await d.page.waitForURL((u) => u.pathname === "/", { waitUntil: "commit" });
+  await settle(d.page);
+  await d.snap("309-delete-done", {
+    highlight: d.page.getByRole("status").first(),
+  });
+  await d.close();
+});
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// 26. The bottom bar, the More sheet and the language switch
+// ═══════════════════════════════════════════════════════════════════════════════
+register("more", async (S) => {
+  const { page, shot } = S;
+  await go(page, "/today");
+  const bar = page.getByRole("navigation", { name: "เมนูด้านล่าง" });
+  await shot("310-bottom-bar", { highlight: bar });
+  await shot("311-header-lang", {
+    highlight: page.getByRole("group", { name: "ภาษา" }),
+  });
+  await openMore(page);
+  await shot("312-more-open", {});
+  const list = page.getByRole("dialog").locator("div.overflow-y-auto");
+  await list.evaluate((el) => (el.scrollTop = el.scrollHeight));
+  await page.waitForTimeout(300);
+  await shot("313-more-bottom", {
+    highlight: [
+      page.getByRole("dialog").getByText("คู่มือการใช้งาน"),
+      page.getByRole("dialog").getByRole("button", { name: "ออกจากระบบ" }),
+    ],
+  });
+});
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// 27. What a Free-lite person sees (paid features show their plan)
+// ═══════════════════════════════════════════════════════════════════════════════
+register("freelite", async (S) => {
+  S.F ??= await newUser("คุณทดลองครบ");
+  await endTrial(S, S.F.id);
+  const f = await session(S, S.F);
+  for (const [id, path, name] of [
+    ["320-free-passport", "/passport", "สำหรับแพ็กเกจ Premium"],
+    ["321-free-agent", "/agent", "สำหรับแพ็กเกจ Premium"],
+    ["322-free-wearables", "/wearables", "สำหรับแพ็กเกจ Gold ขึ้นไป"],
+    ["323-free-family", "/family", "การชวนสมาชิกสำหรับ Premium"],
+  ]) {
+    await go(f.page, path);
+    await f.snap(id, {
+      highlight: f.page.getByRole("heading", { name }).locator(".."),
+    });
+  }
+  await go(f.page, "/timeline");
+  await f.snap("324-free-timeline", {
+    scrollTo: f.page.getByText(/แพ็กเกจของคุณดูย้อนหลังได้/).first(),
+    highlight: f.page.getByText(/แพ็กเกจของคุณดูย้อนหลังได้/).first(),
+  });
+  await go(f.page, "/vault");
+  await f.snap("325-free-vault", {
+    highlight: f.page.getByText(/ใช้ไป \d+ จาก/),
+  });
+  await f.close();
+});
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// 28. Insight card on Today + legal pages
+// ═══════════════════════════════════════════════════════════════════════════════
+register("insight", async (S) => {
+  const { page, shot } = S;
+  await ensureHistory(S);
+  await go(page, "/today");
+  const card = page.locator("#insight");
+  if (await card.count()) {
+    await shot("330-today-insight", { highlight: card });
+    await shot("331-today-insight-ai", {
+      scrollTo: btn(page, "ให้ AI อธิบายเพิ่ม"),
+      highlight: btn(page, "ให้ AI อธิบายเพิ่ม"),
+    });
+  } else console.warn("no insight card today (data does not trigger one)");
+  await go(page, "/privacy");
+  await shot("332-privacy", {});
+  await go(page, "/terms");
+  await shot("333-terms", {});
 });
 
 // PART2 (more chapters are added below)
