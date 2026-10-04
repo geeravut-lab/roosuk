@@ -1,7 +1,8 @@
 import "server-only";
 import { cache } from "react";
 import { createClient } from "@/lib/supabase/server";
-import type { BillingProfile, UsageRow } from "./plan";
+import { loadGrant } from "./grants.server";
+import { withGrant, type BillingProfile, type UsageRow } from "./plan";
 
 /** The signed-in user's plan/trial columns (read with their own client; RLS limits it to their row). */
 export const getBillingProfile = cache(
@@ -14,7 +15,8 @@ export const getBillingProfile = cache(
       )
       .eq("id", userId)
       .maybeSingle<BillingProfile>();
-    return data;
+    // a family (or company) seat lifts the plan for exactly as long as it lasts
+    return data ? withGrant(data, await loadGrant(userId)) : data;
   },
 );
 

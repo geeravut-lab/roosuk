@@ -164,6 +164,17 @@ export function agentReminderNotice(t: Dict, text: string, id: string): Notice {
   };
 }
 
+export function familyJoinedNotice(t: Dict, joinerId: string): Notice {
+  return {
+    kind: "family_joined",
+    category: "transactional",
+    title: t.notifFamilyJoinedTitle,
+    body: noticeBody(t.notifFamilyJoinedBody),
+    href: "/family",
+    dedupeKey: `family_joined:${joinerId}`,
+  };
+}
+
 export function streakLastCallNotice(
   t: Dict,
   streak: number,

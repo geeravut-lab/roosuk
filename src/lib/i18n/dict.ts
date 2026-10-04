@@ -1795,6 +1795,77 @@ const th = {
   agentNew: "เริ่มบทสนทนาใหม่",
   agentHistoryNote:
     "การสนทนาและสิ่งที่ผู้ช่วยทำ ถูกบันทึกไว้เพื่อให้คุณตรวจสอบได้ และลบได้ในหน้าตั้งค่า",
+  navFamily: "ครอบครัว",
+  notifFamilyJoinedTitle: "มีสมาชิกเข้าร่วมครอบครัวของคุณ",
+  notifFamilyJoinedBody:
+    "สมาชิกใช้รหัสเชิญของคุณแล้ว ดูและตั้งค่าการแชร์ได้ที่หน้าครอบครัว",
+  err_family_plan:
+    "แพ็กเกจของคุณยังไม่มีสิทธิ์ชวนสมาชิกครอบครัว (Premium เท่านั้น)",
+  err_family_is_member:
+    "คุณเป็นสมาชิกในครอบครัวของคนอื่นอยู่ จึงชวนคนอื่นต่อไม่ได้",
+  err_family_full: "ที่นั่งในครอบครัวเต็มแล้ว",
+  err_family_invalid: "ไม่พบรหัสเชิญนี้ ตรวจสอบตัวอักษรอีกครั้ง",
+  err_family_revoked: "รหัสเชิญนี้ถูกยกเลิกแล้ว ขอรหัสใหม่จากเจ้าของ",
+  err_family_expired: "รหัสเชิญหมดอายุแล้ว ขอรหัสใหม่จากเจ้าของ",
+  err_family_used: "รหัสเชิญนี้ถูกใช้ไปแล้ว",
+  err_family_own: "นี่คือรหัสเชิญของคุณเอง ส่งให้คนที่คุณอยากชวน",
+  err_family_in_family: "คุณอยู่ในครอบครัวอยู่แล้ว ออกจากครอบครัวเดิมก่อน",
+  err_family_owner_busy:
+    "คุณมีสมาชิกครอบครัวอยู่ จึงเข้าร่วมครอบครัวอื่นไม่ได้",
+  err_family_ack: "กรุณาติ๊กยืนยันก่อนเปิดการแชร์",
+  familyTitle: "ครอบครัว (Premium +1)",
+  familyIntro:
+    "ชวนคนใกล้ตัวหนึ่งคนมาใช้ Premium ด้วยกัน แต่ละคนมีบัญชีและข้อมูลของตัวเอง ไม่มีใครเห็นข้อมูลของอีกฝ่าย เว้นแต่เจ้าของข้อมูลเลือกแชร์สรุปสั้นๆ เอง",
+  familyJoined: "เข้าร่วมครอบครัวแล้ว",
+  familyLeft: "สิ้นสุดการเชื่อมครอบครัวแล้ว",
+  familySaved: "บันทึกการแชร์แล้ว",
+  familyInviteTitle: "ชวนสมาชิก",
+  familyInviteBody:
+    "สร้างรหัสเชิญแล้วส่งให้คนที่คุณอยากชวน รหัสใช้ได้ครั้งเดียวภายใน 7 วัน",
+  familyInviteMake: "สร้างรหัสเชิญ",
+  familyInviteNew: "สร้างรหัสใหม่ (รหัสเดิมจะใช้ไม่ได้)",
+  familyInviteCancel: "ยกเลิกรหัสนี้",
+  familyInviteCode: "รหัสเชิญของคุณ",
+  familyInviteLink: "หรือส่งลิงก์นี้",
+  familyInviteUntil: "ใช้ได้ถึง {date}",
+  familyPaidNote:
+    "สมาชิกได้สิทธิ์ Premium ตราบเท่าที่แพ็กเกจ Premium แบบชำระเงินของคุณยังไม่หมดอายุ (ช่วงทดลองใช้ไม่นับ)",
+  familyPlanTitle: "การชวนสมาชิกสำหรับ Premium",
+  familyPlanBody:
+    "ถ้าคุณมีรหัสเชิญจากเจ้าของ Premium ใส่ด้านล่างเพื่อเข้าร่วมได้เลย ไม่ต้องมีแพ็กเกจ",
+  familyJoinTitle: "เข้าร่วมด้วยรหัสเชิญ",
+  familyJoinField: "รหัสเชิญ",
+  familyJoinBtn: "เข้าร่วมครอบครัว",
+  familyJoinNote:
+    "เมื่อเข้าร่วม คุณได้สิทธิ์ Premium ตามแพ็กเกจของเจ้าของ ข้อมูลของคุณยังเป็นของคุณคนเดียว",
+  familyOwnerOf: "สมาชิกครอบครัวของคุณ",
+  familyMemberOf: "คุณอยู่ในครอบครัวของ",
+  familySince: "ตั้งแต่ {date}",
+  familyPerson: "ผู้ใช้",
+  familyRemove: "นำสมาชิกออก",
+  familyLeave: "ออกจากครอบครัว",
+  familyEndNote:
+    "เมื่อสิ้นสุด การแชร์ของทั้งสองฝ่ายจะหยุดทันที และสิทธิ์ Premium จากครอบครัวจะสิ้นสุด",
+  familyShareTitle: "สิ่งที่ฉันแชร์ให้อีกฝ่ายเห็น",
+  familyShareIntro:
+    "เลือกเอง แยกเป็นรายข้อ ปิดอยู่ทั้งหมดจนกว่าคุณจะเปิด เปลี่ยนใจเมื่อไหร่ก็ได้",
+  familyScope_checkin:
+    "การเช็กอิน: วันนี้เช็กอินแล้วหรือยัง ความต่อเนื่อง และจำนวนวันใน 7 วัน",
+  familyScope_score: "คะแนนสุขภาพรวมและด้านที่ควรใส่ใจ",
+  familyShareNever:
+    "ไม่แชร์: ผลตรวจ อาหาร รูป น้ำหนัก และรายละเอียดอื่นทั้งหมด",
+  familyShareAck:
+    "ฉันยินยอมให้อีกฝ่ายเห็นสรุปที่ติ๊กไว้ข้างบน และเข้าใจว่าปิดได้ทุกเมื่อ",
+  familyShareSave: "บันทึกการแชร์",
+  familyTheirsTitle: "สิ่งที่อีกฝ่ายแชร์ให้ฉัน",
+  familyTheirsNone: "อีกฝ่ายยังไม่ได้เปิดแชร์อะไรให้คุณ",
+  familyTheirsCheckinToday: "วันนี้เช็กอินแล้ว",
+  familyTheirsCheckinNot: "วันนี้ยังไม่ได้เช็กอิน",
+  familyTheirsStreak: "ต่อเนื่อง {n} วัน · 7 วันล่าสุดเช็กอิน {d} วัน",
+  familyTheirsScore: "คะแนนสุขภาพรวม {n}",
+  familyTheirsScoreNone: "ยังไม่มีคะแนน (ยังไม่มีเช็กอินใน 7 วัน)",
+  familyTheirsFocus: "ด้านที่ควรใส่ใจ: {area}",
+  familyTheirsNote: "เป็นเพียงสรุปที่เจ้าของข้อมูลเลือกแชร์ ไม่ใช่การวินิจฉัย",
 } as const;
 
 export type Dict = { [K in keyof typeof th]: string };
@@ -3645,6 +3716,77 @@ const en = {
   agentNew: "New conversation",
   agentHistoryNote:
     "The conversation and what the agent did are kept so you can check them, and you can erase them in Settings.",
+  navFamily: "Family",
+  notifFamilyJoinedTitle: "Someone joined your family",
+  notifFamilyJoinedBody:
+    "Someone used your invite code. See it and set what you share on the Family page.",
+  err_family_plan: "Your plan cannot invite a family member (Premium only).",
+  err_family_is_member:
+    "You are a member of someone else's family, so you cannot invite others.",
+  err_family_full: "The family seat is already taken.",
+  err_family_invalid: "This invite code was not found. Check the characters.",
+  err_family_revoked: "This invite was cancelled. Ask the owner for a new one.",
+  err_family_expired: "This invite has expired. Ask the owner for a new one.",
+  err_family_used: "This invite has already been used.",
+  err_family_own:
+    "This is your own invite code. Send it to the person you want to invite.",
+  err_family_in_family: "You are already in a family. Leave it first.",
+  err_family_owner_busy:
+    "You have a family member, so you cannot join another family.",
+  err_family_ack: "Please tick the confirmation before turning sharing on.",
+  familyTitle: "Family (Premium +1)",
+  familyIntro:
+    "Invite one person you are close to to share Premium. Each of you keeps your own account and data. Nobody sees the other's data unless its owner chooses to share a short summary.",
+  familyJoined: "You joined the family.",
+  familyLeft: "The family link has ended.",
+  familySaved: "Sharing saved.",
+  familyInviteTitle: "Invite a member",
+  familyInviteBody:
+    "Make an invite code and send it to the person. It works once, within 7 days.",
+  familyInviteMake: "Make an invite code",
+  familyInviteNew: "Make a new code (the old one stops working)",
+  familyInviteCancel: "Cancel this code",
+  familyInviteCode: "Your invite code",
+  familyInviteLink: "Or send this link",
+  familyInviteUntil: "Valid until {date}",
+  familyPaidNote:
+    "The member has Premium for as long as your PAID Premium plan is live (the free trial does not count).",
+  familyPlanTitle: "Inviting is a Premium feature",
+  familyPlanBody:
+    "If you have an invite code from a Premium owner, enter it below to join — you need no plan.",
+  familyJoinTitle: "Join with an invite code",
+  familyJoinField: "Invite code",
+  familyJoinBtn: "Join the family",
+  familyJoinNote:
+    "When you join you get Premium through the owner's plan. Your data stays yours alone.",
+  familyOwnerOf: "Your family member",
+  familyMemberOf: "You are in the family of",
+  familySince: "since {date}",
+  familyPerson: "A user",
+  familyRemove: "Remove the member",
+  familyLeave: "Leave the family",
+  familyEndNote:
+    "When it ends, both sides' sharing stops at once and the family Premium ends.",
+  familyShareTitle: "What I share with them",
+  familyShareIntro:
+    "Your choice, one switch at a time. Everything is off until you turn it on. Change your mind any time.",
+  familyScope_checkin:
+    "Check-ins: whether I checked in today, my streak and days in the last 7",
+  familyScope_score: "My overall health score and the area needing attention",
+  familyShareNever:
+    "Never shared: lab results, meals, photos, weight or any other detail.",
+  familyShareAck:
+    "I consent to the other person seeing the summaries ticked above, and I understand I can turn them off at any time.",
+  familyShareSave: "Save sharing",
+  familyTheirsTitle: "What they share with me",
+  familyTheirsNone: "They have not shared anything with you yet.",
+  familyTheirsCheckinToday: "Checked in today",
+  familyTheirsCheckinNot: "Not checked in yet today",
+  familyTheirsStreak: "Streak {n} days · checked in {d} of the last 7 days",
+  familyTheirsScore: "Overall health score {n}",
+  familyTheirsScoreNone: "No score yet (no check-ins in the last 7 days)",
+  familyTheirsFocus: "Needs attention: {area}",
+  familyTheirsNote: "Only a summary its owner chose to share. Not a diagnosis.",
 } satisfies Dict;
 
 export const dict: Record<Lang, Dict> = { th, en };

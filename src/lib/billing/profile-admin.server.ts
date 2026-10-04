@@ -1,6 +1,7 @@
 import "server-only";
 import { createAdminClient } from "@/lib/supabase/admin";
-import type { BillingProfile } from "./plan";
+import { loadGrant } from "./grants.server";
+import { withGrant, type BillingProfile } from "./plan";
 
 /** The billing columns read with the service role, for code that runs without the person's session (a webhook, the ingestion API, the quota check). */
 export async function loadBillingProfileAdmin(
@@ -13,5 +14,5 @@ export async function loadBillingProfileAdmin(
     )
     .eq("id", userId)
     .maybeSingle<BillingProfile>();
-  return data;
+  return data ? withGrant(data, await loadGrant(userId)) : data;
 }

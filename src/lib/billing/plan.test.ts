@@ -4,6 +4,7 @@ import {
   fairUseCapFor,
   resolvePlan,
   summarizeUsage,
+  withGrant,
   type BillingProfile,
 } from "./plan";
 import { windowStart } from "./period";
@@ -201,5 +202,64 @@ describe("summarizeUsage", () => {
       remaining: "unlimited",
       percent: null,
     });
+  });
+});
+
+describe("withGrant", () => {
+  const now = new Date("2026-10-20T00:00:00Z");
+  const base: BillingProfile = {
+    plan_tier: "free",
+    plan_expires_at: null,
+    trial_started_at: "2026-09-01T00:00:00Z",
+    trial_ends_at: "2026-09-15T00:00:00Z",
+    ai_suspended: false,
+  };
+  const grant = { tier: "premium" as const, until: "2026-11-20T00:00:00Z" };
+
+  it("lifts a free person to the granted plan until the grant ends", () => {
+    const p = withGrant(base, grant, now);
+    expect(p).toMatchObject({
+      plan_tier: "premium",
+      plan_expires_at: grant.until,
+    });
+    expect(resolvePlan(p, now)).toMatchObject({
+      tier: "premium",
+      source: "paid",
+    });
+    expect(resolvePlan(p, new Date("2026-11-21T00:00:00Z")).tier).toBe("free"); // and not a day longer
+  });
+  it("lifts Gold to Premium, but never lowers anyone", () => {
+    const gold = {
+      ...base,
+      plan_tier: "gold" as const,
+      plan_expires_at: "2026-12-01T00:00:00Z",
+    };
+    expect(withGrant(gold, grant, now).plan_tier).toBe("premium");
+    const prem = {
+      ...base,
+      plan_tier: "premium" as const,
+      plan_expires_at: "2026-12-01T00:00:00Z",
+    };
+    expect(withGrant(prem, { tier: "gold", until: grant.until }, now)).toBe(
+      prem,
+    );
+    expect(withGrant(prem, grant, now)).toBe(prem); // their own live Premium stands
+  });
+  it("an expired own plan does not block a grant", () => {
+    const lapsed = {
+      ...base,
+      plan_tier: "gold" as const,
+      plan_expires_at: "2026-10-01T00:00:00Z",
+    };
+    expect(withGrant(lapsed, grant, now).plan_tier).toBe("premium");
+  });
+  it("ignores no grant, a free grant and a grant that has ended", () => {
+    expect(withGrant(base, null, now)).toBe(base);
+    expect(withGrant(base, { tier: "free", until: grant.until }, now)).toBe(
+      base,
+    );
+    expect(
+      withGrant(base, { tier: "premium", until: "2026-10-19T00:00:00Z" }, now),
+    ).toBe(base);
   });
 });

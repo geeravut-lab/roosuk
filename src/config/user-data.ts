@@ -166,6 +166,18 @@ export const OWNED_TABLES: readonly OwnedTable[] = [
     countable: true,
   },
   {
+    table: "family_invites",
+    column: "owner_id",
+    onDelete: "erased",
+    countable: true,
+  },
+  {
+    table: "family_members",
+    column: "member_id",
+    onDelete: "erased",
+    countable: true,
+  },
+  {
     table: "monthly_reports",
     column: "user_id",
     onDelete: "erased",
@@ -247,4 +259,6 @@ export const INTERNAL_USER_REFERENCES: readonly string[] = [
   "notification_settings.updated_by",
   "platform_settings.updated_by",
   "payments.reviewed_by",
+  // who used an invite: the person's own copy is the membership (family_members)
+  "family_invites.accepted_by",
 ];

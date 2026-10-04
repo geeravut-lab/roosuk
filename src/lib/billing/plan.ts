@@ -16,6 +16,35 @@ export interface BillingProfile {
   ai_suspended: boolean;
 }
 
+/** A plan someone else's arrangement gives this person for a while (a family seat, a company seat). */
+export interface PlanGrant {
+  tier: PlanId;
+  until: string;
+}
+
+const RANK: Record<PlanId, number> = { free: 0, gold: 1, premium: 2 };
+
+/**
+ * The profile as the person experiences it: their own plan, lifted by a grant when
+ * the grant is live and better than what they pay for themselves. The stored
+ * profile is never changed — the grant lasts exactly as long as the arrangement does.
+ * A trial is not touched (it is already Premium, and ends on its own).
+ */
+export function withGrant(
+  profile: BillingProfile,
+  grant: PlanGrant | null,
+  now: Date = new Date(),
+): BillingProfile {
+  if (!grant || grant.tier === "free" || new Date(grant.until) <= now)
+    return profile;
+  const ownLive =
+    profile.plan_tier !== "free" &&
+    !!profile.plan_expires_at &&
+    new Date(profile.plan_expires_at) > now;
+  if (ownLive && RANK[profile.plan_tier] >= RANK[grant.tier]) return profile;
+  return { ...profile, plan_tier: grant.tier, plan_expires_at: grant.until };
+}
+
 export type PlanSource = "paid" | "trial" | "free";
 
 export interface EffectivePlan {

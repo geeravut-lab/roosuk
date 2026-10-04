@@ -8,6 +8,7 @@ import {
   IdCard,
   Smartphone,
   Bot,
+  UsersRound,
   Watch,
   Gift,
   Trophy,
@@ -46,6 +47,12 @@ export const NAV: readonly NavItem[] = [
     label: "navAgent",
     icon: Bot,
     group: "daily",
+  },
+  {
+    href: "/family",
+    label: "navFamily",
+    icon: UsersRound,
+    group: "account",
   },
   {
     href: "/report",
