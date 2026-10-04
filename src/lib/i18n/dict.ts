@@ -53,6 +53,41 @@ const th = {
   // ── landing
   landingHeadline: "AI ที่รู้จักสุขภาพของคุณ",
   landingQuizCta: "ลองประเมินสุขภาพฟรี ไม่ต้องสมัคร",
+  askTitle: "ถามรู้สุข",
+  askIntro:
+    "ถามเรื่องสุขภาพของคุณ เช่น ผลตรวจหมายความว่าอะไร หรือเตรียมคำถามไปคุยกับแพทย์ รู้สุขดูข้อมูลของคุณที่บันทึกไว้ประกอบการตอบ",
+  askPlaceholder: "พิมพ์คำถามของคุณ…",
+  askSend: "ถาม",
+  askThinking: "กำลังคิดคำตอบ…",
+  askNew: "เริ่มสนทนาใหม่",
+  askEmpty: "ยังไม่มีบทสนทนา ลองถามอะไรสักอย่างได้เลย",
+  askYou: "คุณ",
+  askAssistant: "รู้สุข",
+  askDisclaimer:
+    "คำตอบนี้เป็นข้อมูลทั่วไป ไม่ใช่การวินิจฉัยหรือคำแนะนำทางการแพทย์ หากมีอาการหรือกังวล กรุณาปรึกษาแพทย์",
+  askSeeDoctor: "ควรปรึกษาแพทย์ในเร็ว ๆ นี้เกี่ยวกับเรื่องนี้",
+  askLowConfidence:
+    "รู้สุขไม่ค่อยมั่นใจกับคำตอบนี้ ควรถามแพทย์หรือเภสัชกรเพื่อความแน่ใจ",
+  askEmergency:
+    "ถ้าอาการนี้กำลังเกิดขึ้นกับคุณหรือคนใกล้ตัว โปรดโทร 1669 (สายด่วนการแพทย์ฉุกเฉิน) หรือไปโรงพยาบาลที่ใกล้ที่สุดทันที รู้สุขช่วยในเหตุฉุกเฉินไม่ได้ หากไม่ใช่เหตุฉุกเฉินและต้องการถามข้อมูลทั่วไป ลองถามใหม่ด้วยถ้อยคำอื่นได้",
+  askSelfHarm:
+    "ขอบคุณที่บอกให้เรารู้ ความรู้สึกแบบนี้สำคัญและคุณไม่ต้องรับมือคนเดียว โทรสายด่วนสุขภาพจิต 1323 ได้ตลอด 24 ชั่วโมง หากรู้สึกว่าตัวเองอยู่ในอันตรายทันที โทร 1669 หรือไปโรงพยาบาลใกล้ที่สุด และลองบอกคนที่ไว้ใจให้มาอยู่ด้วย",
+  askGuardrail:
+    "ขออภัย รู้สุขตอบเรื่องนี้ไม่ได้ เพราะเป็นเรื่องที่ต้องให้แพทย์หรือเภสัชกรประเมิน เช่น การวินิจฉัย หรือการใช้/ปรับยา กรุณาปรึกษาแพทย์โดยตรง",
+  askHistoryNote:
+    "บทสนทนาถูกเก็บไว้ในบัญชีของคุณ ลบหรือดาวน์โหลดได้ในหน้าตั้งค่า",
+  err_ask_invalid: "พิมพ์คำถามก่อน (ไม่เกิน 1,000 ตัวอักษร)",
+  labExplainCta: "อธิบายผลด้วย AI",
+  labExplainBusy: "กำลังสร้างคำอธิบาย…",
+  labExplainTitle: "คำอธิบายจาก AI",
+  labExplainHint:
+    "AI อธิบายจากค่าและสถานะที่ระบบคำนวณไว้ ไม่เปลี่ยนสถานะและไม่วินิจฉัย (นับเป็น 1 ครั้งของโควตาถาม AI)",
+  labExplainSeeDoctor: "มีค่าที่ควรให้แพทย์ช่วยแปลผล แนะนำให้ปรึกษาแพทย์",
+  labExplainDisclaimer:
+    "คำอธิบายนี้ไม่ใช่การวินิจฉัยหรือคำแนะนำทางการแพทย์ กรุณาปรึกษาแพทย์เพื่อแปลผลตรวจของคุณ",
+  labExplainRequest: "ขอให้อธิบายผลตรวจฉบับนี้",
+  err_lab_nothing_to_explain:
+    "ไม่มีค่าที่ประเมินสถานะได้ จึงยังไม่มีอะไรให้อธิบาย",
   landingSub: "ถ่ายรูปอาหาร อัปโหลดผลตรวจ แล้วรู้ว่าวันนี้ควรใส่ใจเรื่องอะไร",
   landingCtaStart: "เริ่มต้นใช้งานฟรี",
   landingCtaLogin: "เข้าสู่ระบบ",
@@ -587,6 +622,8 @@ const th = {
   adminAiEventsNote:
     "บันทึกเฉพาะการสลับสำรองและข้อผิดพลาด ไม่บันทึกข้อความของผู้ใช้",
   adminAiEventsNone: "ยังไม่มีเหตุการณ์",
+  adminAiFreeTier:
+    "คีย์ของ {provider} น่าจะเป็นบัญชีฟรี (free tier): ผู้ให้บริการอาจนำข้อมูลไปพัฒนาผลิตภัณฑ์ ห้ามใช้กับข้อมูลสุขภาพจริงของผู้ใช้ ต้องเปิด billing ก่อนเปิดให้ผู้ใช้จริง",
   adminAiUpdated: "แก้ล่าสุด {when}",
   adminAiEffective: "ตอนนี้ใช้: {primary}{fallback}",
   adminAiEffectiveFallback: " · สำรอง: {fallback}",
@@ -675,6 +712,42 @@ const en = {
 
   landingHeadline: "The AI that knows your health",
   landingQuizCta: "Try the free health check — no sign-up",
+  askTitle: "Ask RooSuk",
+  askIntro:
+    "Ask about your health — what a result means, or help preparing questions for your doctor. RooSuk looks at the data you have saved when it answers.",
+  askPlaceholder: "Type your question…",
+  askSend: "Ask",
+  askThinking: "Thinking…",
+  askNew: "Start a new conversation",
+  askEmpty: "No conversation yet. Ask anything to get started.",
+  askYou: "You",
+  askAssistant: "RooSuk",
+  askDisclaimer:
+    "This is general information, not a diagnosis or medical advice. If you have symptoms or are worried, please talk to a doctor.",
+  askSeeDoctor: "It would be wise to talk to a doctor about this soon.",
+  askLowConfidence:
+    "RooSuk is not very sure about this answer. Please check with a doctor or pharmacist.",
+  askEmergency:
+    "If this is happening to you or someone near you right now, call 1669 (emergency medical services) or go to the nearest hospital immediately. RooSuk cannot help in an emergency. If it is not an emergency and you want general information, try asking again in different words.",
+  askSelfHarm:
+    "Thank you for telling us. These feelings matter and you do not have to face them alone. The mental health hotline 1323 is open 24 hours. If you feel in immediate danger, call 1669 or go to the nearest hospital, and ask someone you trust to be with you.",
+  askGuardrail:
+    "Sorry, RooSuk cannot answer that — it needs a doctor or pharmacist to assess, for example a diagnosis or starting, stopping or changing a medicine. Please talk to a doctor directly.",
+  askHistoryNote:
+    "Conversations are kept in your account. You can delete or download them in Settings.",
+  err_ask_invalid: "Type a question first (up to 1,000 characters).",
+  labExplainCta: "Explain with AI",
+  labExplainBusy: "Writing the explanation…",
+  labExplainTitle: "Explanation from AI",
+  labExplainHint:
+    "AI explains from the values and statuses the app calculated; it never changes a status and never diagnoses. (Counts as 1 use of your AI question allowance.)",
+  labExplainSeeDoctor:
+    "Some values should be interpreted by a doctor. We recommend talking to one.",
+  labExplainDisclaimer:
+    "This explanation is not a diagnosis or medical advice. Please talk to a doctor to interpret your results.",
+  labExplainRequest: "Please explain this lab report",
+  err_lab_nothing_to_explain:
+    "No value could be assessed, so there is nothing to explain yet.",
   landingSub:
     "Snap your meals, upload your lab results, and see what deserves your attention today.",
   landingCtaStart: "Start for free",
@@ -1227,6 +1300,8 @@ const en = {
   adminAiEventsNote:
     "Only fallbacks and errors are logged — never user messages.",
   adminAiEventsNone: "No events yet",
+  adminAiFreeTier:
+    "The {provider} key looks like a FREE-tier account: the provider may use the data to improve its products. Do not use it for real users’ health data — enable billing before launch.",
   adminAiUpdated: "Last edited {when}",
   adminAiEffective: "Using now: {primary}{fallback}",
   adminAiEffectiveFallback: " · fallback: {fallback}",

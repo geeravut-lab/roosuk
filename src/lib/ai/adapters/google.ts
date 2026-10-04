@@ -1,4 +1,8 @@
-import { GoogleGenAI, type GenerateContentResponse } from "@google/genai";
+import {
+  GoogleGenAI,
+  ThinkingLevel,
+  type GenerateContentResponse,
+} from "@google/genai";
 import {
   AiError,
   type AiRequest,
@@ -7,6 +11,15 @@ import {
 } from "../types";
 
 const DEFAULT_MAX_TOKENS = 2048;
+/**
+ * Gemini 3 / Flash models "think" before answering and COUNT those thinking
+ * tokens against maxOutputTokens: a 1024-token limit was measured spending 873
+ * on thinking, leaving a long answer truncated into invalid JSON. So thinking is
+ * set to LOW (accepted by every current Flash / Flash-Lite model; probed
+ * 2026-10-11) and the limit gets headroom on top of what the caller asked for.
+ */
+const THINKING_HEADROOM = 2048;
+const SUPPORTS_THINKING_LEVEL = /^gemini-(3|flash)/;
 const NON_TEXT = /tts|image|embedding|live|audio|robotics|computer-use/i;
 
 /**
@@ -20,9 +33,19 @@ export function buildGoogleParams(req: AiRequest, model: string) {
   }));
   return {
     model,
-    contents: [{ role: "user", parts: [...media, { text: req.prompt }] }],
+    contents: [
+      ...(req.history ?? []).map((h) => ({
+        role: h.role === "assistant" ? "model" : "user",
+        parts: [{ text: h.text }],
+      })),
+      { role: "user", parts: [...media, { text: req.prompt }] },
+    ],
     config: {
-      maxOutputTokens: req.maxTokens ?? DEFAULT_MAX_TOKENS,
+      maxOutputTokens:
+        (req.maxTokens ?? DEFAULT_MAX_TOKENS) + THINKING_HEADROOM,
+      ...(SUPPORTS_THINKING_LEVEL.test(model)
+        ? { thinkingConfig: { thinkingLevel: ThinkingLevel.LOW } }
+        : {}),
       ...(req.system ? { systemInstruction: req.system } : {}),
       ...(req.jsonSchema
         ? {

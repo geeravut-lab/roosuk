@@ -33,7 +33,10 @@ export function buildAnthropicParams(req: AiRequest, model: string): Params {
   const params: Params = {
     model,
     max_tokens: req.maxTokens ?? DEFAULT_MAX_TOKENS,
-    messages: [{ role: "user", content }],
+    messages: [
+      ...(req.history ?? []).map((h) => ({ role: h.role, content: h.text })),
+      { role: "user", content },
+    ],
   };
   if (req.system) params.system = req.system;
   if (req.jsonSchema) {

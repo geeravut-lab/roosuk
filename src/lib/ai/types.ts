@@ -26,8 +26,15 @@ export interface AiMedia {
   data: string;
 }
 
+export interface AiTurn {
+  role: "user" | "assistant";
+  text: string;
+}
+
 export interface AiRequest {
   system?: string;
+  /** Earlier turns of a conversation, oldest first; `prompt` is the new user message. */
+  history?: AiTurn[];
   prompt: string;
   images?: AiMedia[];
   /** PDFs (mediaType application/pdf). */

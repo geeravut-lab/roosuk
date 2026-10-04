@@ -41,6 +41,17 @@ function worthSameProviderRetry(error: unknown): boolean {
   return status === 503 || status === 429;
 }
 
+/**
+ * Providers' 429s name the tier ("generate_content_free_tier_requests"). A key on
+ * Google's FREE tier may be used to improve their products, so it must never see
+ * real health data; surfacing that as its own code lets /admin/ai warn about it.
+ */
+export function eventCode(error: unknown): string | null {
+  const message = String((error as { message?: unknown })?.message ?? "");
+  if (/free[_ ]tier/i.test(message)) return "free_tier";
+  return errorStatus(error) ?? (error as AiError)?.code ?? null;
+}
+
 const short = (e: unknown) =>
   String((e as { message?: unknown })?.message ?? e).slice(0, 200);
 
@@ -106,7 +117,7 @@ export async function runAiWith(
         provider: route.primary.provider,
         task,
         status: "error",
-        errorCode: errorStatus(error) ?? (error as AiError).code ?? null,
+        errorCode: eventCode(error),
         message: short(error),
       });
       throw error instanceof AiError
@@ -118,7 +129,7 @@ export async function runAiWith(
       provider: route.primary.provider,
       task,
       status: "fallback",
-      errorCode: errorStatus(error) ?? (error as AiError).code ?? null,
+      errorCode: eventCode(error),
       message: `${short(error)} → ${route.fallback.provider}`,
     });
     try {
@@ -128,8 +139,7 @@ export async function runAiWith(
         provider: route.fallback.provider,
         task,
         status: "error",
-        errorCode:
-          errorStatus(fallbackError) ?? (fallbackError as AiError).code ?? null,
+        errorCode: eventCode(fallbackError),
         message: `fallback also failed: ${short(fallbackError)}`,
       });
       throw fallbackError instanceof AiError

@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { runAi } from "@/lib/ai/server";
+import { appendMessages, createConversation } from "@/lib/ask/server";
 import { AiError } from "@/lib/ai/types";
 import { requireUser } from "@/lib/auth/server";
 import { checkAndConsume, refundUsage } from "@/lib/billing/quota.server";
@@ -11,6 +12,20 @@ import { assertFeature } from "@/lib/flags/server";
 import { sniffImageType } from "@/lib/food/food";
 import { bangkokDate } from "@/lib/health/dates";
 import type { ErrorKey } from "@/lib/i18n/dict";
+import { getLang, getT } from "@/lib/i18n/server";
+import {
+  EMPTY_PROFILE,
+  PROFILE_COLUMNS,
+  profileForPrompt,
+  type HealthProfile,
+} from "@/lib/profile/profile";
+import {
+  EXPLAIN_SCHEMA,
+  explainPrompt,
+  explainSystemPrompt,
+  normalizeExplanation,
+  type LabExplanation,
+} from "@/lib/lab/explain";
 import {
   LAB_SCHEMA,
   MAX_FILE_BYTES,
@@ -175,4 +190,97 @@ export async function deleteLabReportAction(formData: FormData): Promise<void> {
 
   revalidatePath("/timeline");
   redirect("/timeline");
+}
+
+/**
+ * "Explain with AI" for a CONFIRMED report. Costs one use of the AI question
+ * allowance; the answer is stored on the report (so reopening it is free) and
+ * logged as a conversation for audit. Failure or an unusable answer refunds.
+ */
+export async function explainLabAction(formData: FormData): Promise<void> {
+  const user = await requireUser();
+  const id = formData.get("reportId");
+  if (typeof id !== "string" || !UUID.test(id))
+    throw new AppError("err_invalid_input");
+  const back = (error?: ErrorKey) =>
+    redirect(`/scan/lab/${id}${error ? `?error=${error}` : ""}`);
+
+  const db = createAdminClient();
+  const { data: report } = await db
+    .from("lab_reports")
+    .select("items, explanation")
+    .eq("id", id)
+    .eq("user_id", user.id)
+    .eq("status", "confirmed")
+    .maybeSingle<{ items: unknown; explanation: unknown }>();
+  if (!report) throw new AppError("err_payment_state");
+  if (report.explanation) back(); // already explained: nothing to charge
+
+  const items = parseStoredLabItems(report.items);
+  if (items.every((i) => i.status === "unknown"))
+    back("err_lab_nothing_to_explain");
+
+  const decision = await checkAndConsume(user.id, "aiChat");
+  if (!decision.allowed) back(decision.error);
+
+  const [lang, t] = await Promise.all([getLang(), getT()]);
+  let explanation: LabExplanation | null = null;
+  let model = "";
+  try {
+    const { data: profile } = await db
+      .from("health_profiles")
+      .select(PROFILE_COLUMNS)
+      .eq("user_id", user.id)
+      .maybeSingle<HealthProfile>();
+    const ai = await runAi("lab_explain", {
+      system: explainSystemPrompt(lang),
+      prompt: explainPrompt(
+        items,
+        profileForPrompt(profile ?? EMPTY_PROFILE, new Date().getFullYear()),
+      ),
+      jsonSchema: EXPLAIN_SCHEMA as unknown as Record<string, unknown>,
+      maxTokens: 2048,
+    });
+    explanation = normalizeExplanation(ai.json, items);
+    model = `${ai.provider}/${ai.model}`.slice(0, 100);
+  } catch (err) {
+    console.error(
+      "[lab] explanation failed:",
+      err instanceof AiError ? err.code : err,
+    );
+  }
+  if (!explanation) {
+    await refundUsage(user.id, "aiChat");
+    back("err_ai_unavailable");
+    return;
+  }
+
+  const { data: saved, error } = await db
+    .from("lab_reports")
+    .update({ explanation, explained_at: new Date().toISOString() })
+    .eq("id", id)
+    .eq("user_id", user.id)
+    .eq("status", "confirmed")
+    .select("id");
+  if (error || saved?.length !== 1) {
+    await refundUsage(user.id, "aiChat");
+    back("err_save_failed");
+    return;
+  }
+
+  // Audit trail: what was asked, what the user was told.
+  const conversation = await createConversation(user.id, "lab_explain", id);
+  if (conversation)
+    await appendMessages(conversation, user.id, [
+      { role: "user", content: t.labExplainRequest },
+      {
+        role: "assistant",
+        content: explanation.summary,
+        flag: explanation.seeDoctor ? "see_doctor" : null,
+        model,
+      },
+    ]);
+
+  revalidatePath(`/scan/lab/${id}`);
+  back();
 }

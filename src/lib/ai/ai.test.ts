@@ -174,6 +174,28 @@ describe("adapters (pure parts)", () => {
       input_schema: req.jsonSchema,
     });
   });
+  it("passes earlier turns to both providers in order, with each provider's role names", () => {
+    const withHistory: AiRequest = {
+      prompt: "and now?",
+      history: [
+        { role: "user", text: "first" },
+        { role: "assistant", text: "answer" },
+      ],
+    };
+    const a = buildAnthropicParams(withHistory, "m");
+    expect(a.messages.map((m) => m.role)).toEqual([
+      "user",
+      "assistant",
+      "user",
+    ]);
+    expect(a.messages[0].content).toBe("first");
+    const g = buildGoogleParams(withHistory, "m");
+    expect(g.contents.map((c) => c.role)).toEqual(["user", "model", "user"]);
+    expect(g.contents[2].parts).toEqual([{ text: "and now?" }]);
+    // no history = a single user turn
+    expect(buildGoogleParams({ prompt: "x" }, "m").contents).toHaveLength(1);
+  });
+
   it("builds a plain Anthropic request without tools", () => {
     const p = buildAnthropicParams({ prompt: "hi" }, "m");
     expect(p.tools).toBeUndefined();
@@ -228,10 +250,24 @@ describe("adapters (pure parts)", () => {
     expect(p.contents[0].parts).toHaveLength(3);
     expect(p.config).toMatchObject({
       systemInstruction: "sys",
-      maxOutputTokens: 500,
+      maxOutputTokens: 500 + 2048, // headroom: Gemini counts thinking tokens in the limit
       responseMimeType: "application/json",
       responseJsonSchema: req.jsonSchema,
     });
+  });
+  it("lowers thinking on Gemini 3 / Flash models only", () => {
+    for (const m of [
+      "gemini-3-flash-preview",
+      "gemini-flash-latest",
+      "gemini-flash-lite-latest",
+    ])
+      expect(buildGoogleParams({ prompt: "x" }, m).config).toHaveProperty(
+        "thinkingConfig.thinkingLevel",
+        "LOW",
+      );
+    expect(
+      buildGoogleParams({ prompt: "x" }, "gemini-2.0-pro").config,
+    ).not.toHaveProperty("thinkingConfig");
   });
   it("parses Gemini replies and rejects invalid JSON", () => {
     const ok = parseGoogleResponse(
@@ -338,6 +374,25 @@ describe("runAiWith", () => {
     expect(flaky.call).toHaveBeenCalledTimes(2);
     expect(a.anthropic.call).not.toHaveBeenCalled();
     expect(events).toEqual([]);
+  });
+
+  it("flags a free-tier key by name, whatever the status code", async () => {
+    const freeTier = {
+      status: 429,
+      message:
+        "Quota exceeded for metric: generate_content_free_tier_requests, limit: 20",
+    };
+    const a = {
+      anthropic: ok("anthropic"),
+      google: failing("google", freeTier),
+    };
+    const { deps, events } = make(a);
+    await runAiWith(deps, "food_scan", req);
+    expect(events[0]).toMatchObject({
+      provider: "google",
+      status: "fallback",
+      errorCode: "free_tier",
+    });
   });
 
   it("does not retry a dead key on the same provider (goes straight to the fallback)", async () => {

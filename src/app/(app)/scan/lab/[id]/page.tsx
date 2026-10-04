@@ -1,14 +1,20 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { confirmLabAction, deleteLabReportAction } from "@/app/actions/lab";
+import {
+  confirmLabAction,
+  deleteLabReportAction,
+  explainLabAction,
+} from "@/app/actions/lab";
 import { LabStatusChip } from "@/components/LabStatusChip";
+import { PendingButton } from "@/components/PendingButton";
 import { biomarkerByKey } from "@/config/biomarkers";
 import { requireUser } from "@/lib/auth/server";
 import { bangkokDate } from "@/lib/health/dates";
 import { errorText, fmt } from "@/lib/i18n/dict";
 import { formatDate } from "@/lib/i18n/format";
 import { getLang, getT } from "@/lib/i18n/server";
+import { parseStoredExplanation } from "@/lib/lab/explain";
 import {
   countOutOfRange,
   formatRange,
@@ -39,7 +45,7 @@ export default async function LabReportPage({
     getLang(),
     supabase
       .from("lab_reports")
-      .select("id, status, collected_on, items")
+      .select("id, status, collected_on, items, explanation")
       .eq("id", id)
       .eq("user_id", user.id)
       .maybeSingle<{
@@ -47,6 +53,7 @@ export default async function LabReportPage({
         status: "draft" | "confirmed";
         collected_on: string | null;
         items: unknown;
+        explanation: unknown;
       }>(),
   ]);
   if (!report) notFound();
@@ -187,6 +194,7 @@ export default async function LabReportPage({
   }
 
   const outside = countOutOfRange(items);
+  const explanation = parseStoredExplanation(report.explanation);
   return (
     <div className="space-y-4">
       <div className="space-y-1">
@@ -201,6 +209,41 @@ export default async function LabReportPage({
       <p className="card font-medium">
         {outside > 0 ? fmt(t.labSummary, { n: outside }) : t.labSummaryNone}
       </p>
+
+      {typeof error === "string" ? (
+        <p
+          role="alert"
+          className="border-field-border bg-surface rounded-xl border px-3 py-2 text-sm font-medium"
+        >
+          {errorText(error, t)}
+        </p>
+      ) : null}
+
+      {explanation ? (
+        <section className="card space-y-2" aria-labelledby="explain-h">
+          <h2 id="explain-h" className="font-semibold">
+            {t.labExplainTitle}
+          </h2>
+          <p className="whitespace-pre-wrap">{explanation.summary}</p>
+          {explanation.seeDoctor ? (
+            <p className="bg-tint-warn rounded-lg px-2.5 py-1.5 text-sm font-medium">
+              {t.labExplainSeeDoctor}
+            </p>
+          ) : null}
+          <p className="text-muted text-xs">{t.labExplainDisclaimer}</p>
+        </section>
+      ) : (
+        <form action={explainLabAction} className="card space-y-2">
+          <input type="hidden" name="reportId" value={report.id} />
+          <p className="text-muted text-sm">{t.labExplainHint}</p>
+          <PendingButton
+            pendingLabel={t.labExplainBusy}
+            className="btn btn-secondary w-full"
+          >
+            {t.labExplainCta}
+          </PendingButton>
+        </form>
+      )}
 
       <ul className="space-y-3">
         {sortBySeverity(items).map((it, i) => {
@@ -228,6 +271,11 @@ export default async function LabReportPage({
               {it.printed_range ? (
                 <p className="text-muted text-sm">
                   {fmt(t.labRefPrinted, { range: it.printed_range })}
+                </p>
+              ) : null}
+              {it.marker_key && explanation?.items[it.marker_key] ? (
+                <p className="bg-tint-primary rounded-lg px-2.5 py-1.5 text-sm">
+                  {explanation.items[it.marker_key]}
                 </p>
               ) : null}
               {prev ? (

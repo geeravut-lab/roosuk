@@ -28,10 +28,23 @@ interface EventRow {
   created_at: string;
 }
 
+/** Providers whose key was seen on a free tier in the last 7 days (see eventCode in src/lib/ai/run.ts). */
+async function recentFreeTierProviders(): Promise<string[]> {
+  const since = new Date(Date.now() - 7 * 86_400_000).toISOString();
+  const { data } = await createAdminClient()
+    .from("ai_events")
+    .select("provider")
+    .eq("error_code", "free_tier")
+    .gte("created_at", since)
+    .limit(50)
+    .returns<{ provider: string }[]>();
+  return [...new Set((data ?? []).map((e) => e.provider))];
+}
+
 export default async function AdminAiPage() {
   // The admin just changed something: show the truth, not a 30-second-old copy.
   invalidateAiSettingsCache();
-  const [t, lang, settings, modelLists, events] = await Promise.all([
+  const [t, lang, settings, modelLists, events, freeTier] = await Promise.all([
     getT(),
     getLang(),
     loadAiSettings(),
@@ -42,7 +55,9 @@ export default async function AdminAiPage() {
       .order("created_at", { ascending: false })
       .limit(50)
       .returns<EventRow[]>(),
+    recentFreeTierProviders(),
   ]);
+  const freeTierProviders = freeTier;
 
   const providers: ProviderView[] = PROVIDER_IDS.map((id, i) => ({
     id,
@@ -91,6 +106,18 @@ export default async function AdminAiPage() {
           </p>
         ) : null}
       </div>
+
+      {freeTierProviders.map((p) => (
+        <p
+          key={p}
+          role="alert"
+          className="border-danger bg-tint-danger rounded-xl border-2 px-3 py-2 text-sm font-medium"
+        >
+          {fmt(t.adminAiFreeTier, {
+            provider: PROVIDERS[p as keyof typeof PROVIDERS]?.label ?? p,
+          })}
+        </p>
+      ))}
 
       <section className="space-y-2" aria-labelledby="keys-h">
         <h2 id="keys-h" className="font-semibold">
