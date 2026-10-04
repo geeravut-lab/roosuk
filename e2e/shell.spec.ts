@@ -102,6 +102,36 @@ test.describe("mobile layout (390×844)", () => {
     await expect(sheet).toBeHidden();
   });
 
+  test("'More' sheet shows the open page's item and cues for hidden items", async ({
+    page,
+  }) => {
+    // /today is a bottom-bar page: the list starts at the top, more is below.
+    await page.goto(PREVIEW);
+    await page.getByRole("button", { name: "เพิ่มเติม" }).click();
+    const sheet = page.getByRole("dialog", { name: "เมนูทั้งหมด" });
+    const up = sheet.locator("[data-more-cue=up]");
+    const down = sheet.locator("[data-more-cue=down]");
+    await expect(up).toHaveAttribute("data-visible", "false");
+    await expect(down).toHaveAttribute("data-visible", "true");
+    await page.keyboard.press("Escape");
+
+    // /settings sits near the end: it must be on screen, with items hidden above.
+    await page.goto("/preview/settings");
+    await page.getByRole("button", { name: "เพิ่มเติม" }).click();
+    const current = sheet.locator('a[aria-current="page"]');
+    await expect(current).toBeVisible();
+    await expect(current).toBeInViewport({ ratio: 1 });
+    await expect(up).toHaveAttribute("data-visible", "true");
+
+    // Scrolling to the end flips the cues; scrolling back restores them.
+    const list = sheet.locator("div.overflow-y-auto");
+    await list.evaluate((el) => (el.scrollTop = el.scrollHeight));
+    await expect(down).toHaveAttribute("data-visible", "false");
+    await list.evaluate((el) => (el.scrollTop = 0));
+    await expect(up).toHaveAttribute("data-visible", "false");
+    await expect(down).toHaveAttribute("data-visible", "true");
+  });
+
   test("language switch works from the header", async ({ page }) => {
     await page.goto(PREVIEW);
     await page

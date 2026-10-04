@@ -1,9 +1,24 @@
 "use client";
 
-import { Suspense, useEffect, useState, type ReactNode } from "react";
+import {
+  Suspense,
+  useCallback,
+  useEffect,
+  useState,
+  type ReactNode,
+} from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Bell, BookOpen, Ellipsis, LogOut, ShieldCheck, X } from "lucide-react";
+import {
+  Bell,
+  BookOpen,
+  ChevronDown,
+  ChevronUp,
+  Ellipsis,
+  LogOut,
+  ShieldCheck,
+  X,
+} from "lucide-react";
 import { signOutAction } from "@/app/actions/auth";
 import { BackLink } from "@/components/shell/BackLink";
 import { LangSwitch } from "@/components/LangSwitch";
@@ -64,6 +79,35 @@ export function AppShell({
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [moreOpen]);
+
+  // Hidden items above/below in the sheet's list (drives the scroll cues).
+  const [edges, setEdges] = useState({ up: false, down: false });
+  const updateEdges = useCallback((el: HTMLElement) => {
+    const up = el.scrollTop > 4;
+    const down = el.scrollTop + el.clientHeight < el.scrollHeight - 4;
+    setEdges((prev) =>
+      prev.up === up && prev.down === down ? prev : { up, down },
+    );
+  }, []);
+  // Runs when the list mounts (the sheet was just opened): bring the open page's
+  // item into view, then watch the list's size so the cues stay right on rotate.
+  const sheetListRef = useCallback(
+    (el: HTMLDivElement | null) => {
+      if (!el) return;
+      const active = el.querySelector<HTMLElement>('[aria-current="page"]');
+      if (active) {
+        const max = el.scrollHeight - el.clientHeight;
+        const target =
+          active.offsetTop - (el.clientHeight - active.offsetHeight) / 2;
+        el.scrollTop = Math.max(0, Math.min(max, target));
+      }
+      updateEdges(el);
+      const ro = new ResizeObserver(() => updateEdges(el));
+      ro.observe(el);
+      return () => ro.disconnect();
+    },
+    [updateEdges],
+  );
 
   const primary = NAV.slice(0, PRIMARY_NAV_COUNT);
   const rest = NAV.slice(PRIMARY_NAV_COUNT);
@@ -300,9 +344,9 @@ export function AppShell({
             role="dialog"
             aria-modal="true"
             aria-label={t.navMoreTitle}
-            className="bg-surface absolute inset-x-0 bottom-0 max-h-[85dvh] overflow-y-auto rounded-t-3xl p-4 pb-[max(1rem,env(safe-area-inset-bottom))] shadow-xl"
+            className="bg-surface absolute inset-x-0 bottom-0 flex max-h-[85dvh] flex-col rounded-t-3xl p-4 pb-[max(1rem,env(safe-area-inset-bottom))] shadow-xl"
           >
-            <div className="mb-2 flex items-center justify-between">
+            <div className="mb-2 flex shrink-0 items-center justify-between">
               <span className="inline-flex items-center gap-2 font-semibold">
                 <LogoMark size={28} />
                 {displayName}
@@ -316,15 +360,48 @@ export function AppShell({
                 <X className="size-5" aria-hidden />
               </button>
             </div>
-            <div className="flex flex-col gap-1">
-              {rest.map(renderLink)}
-              {adminLink}
-              {manualLink}
-              {signOut}
+            <div className="relative flex min-h-0 flex-col">
+              <div
+                ref={sheetListRef}
+                onScroll={(e) => updateEdges(e.currentTarget)}
+                className="relative flex min-h-0 flex-col gap-1 overflow-y-auto overscroll-contain"
+              >
+                {rest.map(renderLink)}
+                {adminLink}
+                {manualLink}
+                {signOut}
+              </div>
+              <ScrollCue direction="up" visible={edges.up} />
+              <ScrollCue direction="down" visible={edges.down} />
             </div>
           </div>
         </div>
       ) : null}
+    </div>
+  );
+}
+
+/** Fading edge with a chevron: tells the person more menu items are out of view. */
+function ScrollCue({
+  direction,
+  visible,
+}: {
+  direction: "up" | "down";
+  visible: boolean;
+}) {
+  const Icon = direction === "up" ? ChevronUp : ChevronDown;
+  return (
+    <div
+      aria-hidden
+      data-more-cue={direction}
+      data-visible={visible}
+      className={`pointer-events-none absolute inset-x-0 flex h-9 justify-center transition-opacity ${
+        direction === "up"
+          ? "from-surface top-0 items-start bg-linear-to-b to-transparent"
+          : "from-surface bottom-0 items-end bg-linear-to-t to-transparent"
+      } ${visible ? "opacity-100" : "opacity-0"}`}
+    >
+      <Icon className="text-active size-5" />
     </div>
   );
 }
