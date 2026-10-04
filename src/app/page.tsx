@@ -6,7 +6,8 @@ import { POST_LOGIN_PATH } from "@/config/routes";
 import { getCurrentUser } from "@/lib/auth/server";
 import { getT } from "@/lib/i18n/server";
 
-export default async function Home() {
+export default async function Home({ searchParams }: PageProps<"/">) {
+  const deleted = (await searchParams).deleted;
   if (await getCurrentUser()) redirect(POST_LOGIN_PATH);
   const t = await getT();
 
@@ -18,6 +19,14 @@ export default async function Home() {
       </header>
 
       <main className="flex flex-1 flex-col items-center justify-center gap-6 py-8 text-center">
+        {deleted ? (
+          <p
+            role="status"
+            className="bg-tint-secondary w-full rounded-xl px-3 py-2 text-sm font-medium"
+          >
+            {t.landingDeleted}
+          </p>
+        ) : null}
         <LogoMark size={160} priority />
         <div className="space-y-2">
           <h1 className="text-primary-strong text-3xl font-bold">

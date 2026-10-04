@@ -135,6 +135,48 @@ const th = {
   adminTickNone: "ยังไม่มีรอบทำงาน",
   adminSettingsSaved: "บันทึกแล้ว",
   adminLineResume: "เริ่มส่งต่อทันที (ล้างสถานะหยุดชั่วคราว)",
+  privacyRightsTitle: "สิทธิของคุณตามกฎหมาย",
+  privacyRightsIntro:
+    "ตาม พ.ร.บ.คุ้มครองข้อมูลส่วนบุคคล พ.ศ. 2562 ทุกปุ่มทำงานทันที ไม่ต้องยื่นคำขอหรือรอแอดมิน",
+  exportBtn: "ดาวน์โหลดข้อมูลของฉัน (มาตรา 30, 31)",
+  exportBusy: "กำลังเตรียมไฟล์…",
+  exportHint:
+    "ได้ไฟล์ JSON ที่มีข้อมูลทั้งหมดที่ระบบเก็บเกี่ยวกับคุณ ไฟล์ถูกบันทึกในเครื่องของคุณ เราไม่เก็บสำเนาไว้บนเซิร์ฟเวอร์",
+  exportDone: "ดาวน์โหลดแล้ว ({rows} รายการ)",
+  exportSkipped: "อ่านไม่ได้บางส่วน: {tables}",
+  exportNotIncluded1: "ข้อมูลของบุคคลอื่น — คุณไม่มีสิทธิเข้าถึง",
+  exportNotIncluded2: "รหัสผ่าน — ระบบไม่ได้เก็บรหัสผ่านที่อ่านได้",
+  exportNotIncluded3: "รูปอาหารและไฟล์ผลตรวจ — วิเคราะห์แล้วไม่ได้เก็บไว้",
+  exportNotIncluded4:
+    "บันทึกการเข้าสู่ระบบและที่อยู่ IP — จัดการโดยระบบยืนยันตัวตนของผู้ให้บริการ",
+  policyBtn: "อ่านนโยบายความเป็นส่วนตัว (มาตรา 23)",
+  dataStoreTitle: "ที่เก็บข้อมูลของคุณ",
+  dataStoreProvider: "ผู้ให้บริการ",
+  dataStoreRegion: "ภูมิภาค",
+  dataStoreCountry: "ประเทศ",
+  dataStoreAi:
+    "ข้อความและข้อมูลที่จำเป็นอาจถูกส่งไปประมวลผลกับผู้ให้บริการ AI (Anthropic, Google) นอกราชอาณาจักรไทย ตามที่คุณยินยอมไว้ (มาตรา 28) เราไม่ส่งชื่อหรืออีเมลของคุณ",
+  consentOptionalTitle: "เปลี่ยนความยินยอมที่ไม่บังคับ",
+  consentOptionalSave: "บันทึกการเปลี่ยนแปลง",
+  consentOptionalSaved:
+    "บันทึกความยินยอมแล้ว (เก็บเป็นประวัติใหม่ ไม่ทับของเดิม)",
+  dangerTitle: "พื้นที่อันตราย",
+  dangerWithdraw:
+    "การถอนความยินยอมข้อที่จำเป็นมีผลเท่ากับการลบบัญชี เพราะบริการทั้งหมดอาศัยความยินยอมเรื่องข้อมูลสุขภาพ (มาตรา 19 และ 33)",
+  deleteOpen: "ลบบัญชีและข้อมูลทั้งหมด",
+  deletePreviewIntro: "สิ่งที่จะเกิดขึ้นเมื่อลบบัญชี",
+  deleteErased:
+    "ข้อมูลของคุณ {n} รายการจะถูกลบถาวร (บันทึกประจำวัน มื้ออาหาร ผลตรวจ บทสนทนา โปรไฟล์ ฯลฯ)",
+  deleteRetained:
+    "รายการชำระเงินและบันทึกการใช้สิทธิ {n} รายการจะถูกเก็บไว้เพื่อการบัญชีตามกฎหมาย โดยตัดการเชื่อมโยงกับตัวคุณ",
+  deleteIrreversible: "ลบแล้วกู้คืนไม่ได้ และจะออกจากระบบทุกเครื่อง",
+  deleteDownloadFirst: "อยากเก็บสำเนาไว้ ให้กดดาวน์โหลดข้อมูลของคุณก่อน",
+  deleteTypePrompt: "พิมพ์ “{phrase}” เพื่อยืนยัน",
+  deleteConfirm: "ลบบัญชีถาวร",
+  landingDeleted: "ลบบัญชีและข้อมูลของคุณเรียบร้อยแล้ว",
+  err_confirm_phrase: "พิมพ์คำยืนยันให้ถูกต้อง",
+  err_last_admin:
+    "คุณเป็นผู้ดูแลระบบคนสุดท้าย กรุณาตั้งผู้ดูแลคนอื่นก่อนลบบัญชี",
   err_ask_invalid: "พิมพ์คำถามก่อน (ไม่เกิน 1,000 ตัวอักษร)",
   labExplainCta: "อธิบายผลด้วย AI",
   labExplainBusy: "กำลังสร้างคำอธิบาย…",
@@ -855,6 +897,49 @@ const en = {
   adminTickNone: "No runs yet",
   adminSettingsSaved: "Saved",
   adminLineResume: "Resume sending now (clear the pause)",
+  privacyRightsTitle: "Your legal rights",
+  privacyRightsIntro:
+    "Under Thailand’s Personal Data Protection Act B.E. 2562, every button below works immediately — no request to file, no waiting for an admin.",
+  exportBtn: "Download my data (sections 30, 31)",
+  exportBusy: "Preparing the file…",
+  exportHint:
+    "You get a JSON file with everything the system holds about you. It is saved on your device; we keep no copy on the server.",
+  exportDone: "Downloaded ({rows} rows)",
+  exportSkipped: "Some parts could not be read: {tables}",
+  exportNotIncluded1: "Other people’s data — you have no right to it",
+  exportNotIncluded2: "Passwords — the system holds no readable password",
+  exportNotIncluded3: "Food photos and lab files — analysed and not kept",
+  exportNotIncluded4:
+    "Sign-in logs and IP addresses — managed by the provider’s authentication service",
+  policyBtn: "Read the privacy policy (section 23)",
+  dataStoreTitle: "Where your data is kept",
+  dataStoreProvider: "Provider",
+  dataStoreRegion: "Region",
+  dataStoreCountry: "Country",
+  dataStoreAi:
+    "Messages and the data needed may be sent to AI providers (Anthropic, Google) outside Thailand for processing, as you consented (section 28). We never send your name or email.",
+  consentOptionalTitle: "Change optional consents",
+  consentOptionalSave: "Save changes",
+  consentOptionalSaved:
+    "Consent saved (kept as a new history entry; the old one is not overwritten)",
+  dangerTitle: "Danger zone",
+  dangerWithdraw:
+    "Withdrawing a required consent is the same as deleting your account, because the whole service relies on consent to health data (sections 19 and 33).",
+  deleteOpen: "Delete my account and all data",
+  deletePreviewIntro: "What happens when you delete your account",
+  deleteErased:
+    "{n} items of your data will be permanently deleted (daily logs, meals, lab results, conversations, profile and more).",
+  deleteRetained:
+    "{n} payment and audit records are kept for legal bookkeeping, with the link to you removed.",
+  deleteIrreversible:
+    "This cannot be undone, and you will be signed out everywhere.",
+  deleteDownloadFirst: "If you want a copy, download your data first.",
+  deleteTypePrompt: "Type “{phrase}” to confirm",
+  deleteConfirm: "Delete permanently",
+  landingDeleted: "Your account and data have been deleted.",
+  err_confirm_phrase: "Type the confirmation phrase exactly.",
+  err_last_admin:
+    "You are the last administrator. Appoint another before deleting your account.",
   err_ask_invalid: "Type a question first (up to 1,000 characters).",
   labExplainCta: "Explain with AI",
   labExplainBusy: "Writing the explanation…",

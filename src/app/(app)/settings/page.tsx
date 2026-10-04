@@ -13,6 +13,11 @@ import { isLineSyntheticEmail } from "@/lib/line/login";
 import { createClient } from "@/lib/supabase/server";
 import { signOutAction } from "@/app/actions/auth";
 import { savePrefsAction } from "@/app/actions/notifications";
+import { updateOptionalConsentAction } from "@/app/actions/privacy";
+import Link from "next/link";
+import { OWNED_TABLES } from "@/config/user-data";
+import { summariseDeletion } from "@/lib/privacy/privacy";
+import { DeleteAccount, ExportButton } from "./PrivacyCards";
 
 export async function generateMetadata(): Promise<Metadata> {
   return { title: (await getT()).settingsTitle };
@@ -40,6 +45,17 @@ export default async function SettingsPage({
     .select("line_transactional, line_reminders")
     .eq("user_id", user.id)
     .maybeSingle<{ line_transactional: boolean; line_reminders: boolean }>();
+  // Counts the way the user can see them (their own RLS-limited client): what a deletion would erase and what stays.
+  const counts: Record<string, number> = {};
+  await Promise.all(
+    OWNED_TABLES.filter((tbl) => tbl.countable).map(async (tbl) => {
+      const { count } = await supabase
+        .from(tbl.table)
+        .select("*", { count: "exact", head: true });
+      counts[tbl.table] = count ?? 0;
+    }),
+  );
+  const { erasedRows, retainedRows } = summariseDeletion(counts);
   const addFriendUrl = process.env.LINE_OA_ADD_FRIEND_URL?.trim();
 
   const rawError = Array.isArray(params.error) ? params.error[0] : params.error;
@@ -200,6 +216,85 @@ export default async function SettingsPage({
             ) : null}
           </>
         ) : null}
+      </section>
+
+      {consent ? (
+        <section
+          className="card space-y-3"
+          aria-labelledby="optional-consent-h"
+        >
+          <h2 id="optional-consent-h" className="font-semibold">
+            {t.consentOptionalTitle}
+          </h2>
+          {params.consent === "saved" ? (
+            <p
+              role="status"
+              className="bg-tint-secondary rounded-xl px-3 py-2 text-sm font-medium"
+            >
+              {t.consentOptionalSaved}
+            </p>
+          ) : null}
+          <form action={updateOptionalConsentAction} className="space-y-3">
+            {CONSENT_ITEMS.filter((i) => !i.required).map((item) => (
+              <label key={item.key} className="flex min-h-11 items-start gap-3">
+                <input
+                  type="checkbox"
+                  name={`consent_${item.key}`}
+                  defaultChecked={consent.items[item.key] === true}
+                  className="mt-1 size-5 shrink-0"
+                />
+                <span>{t[`consent_${item.key}` as const]}</span>
+              </label>
+            ))}
+            <button type="submit" className="btn btn-secondary">
+              {t.consentOptionalSave}
+            </button>
+          </form>
+        </section>
+      ) : null}
+
+      <section className="card space-y-3" aria-labelledby="rights-h">
+        <h2 id="rights-h" className="font-semibold">
+          {t.privacyRightsTitle}
+        </h2>
+        <p className="text-muted text-sm">{t.privacyRightsIntro}</p>
+        <ExportButton />
+        <p className="text-muted text-sm">{t.exportHint}</p>
+        <Link href="/privacy" className="btn btn-secondary w-full sm:w-auto">
+          {t.policyBtn}
+        </Link>
+      </section>
+
+      <section className="card space-y-2" aria-labelledby="store-h">
+        <h2 id="store-h" className="font-semibold">
+          {t.dataStoreTitle}
+        </h2>
+        <dl className="text-sm">
+          <div className="flex justify-between gap-3 py-0.5">
+            <dt className="text-muted">{t.dataStoreProvider}</dt>
+            <dd className="font-medium">{DATA_REGION.provider}</dd>
+          </div>
+          <div className="flex justify-between gap-3 py-0.5">
+            <dt className="text-muted">{t.dataStoreRegion}</dt>
+            <dd className="font-medium">{DATA_REGION.id}</dd>
+          </div>
+          <div className="flex justify-between gap-3 py-0.5">
+            <dt className="text-muted">{t.dataStoreCountry}</dt>
+            <dd className="font-medium">{vars.country}</dd>
+          </div>
+        </dl>
+        <p className="text-muted text-sm">{t.dataStoreAi}</p>
+      </section>
+
+      <section
+        className="card border-danger space-y-3 border-2"
+        aria-labelledby="danger-h"
+      >
+        <h2 id="danger-h" className="font-semibold">
+          {t.dangerTitle}
+        </h2>
+        <p className="text-sm">{t.dangerWithdraw}</p>
+        <DeleteAccount erasedRows={erasedRows} retainedRows={retainedRows} />
       </section>
 
       <form action={signOutAction}>
