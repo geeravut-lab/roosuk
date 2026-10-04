@@ -127,7 +127,7 @@ export default async function TimelinePage() {
               return (
                 <li key={r.id}>
                   <Link
-                    href={`/scan/lab/${r.id}`}
+                    href={`/scan/lab/${r.id}?from=timeline`}
                     className="card hover:bg-tint-primary block space-y-1"
                   >
                     <span className="flex items-baseline justify-between gap-3">
@@ -160,7 +160,7 @@ export default async function TimelinePage() {
             {meals.map((m) => (
               <li key={m.id}>
                 <Link
-                  href={`/scan/food/${m.id}`}
+                  href={`/scan/food/${m.id}?from=timeline`}
                   className="card hover:bg-tint-primary block space-y-1"
                 >
                   <span className="flex items-baseline justify-between gap-3">

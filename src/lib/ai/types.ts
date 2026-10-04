@@ -9,6 +9,7 @@ export type ProviderId = (typeof PROVIDER_IDS)[number];
 /** What a call is FOR — picks the provider/model (docs/ROOSUK-MASTER-PLAN.md §8.2). */
 export const TASK_KINDS = [
   "food_scan",
+  "body_scan",
   "lab_extract",
   "lab_explain",
   "chat",
@@ -17,6 +18,7 @@ export const TASK_KINDS = [
   "safety",
   "daily_plan",
   "monthly_report",
+  "prompt_review",
 ] as const;
 export type TaskKind = (typeof TASK_KINDS)[number];
 

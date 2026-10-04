@@ -1,17 +1,20 @@
 "use client";
 
-import { useActionState } from "react";
 import { recordConsentAction, type ConsentState } from "@/app/actions/consent";
 import { CONSENT_ITEMS } from "@/config/legal";
 import { DATA_REGION } from "@/config/data-region";
 import { errorText } from "@/lib/i18n/dict";
 import { useI18n } from "@/lib/i18n/provider";
+import { useFormAction } from "@/lib/use-form-action";
 
 const initial: ConsentState = {};
 
 export function ConsentForm({ next }: { next: string }) {
   const { t, lang, fmt } = useI18n();
-  const [state, action, pending] = useActionState(recordConsentAction, initial);
+  const [state, onSubmit, pending] = useFormAction(
+    recordConsentAction,
+    initial,
+  );
 
   const vars = {
     country: lang === "en" ? DATA_REGION.countryEn : DATA_REGION.countryTh,
@@ -19,7 +22,7 @@ export function ConsentForm({ next }: { next: string }) {
   };
 
   return (
-    <form action={action} className="space-y-4">
+    <form onSubmit={onSubmit} className="space-y-4">
       <input type="hidden" name="next" value={next} />
 
       {state.error ? (

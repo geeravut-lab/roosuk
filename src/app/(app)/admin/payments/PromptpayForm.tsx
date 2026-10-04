@@ -1,22 +1,22 @@
 "use client";
 
-import { useActionState } from "react";
 import { setPromptpayIdAction, type FormState } from "@/app/actions/payments";
 import { maskPromptpayId } from "@/lib/billing/promptpay";
 import { errorText, fmt } from "@/lib/i18n/dict";
 import { useI18n } from "@/lib/i18n/provider";
+import { useFormAction } from "@/lib/use-form-action";
 
 const initial: FormState = {};
 
 export function PromptpayForm({ current }: { current: string | null }) {
   const { t } = useI18n();
-  const [state, action, pending] = useActionState(
+  const [state, onSubmit, pending] = useFormAction(
     setPromptpayIdAction,
     initial,
   );
 
   return (
-    <form action={action} className="card space-y-3">
+    <form onSubmit={onSubmit} className="card space-y-3">
       <div>
         <label htmlFor="promptpayId" className="label">
           {t.adminPromptpayLabel}

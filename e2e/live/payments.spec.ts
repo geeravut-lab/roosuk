@@ -1,3 +1,4 @@
+import { removeAdminNoticesSince } from "./cleanup";
 import { randomBytes } from "node:crypto";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import AxeBuilder from "@axe-core/playwright";
@@ -18,6 +19,8 @@ const enabled =
 
 // Every step crosses the network to Supabase (and the sandbox proxy): wait longer than the 5 s default.
 const expect = baseExpect.configure({ timeout: 20_000 });
+
+const startedAt = new Date(Date.now() - 5_000).toISOString();
 
 test.skip(
   !enabled,
@@ -81,6 +84,7 @@ let originalPromptpay: string | null = null;
 
 test.afterAll(async () => {
   const d = db();
+  await removeAdminNoticesSince(d, startedAt);
   if (createdIds.length) {
     await d.from("user_subscriptions").delete().in("user_id", createdIds);
     await d.from("payments").delete().in("user_id", createdIds);

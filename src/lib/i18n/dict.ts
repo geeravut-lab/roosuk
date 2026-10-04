@@ -43,6 +43,7 @@ const th = {
   navMoreTitle: "เมนูทั้งหมด",
   navSettings: "ตั้งค่า",
   navAdmin: "ผู้ดูแลระบบ",
+  backTo: "กลับไป{page}",
   navManual: "คู่มือการใช้งาน",
   navGroupDaily: "ประจำวัน",
   navGroupAccount: "บัญชี",
@@ -688,6 +689,67 @@ const th = {
   // ── admin
   adminTitle: "ผู้ดูแลระบบ",
   adminFlagsTitle: "สวิตช์ฟีเจอร์",
+  adminPromptsTitle: "คำสั่งและกฎของ AI",
+  adminPromptsHint:
+    "ดูคำสั่งหลักและกฎที่โค้ดบังคับของแต่ละงาน (แก้ไม่ได้) และเพิ่มคำสั่งเสริมได้โดยไม่ต้อง deploy ทุกคำสั่งเสริมต้องผ่านการตรวจก่อนบันทึก และอยู่ต่ำกว่ากฎหลักเสมอ",
+  promptBuiltin: "คำสั่งหลักของระบบ (อ่านอย่างเดียว)",
+  promptInput: "ข้อมูลที่ส่งคู่กับคำสั่ง",
+  promptGuardrails: "กฎที่โค้ดบังคับ (อ่านอย่างเดียว)",
+  promptExtraLabel: "คำสั่งเสริมจากแอดมิน",
+  promptExtraHint:
+    "ปรับน้ำเสียง คำศัพท์ หรือเน้นเรื่องที่ต้องการ ไม่เกิน {max} ตัวอักษร คำสั่งเสริมอยู่ต่ำกว่ากฎหลักเสมอ และมีผลภายใน 1 นาที",
+  promptSave: "ตรวจสอบและบันทึก",
+  promptChecking: "กำลังตรวจสอบ…",
+  promptCancel: "ยกเลิกการแก้ไข",
+  promptSaved: "ตรวจแล้วปลอดภัย บันทึกแล้ว",
+  promptCleared: "ลบคำสั่งเสริมแล้ว",
+  promptRejected:
+    "ยังบันทึกไม่ได้ พบข้อความที่อาจเป็นอันตรายต่องานนี้ ปรับแล้วลองใหม่ หรือกดยกเลิก",
+  promptRisky:
+    "ยังบันทึกไม่ได้ ผู้ตรวจ AI เห็นว่าอาจเป็นอันตรายต่องานนี้ ปรับแล้วลองใหม่ หรือกดยกเลิก",
+  promptRiskyGeneric:
+    "ผู้ตรวจ AI ไม่เห็นว่าปลอดภัยพอ ลองเขียนให้เจาะจงเรื่องน้ำเสียงหรือคำศัพท์ของงานนี้",
+  promptUnavailable:
+    "ตรวจสอบไม่ได้ตอนนี้ (ผู้ตรวจ AI ไม่ตอบ) จึงยังไม่บันทึก ลองใหม่ภายหลัง",
+  promptInvalid: "ข้อมูลไม่ถูกต้อง",
+  promptHistory: "ประวัติการแก้ไข",
+  promptHistoryNone: "ยังไม่เคยเพิ่มคำสั่งเสริม",
+  promptHistoryRow: "{when} · {who}",
+  promptHistoryCleared: "(ลบคำสั่งเสริม)",
+  promptNotInUse: "งานนี้ยังไม่เปิดใช้ในแอป จึงยังเพิ่มคำสั่งเสริมไม่ได้",
+  promptReviewerNote:
+    "งานนี้คือผู้ตรวจคำสั่งเสริมเอง แก้ไม่ได้ เพื่อไม่ให้ตรวจตัวเอง",
+  promptReason_too_long: "ยาวเกินกำหนด",
+  promptReason_control_chars: "มีอักขระควบคุมที่มองไม่เห็น",
+  promptReason_url: "มีลิงก์ (ช่องทางโจมตีแบบ prompt injection)",
+  promptReason_override_rules:
+    "สั่งให้ละเลยหรือฝ่าฝืนกฎ/คำสั่งหลัก หรือให้สวมบทบาทอื่น",
+  promptReason_reveal_prompt: "สั่งให้เปิดเผยคำสั่งระบบหรือข้อมูลลับ",
+  promptReason_drop_disclaimer: "สั่งให้ตัดคำเตือน/ข้อความปฏิเสธความรับผิดชอบ",
+  promptReason_diagnose: "สั่งให้วินิจฉัยหรือบอกว่าผู้ใช้เป็นโรค",
+  promptReason_medication: "เกี่ยวกับขนาดยาหรือการเริ่ม/หยุด/เปลี่ยนยา",
+  promptReason_weight_loss: "เกี่ยวกับการลดน้ำหนักหรือเป้าหมายน้ำหนัก/แคลอรี",
+  promptReason_shaming: "ถ้อยคำที่ตำหนิหรือล้อเลียนรูปร่าง",
+  promptReason_change_format: "สั่งเปลี่ยนรูปแบบคำตอบที่ระบบต้องการ",
+  guardrails_food_scan:
+    'ตัวเลขโภชนาการมาจากตารางอาหารไทยในโค้ด AI แค่ระบุเมนูและปริมาณ\nค่าที่ AI ประมาณเองถูกจำกัดช่วงและขึ้นป้าย "AI ประมาณการ ตรวจทานด้วยนะ"\nตรวจชนิดไฟล์จากไบต์จริง ไม่เกิน 3 MB ข้อความในรูปถือเป็นข้อมูล ไม่ใช่คำสั่ง\nผู้ใช้ตรวจทานก่อนบันทึกทุกครั้ง ไม่มีเป้าหมายแคลอรีหรือน้ำหนัก\nไม่เก็บรูป เว้นแต่ผู้ใช้เลือกเก็บ (เข้ารหัส)',
+  guardrails_body_scan:
+    'ใช้ได้เฉพาะผู้ใช้อายุ 18 ปีขึ้นไป และต้องยินยอมเรื่องรูปภาพ\nAI ส่งกลับเฉพาะตัวเลขและหมวดที่กำหนด ไม่มีข้อความอิสระ ข้อความที่ผู้ใช้เห็นเขียนโดยโค้ดทั้งหมด\nBMI และช่วง BMI คำนวณโดยโค้ดตามเกณฑ์เอเชีย แสดงเป็นช่วงไม่ใช่ตัวเลขเป๊ะ ค่าที่ไม่สมเหตุสมผลถูกทิ้ง\nน้ำหนักที่ผู้ใช้กรอกเองสำคัญกว่าที่ AI ประมาณเสมอ\nไม่มีเป้าหมายน้ำหนัก ไม่แนะนำการลดน้ำหนักหรือจำกัดอาหาร ให้เฉพาะนิสัยทั่วไป\nรูปหน้าและฝ่ามือเป็นเพียงข้อสังเกตจากภาพตามหมวดที่กำหนด ไม่วินิจฉัย ไม่มีผลต่อคะแนนสุขภาพ\nไม่เก็บรูป เว้นแต่ผู้ใช้เลือกเก็บ (เฉพาะรูปร่างกาย เข้ารหัส) ภาพไม่ชัดจะขอถ่ายใหม่โดยไม่หักสิทธิ์\nแสดง "ไม่ใช่การวินิจฉัย" ทุกครั้ง',
+  guardrails_lab_extract:
+    "AI อ่านเฉพาะชื่อ ตัวเลข หน่วย วันที่ ไม่แปลผล\nสถานะปกติ/ควรติดตาม/ผิดปกติ ตัดสินโดยตารางค่าอ้างอิงในโค้ด (หรือช่วงที่พิมพ์ในเอกสารเมื่อระบบไม่มีรายการนั้น)\nผู้ใช้ตรวจทานและแก้ตัวเลขก่อนบันทึก สถานะถูกคำนวณใหม่โดยโค้ดทุกครั้ง\nข้อความในเอกสารถือเป็นข้อมูล ไม่ใช่คำสั่ง ตรวจชนิดไฟล์จากไบต์จริง ไม่เกิน 3 MB",
+  guardrails_lab_explain:
+    'อธิบายเฉพาะรายการที่นอกช่วง สถานะถูกกำหนดโดยโค้ด AI เปลี่ยนไม่ได้\nข้อความผ่านตัวตรวจคำต้องห้าม (วินิจฉัย ขนาดยา หยุดยา เป้าหมายน้ำหนัก) ไม่ผ่านจะไม่แสดงเลย\nมีค่า "ผิดปกติ" เมื่อไรจะแนะนำพบแพทย์เสมอ โดยไม่ขึ้นกับที่ AI ตอบ\nมี disclaimer ทุกครั้ง บันทึกการสนทนาเพื่อ audit',
+  guardrails_chat:
+    "ข้อความฉุกเฉิน/ทำร้ายตัวเองถูกคัดกรองด้วยโค้ดก่อน และไม่ส่งให้โมเดล\nคำตอบผ่านตัวตรวจคำต้องห้าม ไม่ผ่านจะใช้ข้อความมาตรฐานแทน\nความมั่นใจต่ำหรือเร่งด่วน → แนะนำพบแพทย์ และคำตอบมี disclaimer เสมอ\nข้อมูลส่วนตัวมาจากบล็อกบริบทเท่านั้น บันทึกการสนทนาเพื่อ audit จำกัดโควตาต่อแพ็กเกจ",
+  guardrails_agent: "ยังไม่เปิดใช้ในแอป",
+  guardrails_quick: "ยังไม่เปิดใช้ในแอป",
+  guardrails_safety:
+    "การคัดกรองข้อความเสี่ยง (ฉุกเฉิน/ทำร้ายตัวเอง) ทำด้วยโค้ดล้วน ไม่ผ่านโมเดล และเกิดก่อนการเรียก AI ทุกครั้ง",
+  guardrails_daily_plan:
+    "แผนที่ AI เขียนต้องผ่านตรวจ: ครบ 7 วัน ความยาวพอเหมาะ ไม่มีคำเกี่ยวกับยา อาหารเสริม การรักษา ลดน้ำหนัก ไม่ผ่านใช้แม่แบบจากโค้ด\nไม่ส่งชื่อ อีเมล หรือปีเกิดให้โมเดล ส่งเฉพาะหมวดที่ควรปรับ",
+  guardrails_monthly_report: "ยังไม่เปิดใช้ในแอป",
+  guardrails_prompt_review:
+    "ตรวจคำสั่งเสริมของแอดมินก่อนบันทึก ถ้าไม่แน่ใจหรือตอบไม่ได้จะไม่บันทึก",
   cardTagline: "AI ที่รู้จักสุขภาพของคุณ",
   cardDisclaimer: "ไม่ใช่การวินิจฉัยหรือคำแนะนำทางการแพทย์",
   cardCta: "ลองประเมินสุขภาพฟรีที่ {host}",
@@ -837,6 +899,8 @@ const th = {
   aiTask_safety: "คัดกรองข้อความเสี่ยง",
   aiTask_daily_plan: "สร้างคำแนะนำรายวัน",
   aiTask_monthly_report: "รายงานสุขภาพรายเดือน",
+  aiTask_body_scan: "สแกนร่างกาย (รูป)",
+  aiTask_prompt_review: "ตรวจคำสั่งเพิ่มเติมจากแอดมิน",
   adminAiTitle: "ตั้งค่า AI",
   adminAiHint:
     "เลือกผู้ให้บริการและรุ่นโมเดลต่องาน การเปลี่ยนแปลงมีผลภายใน 1 นาที ไม่ต้อง deploy",
@@ -943,6 +1007,7 @@ const en = {
   navMoreTitle: "All menus",
   navSettings: "Settings",
   navAdmin: "Admin",
+  backTo: "Back to {page}",
   navManual: "User guide",
   navGroupDaily: "Daily",
   navGroupAccount: "Account",
@@ -1609,6 +1674,72 @@ const en = {
 
   adminTitle: "Admin",
   adminFlagsTitle: "Feature switches",
+  adminPromptsTitle: "AI instructions and guardrails",
+  adminPromptsHint:
+    "See each task's main instructions and the guardrails the code enforces (read-only), and add extra instructions without a deploy. Every addition is checked before it is saved and always ranks below the main rules.",
+  promptBuiltin: "Built-in instructions (read-only)",
+  promptInput: "Data sent with the instructions",
+  promptGuardrails: "Guardrails enforced by the code (read-only)",
+  promptExtraLabel: "Admin additions",
+  promptExtraHint:
+    "Adjust tone, vocabulary or emphasis, up to {max} characters. An addition always ranks below the main rules and takes effect within a minute.",
+  promptSave: "Check and save",
+  promptChecking: "Checking…",
+  promptCancel: "Cancel the edit",
+  promptSaved: "Checked and safe — saved.",
+  promptCleared: "The addition was removed.",
+  promptRejected:
+    "Not saved — the text may be harmful to this task. Adjust it and try again, or cancel.",
+  promptRisky:
+    "Not saved — the AI reviewer thinks it may be harmful to this task. Adjust it and try again, or cancel.",
+  promptRiskyGeneric:
+    "The AI reviewer could not find it safe enough. Try wording that is specific to tone or vocabulary for this task.",
+  promptUnavailable:
+    "Could not be checked right now (the AI reviewer did not answer), so nothing was saved. Try again later.",
+  promptInvalid: "Invalid input.",
+  promptHistory: "Edit history",
+  promptHistoryNone: "No additions yet.",
+  promptHistoryRow: "{when} · {who}",
+  promptHistoryCleared: "(addition removed)",
+  promptNotInUse:
+    "This task is not in use in the app yet, so it cannot take an addition.",
+  promptReviewerNote:
+    "This task is the reviewer of additions itself and cannot be edited, so it never reviews itself.",
+  promptReason_too_long: "Too long",
+  promptReason_control_chars: "Contains invisible control characters",
+  promptReason_url: "Contains a link (a prompt-injection route)",
+  promptReason_override_rules:
+    "Tells the AI to ignore or break the main rules, or to play another role",
+  promptReason_reveal_prompt:
+    "Asks the AI to reveal its system prompt or secrets",
+  promptReason_drop_disclaimer: "Asks to remove warnings/disclaimers",
+  promptReason_diagnose:
+    "Asks the AI to diagnose or tell users they have a disease",
+  promptReason_medication:
+    "About medicine doses or starting/stopping/changing medicine",
+  promptReason_weight_loss: "About weight loss or weight/calorie targets",
+  promptReason_shaming: "Wording that blames or mocks a body",
+  promptReason_change_format:
+    "Asks to change the answer format the system needs",
+  guardrails_food_scan:
+    'Nutrition numbers come from the Thai food table in code; the AI only names the dish and portion.\nValues the AI estimates itself are range-limited and labelled "AI estimate — please double-check".\nFile type is checked from the real bytes, max 3 MB; text inside the photo is data, not instructions.\nThe user reviews before saving; no calorie or weight targets.\nThe photo is not kept unless the user chooses to keep it (encrypted).',
+  guardrails_body_scan:
+    'Adults only (18+) and the photo consent is required.\nThe AI returns only numbers and fixed categories — no free text; every sentence the user sees is written by code.\nBMI and its range are computed by code with Asian cut-offs, shown as a range, never an exact figure; implausible values are dropped.\nA weight the user types always outranks the AI\'s estimate.\nNo weight targets, no advice to lose weight or restrict food — general habits only.\nFace and palm photos give only fixed visual observations, no diagnosis, and never affect the health score.\nPhotos are not kept unless the user chooses (body photo only, encrypted); an unclear photo is retaken without using the allowance.\n"Not a diagnosis" is shown every time.',
+  guardrails_lab_extract:
+    "The AI reads only names, numbers, units and dates — it does not interpret.\nNormal / watch / abnormal is decided by the reference table in code (or the range printed on the report when the app has no entry).\nThe user reviews and can correct numbers before saving; statuses are recomputed by code each time.\nText in the document is data, not instructions; file type checked from the real bytes, max 3 MB.",
+  guardrails_lab_explain:
+    'It explains only out-of-range items; statuses are set by code and the AI cannot change them.\nText passes the forbidden-statement check (diagnosis, doses, stopping medicine, weight targets); if it fails, nothing is shown.\nAny "abnormal" value always leads to a see-a-doctor message, whatever the AI says.\nA disclaimer every time; the conversation is logged for audit.',
+  guardrails_chat:
+    "Emergency and self-harm messages are screened by code first and never reach the model.\nThe answer passes the forbidden-statement check; if it fails, a standard message replaces it.\nLow confidence or urgency leads to see-a-doctor advice, and a disclaimer is always shown.\nPersonal facts come only from the context block; the conversation is logged for audit; quota per plan.",
+  guardrails_agent: "Not in use in the app yet.",
+  guardrails_quick: "Not in use in the app yet.",
+  guardrails_safety:
+    "Screening for risky messages (emergency / self-harm) is done by code only, not by a model, and always happens before any AI call.",
+  guardrails_daily_plan:
+    "An AI-written plan must pass validation: 7 days, sensible length, no words about medicine, supplements, treatment or weight loss; otherwise the code template is used.\nNo name, e-mail or birth year is sent to the model — only the areas to improve.",
+  guardrails_monthly_report: "Not in use in the app yet.",
+  guardrails_prompt_review:
+    "Reviews an admin's addition before it is saved; if unsure or unable to answer, nothing is saved.",
   cardTagline: "The AI that knows your health",
   cardDisclaimer: "Not a diagnosis or medical advice",
   cardCta: "Try the free health quiz at {host}",
@@ -1759,6 +1890,8 @@ const en = {
   aiTask_safety: "Risky-message screening",
   aiTask_daily_plan: "Daily suggestions",
   aiTask_monthly_report: "Monthly health report",
+  aiTask_body_scan: "Body scan (photos)",
+  aiTask_prompt_review: "Review admin instructions",
   adminAiTitle: "AI settings",
   adminAiHint:
     "Choose the provider and model per task. Changes take effect within 1 minute, no deploy needed.",

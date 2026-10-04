@@ -1,10 +1,11 @@
 "use client";
 
-import { useEffect, useState, type ReactNode } from "react";
+import { Suspense, useEffect, useState, type ReactNode } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Bell, BookOpen, Ellipsis, LogOut, ShieldCheck, X } from "lucide-react";
 import { signOutAction } from "@/app/actions/auth";
+import { BackLink } from "@/components/shell/BackLink";
 import { LangSwitch } from "@/components/LangSwitch";
 import { LogoMark, Wordmark } from "@/components/Logo";
 import {
@@ -205,6 +206,9 @@ export function AppShell({
           id="main"
           className="mx-auto w-full max-w-3xl flex-1 px-4 py-5 md:px-6 md:py-8"
         >
+          <Suspense fallback={null}>
+            <BackLink />
+          </Suspense>
           {children}
         </main>
       </div>

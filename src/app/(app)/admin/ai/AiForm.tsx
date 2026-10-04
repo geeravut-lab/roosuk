@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useState, useTransition } from "react";
+import { useState, useTransition } from "react";
 import {
   saveAiSettingsAction,
   testModelAction,
@@ -8,6 +8,7 @@ import {
 } from "@/app/actions/ai";
 import { errorText, fmt, type Dict } from "@/lib/i18n/dict";
 import { useI18n } from "@/lib/i18n/provider";
+import { useFormAction } from "@/lib/use-form-action";
 
 export interface TaskView {
   task: string;
@@ -142,14 +143,14 @@ export function AiForm({
   providers: ProviderView[];
 }) {
   const { t } = useI18n();
-  const [state, action, pending] = useActionState(
+  const [state, onSubmit, pending] = useFormAction(
     saveAiSettingsAction,
     initial,
   );
   const label = (id: string) => providers.find((p) => p.id === id)?.label ?? id;
 
   return (
-    <form action={action} className="space-y-4">
+    <form onSubmit={onSubmit} className="space-y-4">
       <ul className="space-y-4">
         {tasks.map((v) => (
           <li key={v.task} className="card space-y-3">

@@ -1,3 +1,4 @@
+import { removeAdminNoticesSince } from "./cleanup";
 import { randomBytes } from "node:crypto";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import AxeBuilder from "@axe-core/playwright";
@@ -16,6 +17,8 @@ const enabled =
   process.env.E2E_LIVE === "1" && !!url && !!anonKey && !!serviceKey;
 
 const expect = baseExpect.configure({ timeout: 20_000 });
+
+const startedAt = new Date(Date.now() - 5_000).toISOString();
 
 test.skip(
   !enabled,
@@ -78,6 +81,7 @@ async function serious(page: Page): Promise<string[]> {
 
 test.afterAll(async () => {
   const d = db();
+  await removeAdminNoticesSince(d, startedAt);
   await d
     .from("platform_settings")
     .update({ feature_flags: originalFlags })

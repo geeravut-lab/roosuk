@@ -3,6 +3,7 @@ import Link from "next/link";
 import {
   Bot,
   ChartColumn,
+  FileText,
   ReceiptText,
   Stethoscope,
   Timer,
@@ -69,6 +70,13 @@ export default async function AdminHome() {
       >
         <Bot className="text-primary-strong size-6" aria-hidden />
         <span className="font-semibold">{t.adminAiTitle}</span>
+      </Link>
+      <Link
+        href="/admin/prompts"
+        className="card hover:bg-tint-primary flex items-center gap-3"
+      >
+        <FileText className="text-primary-strong size-6" aria-hidden />
+        <span className="font-semibold">{t.adminPromptsTitle}</span>
       </Link>
       <Link
         href="/admin/rules"

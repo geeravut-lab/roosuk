@@ -1,19 +1,22 @@
 "use client";
 
-import { useActionState } from "react";
 import { reportPaymentAction, type FormState } from "@/app/actions/payments";
 import { errorText } from "@/lib/i18n/dict";
 import { useI18n } from "@/lib/i18n/provider";
+import { useFormAction } from "@/lib/use-form-action";
 
 const initial: FormState = {};
 
 /** "I have transferred" — the reference is mandatory (the reviewer searches the statement for it). */
 export function ReportForm({ paymentId }: { paymentId: string }) {
   const { t } = useI18n();
-  const [state, action, pending] = useActionState(reportPaymentAction, initial);
+  const [state, onSubmit, pending] = useFormAction(
+    reportPaymentAction,
+    initial,
+  );
 
   return (
-    <form action={action} className="space-y-3">
+    <form onSubmit={onSubmit} className="space-y-3">
       <input type="hidden" name="paymentId" value={paymentId} />
       <div>
         <label htmlFor="payerRef" className="label">

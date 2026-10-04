@@ -2,6 +2,8 @@ import "server-only";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createAnthropicAdapter } from "./adapters/anthropic";
 import { createGoogleAdapter } from "./adapters/google";
+import { applyPromptExtra, isEditableTask } from "./prompt-extra";
+import { loadPromptExtras } from "./prompt-extra.server";
 import { apiKeyFor } from "./registry";
 import { errorReason, runAiWith, type AiEventInput, type RunDeps } from "./run";
 import { DEFAULT_AI_SETTINGS, parseAiSettings, type AiSettings } from "./route";
@@ -85,8 +87,15 @@ const deps: RunDeps = {
  * THE way to call an AI model. Callers must already have passed
  * `checkAndConsume(userId, feature)` (src/lib/billing/quota.server.ts).
  */
-export function runAi(task: TaskKind, req: AiRequest): Promise<AiResponse> {
-  return runAiWith(deps, task, req);
+export async function runAi(
+  task: TaskKind,
+  req: AiRequest,
+): Promise<AiResponse> {
+  // The operator's additions for this task (from /admin/prompts), appended below the built-in rules.
+  const extra = isEditableTask(task)
+    ? (await loadPromptExtras())[task]
+    : undefined;
+  return runAiWith(deps, task, applyPromptExtra(req, extra));
 }
 
 // ── model lists + test (admin) ──────────────────────────────────────────────

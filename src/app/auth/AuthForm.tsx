@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useState } from "react";
 import {
   googleSignInAction,
   loginAction,
@@ -9,6 +9,7 @@ import {
 } from "@/app/actions/auth";
 import { errorText } from "@/lib/i18n/dict";
 import { useI18n } from "@/lib/i18n/provider";
+import { useFormAction } from "@/lib/use-form-action";
 
 const initial: AuthState = {};
 
@@ -25,11 +26,8 @@ export function AuthForm({
 }) {
   const { t } = useI18n();
   const [mode, setMode] = useState(initialMode);
-  const [loginState, login, loginPending] = useActionState(
-    loginAction,
-    initial,
-  );
-  const [signupState, signup, signupPending] = useActionState(
+  const [loginState, login, loginPending] = useFormAction(loginAction, initial);
+  const [signupState, signup, signupPending] = useFormAction(
     signupAction,
     initial,
   );
@@ -66,7 +64,7 @@ export function AuthForm({
       ) : null}
 
       <form
-        action={isSignup ? signup : login}
+        onSubmit={isSignup ? signup : login}
         className="space-y-4"
         noValidate={false}
       >

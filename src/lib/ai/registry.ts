@@ -44,6 +44,7 @@ export const PROVIDERS: Record<ProviderId, ProviderInfo> = {
     capabilities: { images: true, pdf: true },
     models: {
       food_scan: HAIKU,
+      body_scan: SONNET,
       lab_extract: SONNET,
       lab_explain: SONNET,
       chat: SONNET,
@@ -52,6 +53,7 @@ export const PROVIDERS: Record<ProviderId, ProviderInfo> = {
       safety: HAIKU,
       daily_plan: HAIKU,
       monthly_report: SONNET,
+      prompt_review: HAIKU,
     },
   },
   google: {
@@ -60,6 +62,7 @@ export const PROVIDERS: Record<ProviderId, ProviderInfo> = {
     capabilities: { images: true, pdf: true },
     models: {
       food_scan: FLASH,
+      body_scan: FLASH,
       lab_extract: FLASH,
       lab_explain: FLASH,
       chat: FLASH,
@@ -68,6 +71,7 @@ export const PROVIDERS: Record<ProviderId, ProviderInfo> = {
       safety: FLASH_LITE,
       daily_plan: FLASH_LITE,
       monthly_report: FLASH,
+      prompt_review: FLASH_LITE,
     },
   },
 };
@@ -78,6 +82,7 @@ export const TASK_ROUTES: Record<
   { primary: ProviderId; fallback: ProviderId | null }
 > = {
   food_scan: { primary: "google", fallback: "anthropic" },
+  body_scan: { primary: "google", fallback: "anthropic" },
   lab_extract: { primary: "anthropic", fallback: "google" },
   lab_explain: { primary: "anthropic", fallback: "google" },
   chat: { primary: "anthropic", fallback: "google" },
@@ -86,6 +91,7 @@ export const TASK_ROUTES: Record<
   safety: { primary: "anthropic", fallback: null },
   daily_plan: { primary: "anthropic", fallback: "google" },
   monthly_report: { primary: "anthropic", fallback: "google" },
+  prompt_review: { primary: "anthropic", fallback: "google" },
 };
 
 export function isProviderId(v: unknown): v is ProviderId {

@@ -180,6 +180,8 @@ test("only admins reach /admin/ai; an admin edits routing, which is stored and v
   await gemini.evaluate((el: HTMLSelectElement) => {
     el.add(new Option("bad model!", "bad model!"));
     el.value = "bad model!";
+    // tell React too (the field is controlled), as a real choice would
+    el.dispatchEvent(new Event("change", { bubbles: true }));
   });
   await page.getByRole("button", { name: "บันทึก", exact: true }).click();
   await expect(

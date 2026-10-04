@@ -101,6 +101,8 @@ test("a new user signs in, must consent, reaches the app, and can sign out", asy
   await expect(page.locator("main").getByRole("alert")).toHaveText(
     "อีเมลหรือรหัสผ่านไม่ถูกต้อง",
   );
+  // the error does not wipe the form: the e-mail is still there to correct the password
+  await expect(page.getByLabel("อีเมล")).toHaveValue(user.email);
 
   await signIn(page, user.email, user.password);
 

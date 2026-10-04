@@ -115,6 +115,12 @@ test("food scan: input checks cost nothing; review → confirm → timeline → 
   await expect(page).toHaveURL(/\/scan\/food$/);
   expect(await serious(page)).toEqual([]);
 
+  // A way back for devices without a back button: up to the scan hub.
+  await page.getByRole("link", { name: "กลับไปสแกน" }).click();
+  await expect(page).toHaveURL(/\/scan$/);
+  await page.getByRole("link", { name: /สแกนอาหาร/ }).click();
+  await expect(page).toHaveURL(/\/scan\/food$/);
+
   // Two ways in: a camera button (opens the camera directly) and the gallery picker.
   await expect(page.getByText("ถ่ายรูปอาหาร", { exact: true })).toBeVisible();
   await expect(page.locator("#photo-camera")).toHaveAttribute(
@@ -261,6 +267,16 @@ test("food scan: input checks cost nothing; review → confirm → timeline → 
   expect((await c2.from("meal_logs").select("id")).data).toEqual([]);
 
   // Delete from the meal page.
+  // reached from the timeline → the way back goes to the timeline, not the scan hub
+  await page.goto(`/scan/food/${mealId}?from=timeline`);
+  await expect(
+    page.getByRole("link", { name: "กลับไปไทม์ไลน์" }),
+  ).toHaveAttribute("href", "/timeline");
+  await page.goto(`/scan/food/${mealId}?from=https://evil.example`);
+  await expect(page.getByRole("link", { name: "กลับไปสแกน" })).toHaveAttribute(
+    "href",
+    "/scan",
+  );
   await page.goto(`/scan/food/${mealId}`);
   await page.getByRole("button", { name: "ลบมื้อนี้" }).click();
   await expect(page).toHaveURL(/\/timeline/);

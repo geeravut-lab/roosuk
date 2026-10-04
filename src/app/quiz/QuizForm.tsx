@@ -1,12 +1,12 @@
 "use client";
 
-import { useActionState } from "react";
 import { submitQuizAction, type QuizState } from "@/app/actions/quiz";
 import { ChoiceGroup } from "@/components/ChoiceGroup";
 import { QuizResultView } from "@/components/QuizResultView";
 import { errorText, type Dict } from "@/lib/i18n/dict";
 import { useI18n } from "@/lib/i18n/provider";
 import { ALCOHOL_VALUES, SMOKING_VALUES } from "@/lib/profile/profile";
+import { useFormAction } from "@/lib/use-form-action";
 
 export interface QuizDefaults {
   birth_year: string;
@@ -19,7 +19,7 @@ const initial: QuizState = {};
 
 export function QuizForm({ defaults }: { defaults: QuizDefaults }) {
   const { t } = useI18n();
-  const [state, action, pending] = useActionState(submitQuizAction, initial);
+  const [state, onSubmit, pending] = useFormAction(submitQuizAction, initial);
 
   if (state.result && state.plan) {
     return (
@@ -42,7 +42,7 @@ export function QuizForm({ defaults }: { defaults: QuizDefaults }) {
     }));
 
   return (
-    <form action={action} className="space-y-5">
+    <form onSubmit={onSubmit} className="space-y-5">
       <div className="space-y-1">
         <h1 className="text-primary-strong text-2xl font-bold">
           {t.quizTitle}
