@@ -103,6 +103,12 @@ export const OWNED_TABLES: readonly OwnedTable[] = [
   },
   // Usage events (no content): the user's copy is in the export; they go with the account.
   {
+    table: "challenge_participants",
+    column: "user_id",
+    onDelete: "erased",
+    countable: true,
+  },
+  {
     table: "reward_ledger",
     column: "user_id",
     onDelete: "erased",
@@ -202,6 +208,8 @@ export const INTERNAL_USER_REFERENCES: readonly string[] = [
   "biomarker_extras.approved_by",
   // the inviter: the person's own copy holds the invitation as the invited person (referee_id)
   "referrals.referrer_id",
+  // who started the challenge: a participant's own copy is their participation (challenge_participants)
+  "challenges.created_by",
   "biomarker_extras.created_by",
   "automation_rules.updated_by",
   "notification_settings.updated_by",
