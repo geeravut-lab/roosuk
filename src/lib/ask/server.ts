@@ -90,7 +90,13 @@ export async function latestChatConversation(
 
 export async function createConversation(
   userId: string,
-  kind: "chat" | "lab_explain" | "monthly_report" | "insight",
+  kind:
+    | "chat"
+    | "lab_explain"
+    | "monthly_report"
+    | "insight"
+    | "doctor_brief"
+    | "agent",
   reportId: string | null = null,
 ): Promise<string | null> {
   const { data, error } = await createAdminClient()

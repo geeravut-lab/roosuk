@@ -55,6 +55,7 @@ export const PROVIDERS: Record<ProviderId, ProviderInfo> = {
       monthly_report: SONNET,
       prompt_review: HAIKU,
       voice_transcribe: HAIKU, // never used: this provider takes no audio
+      doctor_brief: SONNET,
     },
   },
   google: {
@@ -74,6 +75,7 @@ export const PROVIDERS: Record<ProviderId, ProviderInfo> = {
       monthly_report: FLASH,
       prompt_review: FLASH_LITE,
       voice_transcribe: FLASH_LITE,
+      doctor_brief: FLASH,
     },
   },
 };
@@ -96,6 +98,7 @@ export const TASK_ROUTES: Record<
   prompt_review: { primary: "anthropic", fallback: "google" },
   // Speech: Gemini Flash-Lite takes audio at a fraction of a cent a minute; Anthropic takes none, so no fallback.
   voice_transcribe: { primary: "google", fallback: null },
+  doctor_brief: { primary: "anthropic", fallback: "google" },
 };
 
 export function isProviderId(v: unknown): v is ProviderId {

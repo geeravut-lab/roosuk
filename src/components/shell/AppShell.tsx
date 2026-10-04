@@ -141,7 +141,7 @@ export function AppShell({
     <div className="bg-background min-h-screen md:flex">
       <a
         href="#main"
-        className="focus:bg-surface sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-50 focus:rounded-lg focus:px-3 focus:py-2"
+        className="focus:bg-surface sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-50 focus:rounded-lg focus:px-3 focus:py-2 print:hidden"
       >
         {t.skipToContent}
       </a>
@@ -149,7 +149,7 @@ export function AppShell({
       {/* Desktop sidebar — h-dvh, not h-screen: 100vh on iOS includes the collapsible bars */}
       <aside
         aria-label={t.navMainLabel}
-        className="border-line bg-surface sticky top-0 hidden h-dvh w-60 shrink-0 flex-col gap-4 overflow-y-auto border-r p-3 md:flex"
+        className="border-line bg-surface sticky top-0 hidden h-dvh w-60 shrink-0 flex-col gap-4 overflow-y-auto border-r p-3 md:flex print:hidden!"
       >
         <Link href="/today" className="px-2 py-2">
           <Wordmark name={t.appName} />
@@ -185,7 +185,7 @@ export function AppShell({
 
       {/* pb-* makes room for the fixed bottom bar; min-w-0 stops wide content widening the page */}
       <div className="flex min-w-0 flex-1 flex-col pb-[calc(4rem+env(safe-area-inset-bottom))] md:pb-0">
-        <header className="border-line bg-surface/95 sticky top-0 z-30 flex h-14 items-center justify-between border-b px-4 backdrop-blur md:hidden">
+        <header className="border-line bg-surface/95 sticky top-0 z-30 flex h-14 items-center justify-between border-b px-4 backdrop-blur md:hidden print:hidden!">
           <Link href="/today">
             <Wordmark name={t.appName} size={32} />
           </Link>
@@ -227,7 +227,7 @@ export function AppShell({
       {/* Mobile bottom bar: today · timeline · [SCAN] · ask · more */}
       <nav
         aria-label={t.navMobileLabel}
-        className="border-line bg-surface fixed inset-x-0 bottom-0 z-40 border-t pb-[env(safe-area-inset-bottom)] md:hidden"
+        className="border-line bg-surface fixed inset-x-0 bottom-0 z-40 border-t pb-[env(safe-area-inset-bottom)] md:hidden print:hidden!"
       >
         <ul className="grid h-16 grid-cols-5 items-end">
           {primary.map((item, index) => {

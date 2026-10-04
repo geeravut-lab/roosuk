@@ -20,6 +20,7 @@ export const TASK_KINDS = [
   "monthly_report",
   "prompt_review",
   "voice_transcribe",
+  "doctor_brief",
 ] as const;
 export type TaskKind = (typeof TASK_KINDS)[number];
 

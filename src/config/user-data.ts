@@ -134,6 +134,13 @@ export const OWNED_TABLES: readonly OwnedTable[] = [
     countable: true,
   },
   {
+    table: "health_passports",
+    column: "user_id",
+    omit: ["token_hash"],
+    onDelete: "erased",
+    countable: true,
+  },
+  {
     table: "monthly_reports",
     column: "user_id",
     onDelete: "erased",

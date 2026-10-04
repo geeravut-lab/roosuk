@@ -5,6 +5,7 @@ import {
   ChartLine,
   FileChartColumn,
   FolderLock,
+  IdCard,
   Gift,
   Trophy,
   Crown,
@@ -53,6 +54,12 @@ export const NAV: readonly NavItem[] = [
     href: "/vault",
     label: "navVault",
     icon: FolderLock,
+    group: "daily",
+  },
+  {
+    href: "/passport",
+    label: "navPassport",
+    icon: IdCard,
     group: "daily",
   },
   {
