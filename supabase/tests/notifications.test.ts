@@ -267,7 +267,7 @@ describe("notification_prefs", () => {
 });
 
 describe("settings, rules and ticks", () => {
-  it("seeds one settings row with sane defaults and the five rules, service-role only", async () => {
+  it("seeds one settings row with sane defaults and the eight rules, service-role only", async () => {
     await actAs(db, null, "service_role");
     expect(
       (
@@ -297,6 +297,9 @@ describe("settings, rules and ticks", () => {
     ).rows.map((r) => r.key);
     expect(keys).toEqual([
       "checkin_reminder",
+      "streak_at_risk",
+      "monthly_report_ready",
+      "checkup_reminder",
       "trial_ending",
       "plan_expiring",
       "queue_expire",
