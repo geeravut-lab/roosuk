@@ -1289,6 +1289,15 @@ const th = {
   theme_dark: "มืด",
   settingsTheme: "ธีมสี (จำไว้ในเครื่องนี้)",
   loadingPage: "กำลังโหลด…",
+  adminManualTitle: "คู่มือการใช้งาน (ลิงก์)",
+  adminManualHint:
+    'ใส่ลิงก์ https ของเอกสารบนคลาวด์ (เช่น PDF บน Google Drive ที่แชร์ให้ทุกคนเปิดได้) ผู้ใช้กดเมนู "คู่มือการใช้งาน" แล้วจะเปิดเอกสารนี้ในแท็บใหม่ ถ้าเว้นว่าง เมนูจะเป็นสีเทาและกดไม่ได้',
+  adminManualUrl: "ลิงก์คู่มือ (https)",
+  adminManualSaved: "บันทึกลิงก์แล้ว เมนูคู่มือใช้งานได้แล้ว",
+  adminManualCleared: "ล้างลิงก์แล้ว เมนูคู่มือเป็นสีเทาและกดไม่ได้",
+  err_manual_url:
+    "ลิงก์ไม่ถูกต้อง ต้องขึ้นต้นด้วย https:// เป็นที่อยู่เว็บจริง และไม่มีช่องว่างหรือรหัสผ่านในลิงก์",
+  manualUnavailable: "ยังไม่พร้อมใช้งาน",
 } as const;
 
 export type Dict = { [K in keyof typeof th]: string };
@@ -2602,6 +2611,15 @@ const en = {
   theme_dark: "Dark",
   settingsTheme: "Colour theme (remembered on this device)",
   loadingPage: "Loading…",
+  adminManualTitle: "User guide link",
+  adminManualHint:
+    'Paste the https link of a document in the cloud (for example a PDF on Google Drive that anyone with the link can open). People who tap "User guide" open it in a new tab. Leave it empty and the menu entry is greyed out and cannot be tapped.',
+  adminManualUrl: "Guide link (https)",
+  adminManualSaved: "Link saved. The guide menu entry is now active.",
+  adminManualCleared: "Link cleared. The guide menu entry is greyed out.",
+  err_manual_url:
+    "That link is not valid. It must start with https://, be a real web address, and contain no spaces or credentials.",
+  manualUnavailable: "not available yet",
 } satisfies Dict;
 
 export const dict: Record<Lang, Dict> = { th, en };

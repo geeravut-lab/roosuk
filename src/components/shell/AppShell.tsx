@@ -106,6 +106,7 @@ export function AppShell({
     </Link>
   ) : null;
 
+  // No guide link set yet: the entry is shown greyed out and cannot be pressed.
   const manualLink = manualUrl ? (
     <a
       href={manualUrl}
@@ -116,7 +117,16 @@ export function AppShell({
       <BookOpen className="size-5 shrink-0" aria-hidden />
       <span className="truncate">{t.navManual}</span>
     </a>
-  ) : null;
+  ) : (
+    <span
+      aria-disabled="true"
+      className={`${linkBase} text-muted cursor-not-allowed select-none`}
+    >
+      <BookOpen className="size-5 shrink-0" aria-hidden />
+      <span className="truncate">{t.navManual}</span>
+      <span className="sr-only"> ({t.manualUnavailable})</span>
+    </span>
+  );
 
   const signOut = (
     <form action={signOutAction}>

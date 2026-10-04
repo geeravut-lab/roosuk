@@ -3,6 +3,7 @@ import Link from "next/link";
 import {
   Bot,
   ChartColumn,
+  BookOpen,
   FileText,
   FlaskConical,
   ReceiptText,
@@ -95,6 +96,13 @@ export default async function AdminHome() {
       >
         <FileText className="text-primary-strong size-6" aria-hidden />
         <span className="font-semibold">{t.adminPromptsTitle}</span>
+      </Link>
+      <Link
+        href="/admin/manual"
+        className="card hover:bg-tint-primary flex items-center gap-3"
+      >
+        <BookOpen className="text-primary-strong size-6" aria-hidden />
+        <span className="font-semibold">{t.adminManualTitle}</span>
       </Link>
       <Link
         href="/admin/rules"
