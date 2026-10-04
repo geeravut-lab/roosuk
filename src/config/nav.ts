@@ -5,6 +5,7 @@ import {
   House,
   MessageCircleHeart,
   Settings,
+  UserRound,
   type LucideIcon,
 } from "lucide-react";
 import type { Dict } from "@/lib/i18n/dict";
@@ -34,6 +35,12 @@ export const NAV: readonly NavItem[] = [
     href: "/subscription",
     label: "navSubscription",
     icon: Crown,
+    group: "account",
+  },
+  {
+    href: "/profile",
+    label: "navProfile",
+    icon: UserRound,
     group: "account",
   },
   { href: "/settings", label: "navSettings", icon: Settings, group: "account" },
