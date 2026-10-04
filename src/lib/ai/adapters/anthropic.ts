@@ -79,10 +79,13 @@ export function parseAnthropicResponse(
   };
 }
 
+/** Pinned: the SDK reads ANTHROPIC_BASE_URL, which Netlify's AI Gateway injects (see GOOGLE_BASE_URL). */
+export const ANTHROPIC_BASE_URL = "https://api.anthropic.com";
+
 export function createAnthropicAdapter(
   makeClient: (apiKey: string) => Pick<Anthropic, "messages" | "models"> = (
     k,
-  ) => new Anthropic({ apiKey: k }),
+  ) => new Anthropic({ apiKey: k, baseURL: ANTHROPIC_BASE_URL }),
 ): ProviderAdapter {
   return {
     id: "anthropic",

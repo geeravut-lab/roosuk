@@ -83,9 +83,17 @@ export function parseGoogleResponse(
   };
 }
 
+/**
+ * Pinned on purpose. The SDK silently reads GOOGLE_GEMINI_BASE_URL, and Netlify's
+ * AI Gateway injects that variable into functions: without this, calls go to the
+ * gateway with OUR key and fail with a bare "401 Unauthorized" (and health data
+ * would pass through a third party we have not agreed to). Direct to Google only.
+ */
+export const GOOGLE_BASE_URL = "https://generativelanguage.googleapis.com/";
+
 export function createGoogleAdapter(
   makeClient: (apiKey: string) => Pick<GoogleGenAI, "models"> = (k) =>
-    new GoogleGenAI({ apiKey: k }),
+    new GoogleGenAI({ apiKey: k, httpOptions: { baseUrl: GOOGLE_BASE_URL } }),
 ): ProviderAdapter {
   return {
     id: "google",
