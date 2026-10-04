@@ -1913,19 +1913,17 @@ register("family", async (S) => {
   const { page, shot, admin, M } = S;
   const B = await getB(S);
   await setPaidPremium(S, M.id);
-  await admin
-    .from("daily_checkins")
-    .upsert(
-      [0, 1, 2].map((i) => ({
-        user_id: B.id,
-        checkin_date: day(-i),
-        sleep_band: 3,
-        activity_band: 3,
-        energy: 4,
-        mood: 4,
-        nutrition: 4,
-      })),
-    );
+  await admin.from("daily_checkins").upsert(
+    [0, 1, 2].map((i) => ({
+      user_id: B.id,
+      checkin_date: day(-i),
+      sleep_band: 3,
+      activity_band: 3,
+      energy: 4,
+      mood: 4,
+      nutrition: 4,
+    })),
+  );
   await fromMore(S, "ครอบครัว", /\/family/);
   await shot("210-family-open", {
     highlight: page.getByRole("heading", { name: "ชวนสมาชิก" }).locator(".."),
@@ -2162,15 +2160,13 @@ register("shop", async (S) => {
       .from("shop-images")
       .upload(path, bytes, { contentType: "image/png" });
     if (up.error) throw up.error;
-    const row = await admin
-      .from("shop_product_images")
-      .insert({
-        product_id: id,
-        path,
-        mime: "image/png",
-        bytes: bytes.length,
-        position: 0,
-      });
+    const row = await admin.from("shop_product_images").insert({
+      product_id: id,
+      path,
+      mime: "image/png",
+      bytes: bytes.length,
+      position: 0,
+    });
     if (row.error) throw row.error;
   }
   cleanup.push(async () => {
@@ -2504,13 +2500,11 @@ register("settings", async (S) => {
     highlight: notif.locator(".."),
   });
   // once a LINE account is linked, the two switches appear (the link itself needs the real LINE app: a sample link is stored)
-  const ll = await admin
-    .from("line_links")
-    .insert({
-      user_id: M.id,
-      line_sub: `Usample${randomBytes(8).toString("hex")}`,
-      display_name: "คุณสุขใจ",
-    });
+  const ll = await admin.from("line_links").insert({
+    user_id: M.id,
+    line_sub: `Usample${randomBytes(8).toString("hex")}`,
+    display_name: "คุณสุขใจ",
+  });
   if (ll.error) throw ll.error;
   await go(page, "/settings");
   await page.getByRole("checkbox", { name: /เตือนเช็กอินรายวัน/ }).check();
@@ -2589,7 +2583,10 @@ register("settings", async (S) => {
   const out = btn(page, "ออกจากระบบ");
   await shot("303-settings-signout", { scrollTo: out, highlight: out });
   await out.click();
-  await page.waitForURL((u) => u.pathname === "/", { waitUntil: "commit", timeout: 60_000 });
+  await page.waitForURL((u) => u.pathname === "/", {
+    waitUntil: "commit",
+    timeout: 60_000,
+  });
   await settle(page);
   await shot("304-signed-out-landing", {
     highlight: link(page, "เข้าสู่ระบบ"),
@@ -2626,7 +2623,10 @@ register("delete-account", async (S) => {
     highlight: d.page.getByRole("button", { name: "ลบบัญชีถาวร" }),
   });
   await d.page.getByRole("button", { name: "ลบบัญชีถาวร" }).click();
-  await d.page.waitForURL((u) => u.pathname === "/", { waitUntil: "commit", timeout: 60_000 });
+  await d.page.waitForURL((u) => u.pathname === "/", {
+    waitUntil: "commit",
+    timeout: 60_000,
+  });
   await settle(d.page);
   await d.snap("309-delete-done", {
     highlight: d.page.getByRole("status").first(),
