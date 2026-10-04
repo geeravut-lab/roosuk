@@ -156,6 +156,13 @@ test("public quiz stores nothing; signed-in quiz saves a result with a plan; quo
     ap.getByText(/ไม่ใช่ผลตรวจทางการแพทย์และไม่ใช่การวินิจฉัย/),
   ).toBeVisible();
   await expect(ap.getByRole("link", { name: "สมัครสมาชิก" })).toBeVisible();
+  // the result can be shared as a card (the public quiz card, drawn from the three numbers)
+  await expect(
+    ap.getByRole("heading", { name: "การ์ดสำหรับแชร์" }),
+  ).toBeVisible();
+  await expect(
+    ap.getByRole("img", { name: "ตัวอย่างการ์ดที่จะแชร์" }),
+  ).toHaveAttribute("src", /^\/api\/share\/quiz\?score=\d+&health=\d+&real=41/);
   await expect(ap.getByRole("heading", { name: "แผน 7 วัน" })).toHaveCount(0); // the plan is for members
   expect(await serious(ap)).toEqual([]);
   expect(

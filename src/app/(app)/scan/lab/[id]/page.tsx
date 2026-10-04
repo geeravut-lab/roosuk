@@ -13,6 +13,7 @@ import {
 } from "@/components/SourceFileCard";
 import { LabStatusChip } from "@/components/LabStatusChip";
 import { PendingButton } from "@/components/PendingButton";
+import { ShareCard } from "@/components/ShareCard";
 import { biomarkerByKey } from "@/config/biomarkers";
 import { requireUser } from "@/lib/auth/server";
 import { bangkokDate } from "@/lib/health/dates";
@@ -323,6 +324,13 @@ export default async function LabReportPage({
       </ul>
 
       <p className="text-muted text-sm">{t.labDisclaimer}</p>
+      {items.some((i) => i.status !== "unknown") ? (
+        <ShareCard
+          src={`/api/share/lab/${report.id}?lang=${lang}`}
+          text={fmt(t.shareTextLab, { url: "{url}" })}
+          filename="roosuk-lab-summary.png"
+        />
+      ) : null}
       {outside > 0 ? (
         <Link
           href="/checkup-interest"

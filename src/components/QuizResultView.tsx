@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { ShareCard } from "@/components/ShareCard";
 import { fmt, type Dict } from "@/lib/i18n/dict";
 import { useI18n } from "@/lib/i18n/provider";
 import type { PlanDay, QuizLever, QuizResult } from "@/lib/quiz/quiz";
@@ -22,7 +23,7 @@ export function QuizResultView({
   mode,
   quotaMessage,
 }: QuizResultProps) {
-  const { t } = useI18n();
+  const { t, lang } = useI18n();
   const delta =
     result.deltaYears < 0
       ? fmt(t.quizDeltaYounger, { n: -result.deltaYears })
@@ -56,6 +57,12 @@ export function QuizResultView({
           <p className="text-sm">{delta}</p>
         </div>
       </section>
+
+      <ShareCard
+        src={`/api/share/quiz?score=${result.score}&health=${result.healthAge}&real=${result.chronoAge}&lang=${lang}`}
+        text={fmt(t.shareTextQuiz, { score: result.score, url: "{url}" })}
+        filename="roosuk-health-score.png"
+      />
 
       <section className="card space-y-2" aria-labelledby="levers-h">
         <h2 id="levers-h" className="font-semibold">

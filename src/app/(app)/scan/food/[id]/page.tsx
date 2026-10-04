@@ -11,10 +11,11 @@ import {
   SourceFileCard,
   type SourceFileRef,
 } from "@/components/SourceFileCard";
+import { ShareCard } from "@/components/ShareCard";
 import { requireUser } from "@/lib/auth/server";
 import { SERVING_CHOICES, mealTotals, parseStoredItems } from "@/lib/food/food";
 import { fmt } from "@/lib/i18n/dict";
-import { getT } from "@/lib/i18n/server";
+import { getLang, getT } from "@/lib/i18n/server";
 import { createClient } from "@/lib/supabase/server";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -34,8 +35,9 @@ export default async function MealPage({
 
   // The user's own client: RLS only returns their rows.
   const supabase = await createClient();
-  const [t, { data: meal }] = await Promise.all([
+  const [t, lang, { data: meal }] = await Promise.all([
     getT(),
+    getLang(),
     supabase
       .from("meal_logs")
       .select("id, status, items, source_file:source_files(id, mime)")
@@ -108,6 +110,11 @@ export default async function MealPage({
         </ul>
         {sourceFile}
         {summary}
+        <ShareCard
+          src={`/api/share/food/${meal.id}?lang=${lang}`}
+          text={fmt(t.shareTextFood, { url: "{url}" })}
+          filename="roosuk-meal.png"
+        />
         <p className="text-muted text-sm">{t.foodEstimateNote}</p>
         <Link href="/scan/food" className="btn btn-primary w-full">
           {t.foodScanAnother}
