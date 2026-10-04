@@ -1,6 +1,14 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ClipboardCheck, Clock, Stethoscope, UserRound } from "lucide-react";
+import {
+  Award,
+  ClipboardCheck,
+  Clock,
+  Stethoscope,
+  UserRound,
+} from "lucide-react";
+import { ACHIEVEMENTS } from "@/lib/achievements/achievements";
+import { awardAchievements } from "@/lib/achievements/server";
 import { requireUser } from "@/lib/auth/server";
 import { getBillingProfile } from "@/lib/billing/profile.server";
 import { resolvePlan } from "@/lib/billing/plan";
@@ -26,19 +34,31 @@ export default async function TodayPage() {
   const user = await requireUser();
   const today = bangkokDate(new Date());
   const supabase = await createClient();
-  const [t, lang, billing, rows, doneKeys, { data: profileRow }] =
-    await Promise.all([
-      getT(),
-      getLang(),
-      getBillingProfile(user.id),
-      loadCheckins(today),
-      loadDoneActions(today),
-      supabase
-        .from("health_profiles")
-        .select("user_id")
-        .eq("user_id", user.id)
-        .maybeSingle(),
-    ]);
+  // Before reading, so a badge earned by what the person just did is counted on this very visit.
+  await awardAchievements(user.id);
+  const [
+    t,
+    lang,
+    billing,
+    rows,
+    doneKeys,
+    { data: profileRow },
+    { count: badges },
+  ] = await Promise.all([
+    getT(),
+    getLang(),
+    getBillingProfile(user.id),
+    loadCheckins(today),
+    loadDoneActions(today),
+    supabase
+      .from("health_profiles")
+      .select("user_id")
+      .eq("user_id", user.id)
+      .maybeSingle(),
+    supabase
+      .from("user_achievements")
+      .select("key", { count: "exact", head: true }),
+  ]);
   const plan = billing ? resolvePlan(billing) : null;
   const view = buildHabitView(rows, doneKeys, today);
 
@@ -106,6 +126,21 @@ export default async function TodayPage() {
       <ScoreCard t={t} score={view.score} />
       <ActionsCard t={t} view={view} />
       <StreakCard t={t} lang={lang} view={view} />
+      <Link
+        href="/achievements"
+        className="card hover:bg-tint-primary flex items-center gap-3"
+      >
+        <Award className="text-primary-strong size-5 shrink-0" aria-hidden />
+        <span className="min-w-0 flex-1">
+          <span className="block font-semibold">{t.achievementsCta}</span>
+          <span className="text-muted block text-sm">
+            {fmt(t.achievementsCtaHint, {
+              n: badges ?? 0,
+              total: ACHIEVEMENTS.length,
+            })}
+          </span>
+        </span>
+      </Link>
     </div>
   );
 }

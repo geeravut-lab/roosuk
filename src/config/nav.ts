@@ -1,4 +1,5 @@
 import {
+  Award,
   Bell,
   Camera,
   ChartLine,
@@ -32,6 +33,12 @@ export const NAV: readonly NavItem[] = [
   { href: "/timeline", label: "navTimeline", icon: ChartLine, group: "daily" },
   { href: "/scan", label: "navScan", icon: Camera, group: "daily" },
   { href: "/ask", label: "navAsk", icon: MessageCircleHeart, group: "daily" },
+  {
+    href: "/achievements",
+    label: "navAchievements",
+    icon: Award,
+    group: "account",
+  },
   {
     href: "/subscription",
     label: "navSubscription",
