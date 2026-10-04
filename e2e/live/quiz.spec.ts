@@ -128,6 +128,13 @@ test("public quiz stores nothing; signed-in quiz saves a result with a plan; quo
   const before = (
     await d.from("quiz_results").select("id", { count: "exact", head: true })
   ).count;
+  const lastEvent = (
+    await d
+      .from("product_events")
+      .select("id")
+      .order("id", { ascending: false })
+      .limit(1)
+  ).data?.[0]?.id as number | undefined;
 
   // server-side validation (browser validation switched off to prove it)
   await ap
@@ -155,6 +162,17 @@ test("public quiz stores nothing; signed-in quiz saves a result with a plan; quo
     (await d.from("quiz_results").select("id", { count: "exact", head: true }))
       .count,
   ).toBe(before);
+  // The funnel counts it — as an event with no user and no content.
+  const events = (
+    await d
+      .from("product_events")
+      .select("id, user_id, event, detail")
+      .eq("event", "quiz_completed")
+      .gt("id", lastEvent ?? 0)
+  ).data!;
+  expect(events).toHaveLength(1);
+  expect(events[0]).toMatchObject({ user_id: null, detail: null });
+  await d.from("product_events").delete().eq("id", events[0].id); // keep the shared project clean
   await anon.close();
 
   // ── signed-in user: prefilled, saved, plan ─────────────────────────────────

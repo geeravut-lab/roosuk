@@ -2,6 +2,7 @@
 
 import { redirect } from "next/navigation";
 import { POLICY_VERSION } from "@/config/legal";
+import { trackEvent } from "@/lib/analytics/server";
 import { requireUser } from "@/lib/auth/server";
 import { safeNextPath } from "@/lib/auth/utils";
 import { parseConsentForm } from "@/lib/consent/consent";
@@ -36,6 +37,8 @@ export async function recordConsentAction(
     })
     .select("id");
   if (error || data?.length !== 1) return { error: "err_save_failed" };
+
+  await trackEvent("signup", user.id); // first consent only (a unique index ignores later ones)
 
   // The Premium trial starts the moment consent is complete. A failure here
   // must not block consent — the app layout retries (self-heal) on the next page.

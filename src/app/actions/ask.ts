@@ -1,5 +1,6 @@
 "use server";
 
+import { trackEvent } from "@/lib/analytics/server";
 import { revalidatePath } from "next/cache";
 import { AiError } from "@/lib/ai/types";
 import { runAi } from "@/lib/ai/server";
@@ -123,6 +124,7 @@ export async function askAction(
     return { error: "err_ai_unavailable", message };
   }
 
+  await trackEvent("ask_sent", user.id);
   revalidatePath("/ask");
   return { ok: true, sent: Date.now() };
 }

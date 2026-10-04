@@ -1,5 +1,6 @@
 "use server";
 
+import { trackEvent } from "@/lib/analytics/server";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { requireAdmin, requireUser } from "@/lib/auth/server";
@@ -77,6 +78,7 @@ export async function startPaymentAction(formData: FormData): Promise<void> {
   if (error || data?.length !== 1)
     redirect("/subscription?error=err_save_failed");
 
+  await trackEvent("order_created", user.id);
   redirect(`/subscription/pay/${data[0].id}`);
 }
 
@@ -114,6 +116,7 @@ export async function reportPaymentAction(
   // Nothing matched: not theirs, or already reported/paid (e.g. a double click).
   if (data?.length !== 1) return { error: "err_payment_state" };
 
+  await trackEvent("payment_reported", user.id);
   revalidatePath(`/subscription/pay/${id}`);
   revalidatePath("/subscription");
   revalidatePath("/admin/payments");
@@ -168,6 +171,7 @@ export async function confirmPaymentAction(formData: FormData): Promise<void> {
       .eq("id", id)
       .maybeSingle<{ user_id: string | null }>();
     if (pay?.user_id) {
+      await trackEvent("subscribed", pay.user_id);
       const { t, lang } = await dictFor(pay.user_id);
       await notifyUser(
         pay.user_id,

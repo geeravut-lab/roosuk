@@ -1,5 +1,6 @@
 "use server";
 
+import { trackEvent } from "@/lib/analytics/server";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { requireUser } from "@/lib/auth/server";
@@ -49,6 +50,7 @@ export async function submitCheckinAction(formData: FormData): Promise<void> {
   if (error || data?.length !== 1)
     redirect("/today/checkin?error=err_save_failed");
 
+  await trackEvent("checkin_done", user.id);
   revalidatePath("/today");
   revalidatePath("/timeline");
   redirect("/today");

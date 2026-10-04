@@ -1,5 +1,6 @@
 "use server";
 
+import { trackEvent } from "@/lib/analytics/server";
 import { redirect } from "next/navigation";
 import { runAi } from "@/lib/ai/server";
 import { getCurrentUser } from "@/lib/auth/server";
@@ -44,6 +45,7 @@ export async function submitQuizAction(
 
   const result = computeQuiz(parsed.answers, year);
   const user = await getCurrentUser();
+  await trackEvent("quiz_completed", user?.id ?? null);
   if (!user)
     return { result, plan: templatePlan(result.levers), unsaved: "anonymous" };
 

@@ -1,5 +1,6 @@
 "use server";
 
+import { trackEvent } from "@/lib/analytics/server";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { AiError } from "@/lib/ai/types";
@@ -131,6 +132,7 @@ export async function scanFoodAction(
       return { error: "err_save_failed" };
     }
     draftId = data[0].id;
+    await trackEvent("food_scanned", user.id);
   } catch (err) {
     return { error: toErrorKey(err) };
   }

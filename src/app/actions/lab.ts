@@ -1,5 +1,6 @@
 "use server";
 
+import { trackEvent } from "@/lib/analytics/server";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { runAi } from "@/lib/ai/server";
@@ -144,6 +145,7 @@ export async function scanLabAction(
       return { error: "err_save_failed" };
     }
     draftId = row[0].id;
+    await trackEvent("lab_scanned", user.id);
   } catch (err) {
     return { error: toErrorKey(err) };
   }
@@ -315,6 +317,7 @@ export async function explainLabAction(formData: FormData): Promise<void> {
       },
     ]);
 
+  await trackEvent("lab_explained", user.id);
   revalidatePath(`/scan/lab/${id}`);
   back();
 }

@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Bot, ReceiptText, Timer, ToggleLeft } from "lucide-react";
+import { Bot, ChartColumn, ReceiptText, Timer, ToggleLeft } from "lucide-react";
 import { fmt } from "@/lib/i18n/dict";
 import { getT } from "@/lib/i18n/server";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -31,6 +31,13 @@ export default async function AdminHome() {
             {fmt(t.adminPaymentsPending, { n: count })}
           </span>
         ) : null}
+      </Link>
+      <Link
+        href="/admin/analytics"
+        className="card hover:bg-tint-primary flex items-center gap-3"
+      >
+        <ChartColumn className="text-primary-strong size-6" aria-hidden />
+        <span className="font-semibold">{t.adminAnalyticsTitle}</span>
       </Link>
       <Link
         href="/admin/ai"

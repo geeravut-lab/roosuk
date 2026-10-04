@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Clock } from "lucide-react";
+import { after } from "next/server";
 import { METERED_FEATURES } from "@/config/plans";
+import { trackEvent } from "@/lib/analytics/server";
 import { requireUser } from "@/lib/auth/server";
 import { PAYMENT_COLUMNS, type PaymentRow } from "@/lib/billing/payments";
 import { getBillingProfile, getUsageRows } from "@/lib/billing/profile.server";
@@ -36,6 +38,7 @@ export default async function SubscriptionPage({
 }: PageProps<"/subscription">) {
   const user = await requireUser();
   const { error } = await searchParams;
+  after(() => trackEvent("paywall_viewed", user.id));
   const now = new Date();
   const monthStart = bangkokMonthStart(now);
   const supabase = await createClient();

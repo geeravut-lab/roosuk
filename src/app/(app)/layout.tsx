@@ -1,5 +1,7 @@
 import { redirect } from "next/navigation";
+import { after } from "next/server";
 import { AppShell } from "@/components/shell/AppShell";
+import { trackEvent } from "@/lib/analytics/server";
 import { isAdminUser, requireUser } from "@/lib/auth/server";
 import { getBillingProfile } from "@/lib/billing/profile.server";
 import { startTrialIfEligible } from "@/lib/billing/trial.server";
@@ -19,6 +21,9 @@ export default async function AppLayout({
 }) {
   const user = await requireUser();
   if (!isConsentCurrent(await getLatestConsent(user.id))) redirect("/consent");
+
+  // Daily-active signal for the admin dashboard, written after the page is sent (once a day per user; repeats are ignored).
+  after(() => trackEvent("active", user.id));
 
   // Self-heal: consent is done but the trial never started (e.g. the consent
   // request failed to start it, or the account predates trials). Idempotent.
