@@ -17,7 +17,7 @@ export function PromptpayForm({ current }: { current: string | null }) {
   );
 
   return (
-    <form onSubmit={onSubmit} className="card space-y-3">
+    <form method="post" onSubmit={onSubmit} className="card space-y-3">
       <div>
         <label htmlFor="promptpayId" className="label">
           {t.adminPromptpayLabel}

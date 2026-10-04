@@ -23,7 +23,7 @@ export function LeadForm({ addFriendUrl }: { addFriendUrl: string | null }) {
     );
 
   return (
-    <form onSubmit={onSubmit} className="space-y-4">
+    <form method="post" onSubmit={onSubmit} className="space-y-4">
       <fieldset className="card space-y-1">
         <legend className="font-semibold">{t.leadInterestTitle}</legend>
         {INTERESTS.map((k, i) => (

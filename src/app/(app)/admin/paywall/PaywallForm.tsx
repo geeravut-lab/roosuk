@@ -19,7 +19,7 @@ export function PaywallForm({ current }: { current: PaywallMode }) {
     initial,
   );
   return (
-    <form onSubmit={onSubmit} className="space-y-3">
+    <form method="post" onSubmit={onSubmit} className="space-y-3">
       <fieldset className="space-y-1">
         <legend className="label">{t.adminPaywallMode}</legend>
         {PAYWALL_MODES.map((m) => (

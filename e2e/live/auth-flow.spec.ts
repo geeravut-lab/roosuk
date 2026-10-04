@@ -74,6 +74,8 @@ async function acceptConsent(page: Page) {
     .all())
     await box.check();
   await page.getByRole("button", { name: "ยืนยันและเริ่มใช้งาน" }).click();
+  // the redirect after consent must land before the test navigates elsewhere
+  await expect(page).not.toHaveURL(/\/consent/);
 }
 
 test.afterAll(async () => {

@@ -74,6 +74,7 @@ export function AuthForm({
       ) : null}
 
       <form
+        method="post"
         onSubmit={isSignup ? signup : login}
         className="space-y-4"
         noValidate={false}

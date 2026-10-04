@@ -24,7 +24,7 @@ export function BodyScanForm({
   const [state, onSubmit, pending] = useFormAction(scanBodyAction, initial);
 
   return (
-    <form onSubmit={onSubmit} className="space-y-4">
+    <form method="post" onSubmit={onSubmit} className="space-y-4">
       <div className="card space-y-3">
         <div>
           <label htmlFor="height" className="label">

@@ -152,7 +152,7 @@ export function AiForm({
   const label = (id: string) => providers.find((p) => p.id === id)?.label ?? id;
 
   return (
-    <form onSubmit={onSubmit} className="space-y-4">
+    <form method="post" onSubmit={onSubmit} className="space-y-4">
       <ul className="space-y-4">
         {tasks.map((v) => (
           <li key={v.task} className="card space-y-3">

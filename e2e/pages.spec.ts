@@ -240,3 +240,38 @@ test.describe("progress feedback", () => {
     await expect(page.locator("svg.animate-spin")).toHaveCount(0);
   });
 });
+
+test.describe("credentials never travel in a URL", () => {
+  test("signing in before the page's script has loaded does not put the password in the address", async ({
+    browser,
+    baseURL,
+  }) => {
+    // JavaScript off = the worst case of "pressed before the page was ready"
+    const ctx = await browser.newContext({ javaScriptEnabled: false, baseURL });
+    const page = await ctx.newPage();
+    await page.goto("/auth");
+    await page.getByLabel("อีเมล").fill("someone@example.com");
+    await page.getByLabel("รหัสผ่าน").fill("S3cret-pass-word");
+    await page
+      .getByRole("button", { name: "เข้าสู่ระบบ", exact: true })
+      .click();
+    await page.waitForLoadState();
+    expect(page.url()).not.toContain("S3cret");
+    expect(page.url()).not.toContain("password");
+    expect(page.url()).not.toContain("someone%40example.com");
+    await ctx.close();
+  });
+
+  test("every login and sign-up form is a POST form", async ({ page }) => {
+    await page.goto("/auth");
+    await expect(page.locator("main form").first()).toHaveAttribute(
+      "method",
+      "post",
+    );
+    await page.goto("/quiz");
+    await expect(page.locator("main form").first()).toHaveAttribute(
+      "method",
+      "post",
+    );
+  });
+});

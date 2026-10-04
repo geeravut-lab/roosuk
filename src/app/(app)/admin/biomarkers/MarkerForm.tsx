@@ -128,7 +128,7 @@ export function MarkerForm({
   }
 
   return (
-    <form onSubmit={onSubmit} className="space-y-3">
+    <form method="post" onSubmit={onSubmit} className="space-y-3">
       {editingKey ? (
         <input type="hidden" name="editingKey" value={editingKey} />
       ) : null}

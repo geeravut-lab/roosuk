@@ -158,7 +158,7 @@ export function BarcodeForm() {
         </p>
       ) : null}
 
-      <form ref={form} onSubmit={onSubmit} className="space-y-2">
+      <form method="post" ref={form} onSubmit={onSubmit} className="space-y-2">
         <label htmlFor="barcode" className="label">
           {t.barcodeNumber}
         </label>

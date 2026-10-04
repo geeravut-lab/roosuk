@@ -19,7 +19,7 @@ export function RewardForm({ current }: { current: RewardSettings }) {
     initial,
   );
   return (
-    <form onSubmit={onSubmit} className="space-y-4">
+    <form method="post" onSubmit={onSubmit} className="space-y-4">
       <div className="grid gap-3 sm:grid-cols-2">
         {REWARD_FIELDS.map((f) => (
           <div key={f.field}>

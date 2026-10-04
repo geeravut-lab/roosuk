@@ -32,7 +32,7 @@ export function PromptForm({
   const dirty = text.trim() !== saved.trim();
 
   return (
-    <form onSubmit={onSubmit} className="space-y-2">
+    <form method="post" onSubmit={onSubmit} className="space-y-2">
       <input type="hidden" name="task" value={task} />
       <label htmlFor={id} className="label">
         {t.promptExtraLabel}

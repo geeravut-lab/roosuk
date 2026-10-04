@@ -23,7 +23,7 @@ export function ConsentForm({ next }: { next: string }) {
   };
 
   return (
-    <form onSubmit={onSubmit} className="space-y-4">
+    <form method="post" onSubmit={onSubmit} className="space-y-4">
       <input type="hidden" name="next" value={next} />
 
       {state.error ? (

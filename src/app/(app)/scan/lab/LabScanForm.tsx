@@ -45,7 +45,7 @@ export function LabScanForm({ keepMode }: { keepMode: KeepMode }) {
   }
 
   return (
-    <form onSubmit={onSubmit} className="space-y-4">
+    <form method="post" onSubmit={onSubmit} className="space-y-4">
       <input
         ref={input}
         id="file"

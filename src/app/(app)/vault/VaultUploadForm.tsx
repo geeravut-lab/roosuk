@@ -25,7 +25,7 @@ export function VaultUploadForm({ today }: { today: string }) {
   );
 
   return (
-    <form ref={form} onSubmit={onSubmit} className="space-y-3">
+    <form method="post" ref={form} onSubmit={onSubmit} className="space-y-3">
       <div>
         <label htmlFor="vault-file" className="label">
           <FileUp className="mr-1 inline size-4" aria-hidden />

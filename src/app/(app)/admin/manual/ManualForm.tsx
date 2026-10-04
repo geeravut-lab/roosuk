@@ -15,7 +15,7 @@ export function ManualForm({ current }: { current: string }) {
     initial,
   );
   return (
-    <form onSubmit={onSubmit} className="space-y-3">
+    <form method="post" onSubmit={onSubmit} className="space-y-3">
       <div>
         <label htmlFor="manualUrl" className="label">
           {t.adminManualUrl}

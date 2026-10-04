@@ -43,7 +43,7 @@ export function QuizForm({ defaults }: { defaults: QuizDefaults }) {
     }));
 
   return (
-    <form onSubmit={onSubmit} className="space-y-5">
+    <form method="post" onSubmit={onSubmit} className="space-y-5">
       <div className="space-y-1">
         <h1 className="text-primary-strong text-2xl font-bold">
           {t.quizTitle}
