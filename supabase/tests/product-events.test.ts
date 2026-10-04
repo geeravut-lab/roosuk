@@ -1,5 +1,6 @@
 import { PGlite } from "@electric-sql/pglite";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import type { Analytics } from "@/lib/analytics/events";
 import { actAs, actAsOwner, createTestDb, isRejected } from "./helpers";
 
 let db: PGlite;
@@ -114,7 +115,7 @@ describe("admin_analytics", () => {
     await ev(A, "lab_scanned");
     await actAs(db, null, "service_role");
     const a = (
-      await db.query<{ a: any }>(`select public.admin_analytics(30) as a`)
+      await db.query<{ a: Analytics }>(`select public.admin_analytics(30) as a`)
     ).rows[0].a;
     expect(a.funnel).toEqual({
       quiz: 1,
@@ -132,13 +133,19 @@ describe("admin_analytics", () => {
     expect(a.dau).toBe(1); // A is active today
     expect(a.wau).toBe(2); // A and C within 7 days
     expect(a.daily).toHaveLength(30);
-    expect(a.daily.at(-1).active).toBe(1);
-    const foodEvent = a.events.find((e: any) => e.event === "food_scanned");
+    expect(a.daily.at(-1)?.active).toBe(1);
+    const foodEvent = a.events.find(
+      (e: { event: string }) => e.event === "food_scanned",
+    );
     expect(foodEvent).toEqual({ event: "food_scanned", total: 2, users: 1 });
-    expect(a.events.some((e: any) => e.event === "active")).toBe(false);
+    expect(a.events.some((e: { event: string }) => e.event === "active")).toBe(
+      false,
+    );
     // the window is clamped
     const w = (
-      await db.query<{ a: any }>(`select public.admin_analytics(100000) as a`)
+      await db.query<{ a: Analytics }>(
+        `select public.admin_analytics(100000) as a`,
+      )
     ).rows[0].a;
     expect(w.days).toBe(365);
   });
