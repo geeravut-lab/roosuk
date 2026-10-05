@@ -51,3 +51,4 @@ next-env.d.ts
 # Manual build intermediates (screenshots are re-recorded; final PDFs live in docs/manual/)
 docs/manual/shots/
 docs/manual/out/
+docs/status/status.html
