@@ -24,6 +24,8 @@ export const FEATURE_FLAGS = [
   "goals",
   "diet_watch",
   "liver_check",
+  "ekyc",
+  "telepharmacy",
 ] as const;
 
 export type FeatureFlag = (typeof FEATURE_FLAGS)[number];

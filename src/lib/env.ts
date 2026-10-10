@@ -59,3 +59,43 @@ export function getConfiguredSiteUrl(): string | undefined {
   const raw = process.env.NEXT_PUBLIC_SITE_URL?.trim();
   return raw ? raw.replace(/\/+$/, "") : undefined;
 }
+
+/**
+ * e-KYC provider (iApp Technology). Null when the key is not set: identity
+ * verification then shows "not available yet" and never pretends to succeed.
+ * `IAPP_BASE_URL` exists so tests can point at a local stub.
+ */
+export function getIappEnv(): { apiKey: string; baseUrl: string } | null {
+  const apiKey = process.env.IAPP_API_KEY?.trim();
+  if (!apiKey) return null;
+  const base = process.env.IAPP_BASE_URL?.trim();
+  return {
+    apiKey,
+    baseUrl: (base || "https://api.iapp.co.th").replace(/\/+$/, ""),
+  };
+}
+
+/**
+ * Video room providers beyond the public Jitsi default. JaaS needs all three
+ * of app id, key id and private key (PEM, `\n` escaped); "custom" needs a base URL.
+ */
+export function getVideoEnv(): {
+  jaas: { appId: string; keyId: string; privateKey: string } | null;
+  customBaseUrl: string | null;
+  jitsiBaseUrl: string;
+} {
+  const appId = process.env.JAAS_APP_ID?.trim();
+  const keyId = process.env.JAAS_KEY_ID?.trim();
+  const privateKey = process.env.JAAS_PRIVATE_KEY?.trim().replace(/\\n/g, "\n");
+  const custom = process.env.VIDEO_BASE_URL?.trim();
+  const jitsi = process.env.JITSI_BASE_URL?.trim();
+  return {
+    jaas: appId && keyId && privateKey ? { appId, keyId, privateKey } : null,
+    customBaseUrl:
+      custom && /^https:\/\//.test(custom) ? custom.replace(/\/+$/, "") : null,
+    jitsiBaseUrl: (jitsi && /^https:\/\//.test(jitsi)
+      ? jitsi
+      : "https://meet.jit.si"
+    ).replace(/\/+$/, ""),
+  };
+}

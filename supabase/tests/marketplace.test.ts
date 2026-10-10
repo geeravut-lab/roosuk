@@ -343,6 +343,94 @@ describe("expire_shop_orders", () => {
   });
 });
 
+describe("products that require a verified identity (e-KYC)", () => {
+  const C = "cccccccc-cccc-4ccc-8ccc-cccccccccccc";
+  let kycProduct = "";
+  beforeAll(async () => {
+    await actAsOwner(db);
+    await db.exec(
+      `insert into auth.users (id, email) values ('${C}', 'c@x.test')`,
+    );
+    kycProduct = (
+      await db.query<{ id: string }>(
+        `insert into public.shop_products (sku, partner_id, name_th, price_thb, stock, active, requires_kyc) values ('KYC-1', '${partner}', 'ต้องยืนยันตัวตน', 120, 5, true, true) returning id`,
+      )
+    ).rows[0].id;
+  });
+
+  it("is off for every existing product, and only the admin's column sets it", async () => {
+    await actAsOwner(db);
+    const r = await db.query<{ n: number }>(
+      `select count(*)::int as n from public.shop_products where requires_kyc and sku <> 'KYC-1'`,
+    );
+    expect(r.rows[0].n).toBe(0);
+    await actAs(db, A);
+    expect(
+      await isRejected(
+        db,
+        `update public.shop_products set requires_kyc = false`,
+      ),
+    ).toBe(true);
+  });
+
+  it("refuses to sell it to a person who is not verified — and changes nothing", async () => {
+    await actAsOwner(db);
+    const before = await stock(kycProduct);
+    expect(await order(C, [{ id: kycProduct, qty: 1 }])).toMatchObject({
+      ok: false,
+      reason: "kyc",
+    });
+    // one flagged line spoils a mixed cart too
+    expect(
+      await order(C, [
+        { id: p2, qty: 1 },
+        { id: kycProduct, qty: 1 },
+      ]),
+    ).toMatchObject({ ok: false, reason: "kyc" });
+    expect(await stock(kycProduct)).toBe(before);
+    expect(await stock(p2)).toBeNull();
+    const n = await db.query(
+      `select 1 from public.shop_orders where user_id = '${C}'`,
+    );
+    expect(n.rows).toHaveLength(0);
+  });
+
+  it("a verification that is still waiting for review, was rejected or was revoked does not count", async () => {
+    await actAsOwner(db);
+    for (const status of ["review", "rejected", "revoked"]) {
+      await db.exec(
+        `insert into public.ekyc_verifications (user_id, doc_type, status) values ('${C}', 'thai_id', '${status}')`,
+      );
+      expect(await order(C, [{ id: kycProduct, qty: 1 }])).toMatchObject({
+        ok: false,
+        reason: "kyc",
+      });
+    }
+  });
+
+  it("sells it once the person is verified (passed or approved), and a product without the flag never needed it", async () => {
+    await actAsOwner(db);
+    const v = (
+      await db.query<{ id: string }>(
+        `insert into public.ekyc_verifications (user_id, doc_type, status) values ('${C}', 'thai_id', 'passed') returning id`,
+      )
+    ).rows[0].id;
+    const ok = await order(C, [{ id: kycProduct, qty: 2 }]);
+    expect(ok).toMatchObject({ ok: true });
+    expect(await stock(kycProduct)).toBe(3);
+    // taken back => not sellable again
+    await db.exec(
+      `update public.ekyc_verifications set status = 'revoked' where id = '${v}'`,
+    );
+    expect(await order(C, [{ id: kycProduct, qty: 1 }])).toMatchObject({
+      ok: false,
+      reason: "kyc",
+    });
+    // an ordinary product is sold to anyone
+    expect(await order(C, [{ id: p2, qty: 1 }])).toMatchObject({ ok: true });
+  });
+});
+
 describe("history is kept as it was", () => {
   it("an order keeps the name and price it was made with", async () => {
     const r = await order(A, [{ id: p1, qty: 1 }]);

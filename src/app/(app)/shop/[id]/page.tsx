@@ -1,10 +1,12 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { Stethoscope } from "lucide-react";
 import { addToCartAction } from "@/app/actions/shop";
 import { Gallery } from "@/components/shop/Photos";
 import { SubmitButton } from "@/components/SubmitButton";
 import { requireUser } from "@/lib/auth/server";
+import { isKycVerified } from "@/lib/ekyc/server";
 import { featureEnabled } from "@/lib/flags/server";
 import { errorText, fmt, isErrorKey, type Dict } from "@/lib/i18n/dict";
 import { getLang, getT } from "@/lib/i18n/server";
@@ -28,8 +30,13 @@ export default async function ProductPage({
   const { id } = await params;
   const sp = await searchParams;
   if (!UUID.test(id)) notFound();
-  await requireUser();
-  const [t, lang] = await Promise.all([getT(), getLang()]);
+  const user = await requireUser();
+  const [t, lang, askPharmacist, kycOk] = await Promise.all([
+    getT(),
+    getLang(),
+    featureEnabled("telepharmacy"),
+    isKycVerified(user.id),
+  ]);
   const p = await loadProduct(id, lang);
   if (!p) notFound();
   const error = Array.isArray(sp.error) ? sp.error[0] : sp.error;
@@ -90,6 +97,20 @@ export default async function ProductPage({
         </p>
       ) : null}
 
+      {p.requires_kyc ? (
+        <p className="bg-tint-primary rounded-xl px-3 py-2 text-sm">
+          {kycOk ? t.shopKycOk : t.shopKycNeeded}{" "}
+          {kycOk ? null : (
+            <Link
+              href={`/verify?next=/shop/${p.id}`}
+              className="text-primary-strong font-semibold underline"
+            >
+              {t.kycGoVerify}
+            </Link>
+          )}
+        </p>
+      ) : null}
+
       {p.availability === "out" ? (
         <p className="bg-tint-warn rounded-xl px-3 py-2 font-semibold">
           {t.shopOut}
@@ -140,6 +161,15 @@ export default async function ProductPage({
             .join(" · ")}
         </p>
       </section>
+      {askPharmacist ? (
+        <Link
+          href={`/telepharmacy?product=${p.id}`}
+          className="btn btn-secondary w-full"
+        >
+          <Stethoscope className="size-5" aria-hidden />
+          {t.shopAskPharmacist}
+        </Link>
+      ) : null}
       <p className="bg-tint-warn rounded-xl px-3 py-2 text-sm">
         {t.shopDisclaimer}
       </p>

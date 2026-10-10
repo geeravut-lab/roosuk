@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useState } from "react";
 import { checkoutAction, type CheckoutState } from "@/app/actions/shop";
 import { Spinner } from "@/components/Spinner";
@@ -141,6 +142,17 @@ export function CheckoutForm({
           className="bg-tint-warn rounded-xl px-3 py-2 text-sm font-medium"
         >
           {errorText(state.error, t)}
+          {state.error === "err_kyc_required" ? (
+            <>
+              {" "}
+              <Link
+                href="/verify?next=/shop/cart"
+                className="text-primary-strong underline"
+              >
+                {t.kycGoVerify}
+              </Link>
+            </>
+          ) : null}
         </p>
       ) : null}
       <button
