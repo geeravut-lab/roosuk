@@ -139,10 +139,11 @@ export interface ProductRow {
   focus_tags: string[];
   active: boolean;
   sort: number;
+  requires_kyc: boolean;
 }
 
 export const PRODUCT_COLUMNS =
-  "id, sku, partner_id, name_th, name_en, brand, summary_th, summary_en, description_th, description_en, ingredients, usage_note, caution, fda_no, serving, price_thb, compare_at_thb, stock, focus_tags, active, sort";
+  "id, sku, partner_id, name_th, name_en, brand, summary_th, summary_en, description_th, description_en, ingredients, usage_note, caution, fda_no, serving, price_thb, compare_at_thb, stock, focus_tags, active, sort, requires_kyc";
 
 export interface ImageRow {
   id: string;

@@ -409,6 +409,25 @@ async function checkupReminders(c: TickCtx): Promise<number> {
   return n;
 }
 
+/** Telepharmacy: close calls nobody took, remind people of booked times, ask about follow-ups. Loaded lazily (it imports this file). */
+async function consultSweep(c: TickCtx): Promise<number> {
+  if (!(await featureEnabled("telepharmacy"))) return 0;
+  const { sweepConsults } = await import("@/lib/telepharmacy/server");
+  return sweepConsults(c.now);
+}
+
+async function consultReminders(c: TickCtx): Promise<number> {
+  if (!(await featureEnabled("telepharmacy"))) return 0;
+  const { sendConsultReminders, sendFollowUpNotices } = await import(
+    "@/lib/telepharmacy/server"
+  );
+  const minutes = ruleNumber(c.rules, "consult_reminders", "minutes_before", 60, 1440);
+  return (
+    (await sendConsultReminders(minutes, c.now)) +
+    (await sendFollowUpNotices(c.now))
+  );
+}
+
 async function expiryNotices(
   c: TickCtx,
   rule: "trial_ending" | "plan_expiring",
@@ -661,6 +680,8 @@ export async function runTick(
     ["monthly_report_ready", () => monthlyReportNotices(ctx)],
     ["checkup_reminder", () => checkupReminders(ctx)],
     ["agent_reminders", () => agentReminders(ctx)],
+    ["consult_sweep", () => consultSweep(ctx)],
+    ["consult_reminders", () => consultReminders(ctx)],
     ["trial_ending", () => expiryNotices(ctx, "trial_ending")],
     ["plan_expiring", () => expiryNotices(ctx, "plan_expiring")],
     ["queue_expire", () => expireQueue(ctx)],

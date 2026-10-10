@@ -11,6 +11,7 @@ import type { ErrorKey } from "@/lib/i18n/dict";
 import { getLang } from "@/lib/i18n/server";
 import { shopPaymentReviewNotice } from "@/lib/notify/messages";
 import { notifyAdmins } from "@/lib/notify/server";
+import { isKycVerified } from "@/lib/ekyc/server";
 import { loadBalance } from "@/lib/rewards/server";
 import { loadPlatformSettings } from "@/lib/settings/server";
 import { loadCart, loadProduct } from "@/lib/shop/server";
@@ -99,6 +100,7 @@ const REASON: Record<string, ErrorKey> = {
   unavailable: "err_shop_unavailable",
   stock: "err_shop_stock",
   credit: "err_credit_changed",
+  kyc: "err_kyc_required",
 };
 
 /**
@@ -121,6 +123,13 @@ export async function checkoutAction(
   ]);
   if (cart.length === 0) return { error: "err_shop_empty" };
   if (!settings.promptpayId) return { error: "err_payment_not_ready" };
+  // A product that needs a verified identity: say so up front. The database function enforces it
+  // as well — this only saves the person a round trip.
+  if (
+    cart.some((l) => l.product.requires_kyc) &&
+    !(await isKycVerified(user.id))
+  )
+    return { error: "err_kyc_required" };
 
   const useCredit = formData.get("useCredit") === "on";
   const balance = useCredit ? await loadBalance(user.id) : 0;

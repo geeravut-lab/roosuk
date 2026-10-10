@@ -65,6 +65,8 @@ export interface ProductInput {
   focus_tags: FocusTag[];
   active: boolean;
   sort: number;
+  /** sold only to a person whose identity was verified (e-KYC); left out = leave as it is */
+  requires_kyc?: boolean;
 }
 
 export type ProductField = keyof ProductInput | "partner" | "claims";
@@ -162,6 +164,10 @@ export function parseProduct(
       focus_tags,
       active: truthy(get("active")),
       sort: typeof sortRaw === "number" ? sortRaw : 100,
+      // absent or blank = unchanged, so a re-import can never silently drop the requirement
+      ...(clean(get("requires_kyc")) === ""
+        ? {}
+        : { requires_kyc: truthy(get("requires_kyc")) }),
     },
   };
 }
@@ -187,6 +193,7 @@ export const PRODUCT_CSV_COLUMNS = [
   "serving",
   "tags",
   "active",
+  "requires_kyc",
   "images",
 ] as const;
 
@@ -213,6 +220,7 @@ export const PRODUCT_CSV_TEMPLATE =
     "60 แคปซูล",
     "sleep;stress",
     "yes",
+    "",
     "MAG-001_1.jpg;MAG-001_2.jpg",
   ].join(",") +
   "\n";

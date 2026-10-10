@@ -41,7 +41,8 @@ export function createDoubleProvider(
 } {
   const calls: string[] = [];
   const pick = <T>(v: T | ProviderErrorCode | undefined, fallback: T): T => {
-    if (typeof v === "string") throw new EkycProviderError(v);
+    if (typeof v === "string")
+      throw new EkycProviderError(v as ProviderErrorCode);
     return v ?? fallback;
   };
   return {

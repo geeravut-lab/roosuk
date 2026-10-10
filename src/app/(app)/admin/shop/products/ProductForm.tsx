@@ -135,6 +135,19 @@ export function ProductForm({
         />
         <span className="text-sm">{label("active")}</span>
       </label>
+      <input type="hidden" name="requires_kyc_form" value="1" />
+      <label className="flex min-h-11 items-start gap-3">
+        <input
+          type="checkbox"
+          name="requires_kyc"
+          defaultChecked={product?.requires_kyc ?? false}
+          className="mt-1 size-5"
+        />
+        <span className="text-sm">
+          {label("requires_kyc")}
+          <span className="text-muted block">{t.adminShopRequiresKycHint}</span>
+        </span>
+      </label>
       {state.error ? (
         <div
           role="alert"

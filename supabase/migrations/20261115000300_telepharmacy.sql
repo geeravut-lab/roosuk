@@ -401,6 +401,33 @@ $$;
 revoke all on function public.consult_log_access(uuid, uuid, text, text, jsonb) from public, anon, authenticated;
 grant execute on function public.consult_log_access(uuid, uuid, text, text, jsonb) to service_role;
 
+-- ── the exact consent text people accepted (kept forever, never edited) ─────
+-- A consult stores the version label and the hash of the text its person saw; this table keeps
+-- the text behind each hash, so "what did they agree to?" can be answered after the admin
+-- has changed the wording.
+create table public.telepharmacy_consent_texts (
+  text_hash text primary key check (length(text_hash) = 64),
+  version text not null check (length(version) between 1 and 40),
+  lang text not null check (lang in ('th', 'en')),
+  body text not null check (length(body) between 1 and 6000),
+  created_at timestamptz not null default now()
+);
+create or replace function public.telepharmacy_consent_texts_guard()
+returns trigger
+language plpgsql
+set search_path = ''
+as $$
+begin
+  raise exception 'consent texts are never edited or removed (violates the audit trail)'
+    using errcode = 'check_violation';
+end;
+$$;
+create trigger telepharmacy_consent_texts_no_edit
+  before update or delete on public.telepharmacy_consent_texts
+  for each row execute function public.telepharmacy_consent_texts_guard();
+alter table public.telepharmacy_consent_texts enable row level security;
+revoke all on public.telepharmacy_consent_texts from anon, authenticated;
+
 -- ── opening hours and availability (decided here, from the heartbeat) ───────
 create or replace function public.telepharmacy_in_hours(p_at timestamptz)
 returns boolean

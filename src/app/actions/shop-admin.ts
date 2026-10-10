@@ -91,9 +91,17 @@ export async function saveProductAction(
   await requireAdmin();
   const id = String(formData.get("id") ?? "");
   const partnerId = String(formData.get("partner_id") ?? "");
-  const parsed = parseProduct((k) =>
-    k === "tags" ? formData.getAll("tags") : formData.get(k),
-  );
+  const parsed = parseProduct((k) => {
+    if (k === "tags") return formData.getAll("tags");
+    // an unticked checkbox sends nothing, so the form says "I am carrying this field" with a marker
+    if (k === "requires_kyc")
+      return formData.get("requires_kyc_form")
+        ? formData.get("requires_kyc") === "on"
+          ? "yes"
+          : "no"
+        : undefined;
+    return formData.get(k);
+  });
   if (!parsed.ok)
     return { error: "err_shop_product_fields", fields: parsed.fields };
   if (!UUID.test(partnerId))
