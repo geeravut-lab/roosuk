@@ -259,6 +259,53 @@ export const OWNED_TABLES: readonly OwnedTable[] = [
     onDelete: "retained",
     countable: true,
   },
+  // Identity verification: masked facts and scores only (no image is ever stored). Erased with the account.
+  {
+    table: "ekyc_verifications",
+    column: "user_id",
+    omit: ["reviewed_by"],
+    onDelete: "erased",
+    countable: true,
+  },
+  {
+    table: "ekyc_attempts",
+    column: "user_id",
+    onDelete: "erased",
+    countable: false,
+  },
+  // A pharmacist's own profile row (the licence mark is the admin's, the person can still see it).
+  {
+    table: "pharmacists",
+    column: "user_id",
+    omit: ["license_verified_by"],
+    onDelete: "erased",
+    countable: true,
+  },
+  // 🔒 LEGAL REVIEW NEEDED. Pharmacy service records may have to be KEPT by law (Pharmacy Council rules), so —
+  // like shop orders — they outlive the account, detached from the person and scrubbed of who they were
+  // (name, what they typed, the shared snapshot). Whether to keep or erase them is the owner's / lawyer's call.
+  {
+    table: "consults",
+    column: "patient_id",
+    omit: ["pharmacist_id", "room_name", "access_key_hash", "consent_text_hash"],
+    onDelete: "retained",
+    countable: true,
+  },
+  {
+    table: "consult_records",
+    column: "patient_id",
+    omit: ["pharmacist_id"],
+    onDelete: "retained",
+    countable: true,
+  },
+  // Who opened the person's record and when: append-only, kept (detached) as an audit trail.
+  {
+    table: "consult_access_log",
+    column: "patient_id",
+    omit: ["actor_id"],
+    onDelete: "retained",
+    countable: true,
+  },
   {
     table: "privacy_audit_log",
     column: "user_id",
@@ -286,4 +333,13 @@ export const INTERNAL_USER_REFERENCES: readonly string[] = [
   "payments.reviewed_by",
   // who used an invite: the person's own copy is the membership (family_members)
   "family_invites.accepted_by",
+  // the pharmacist / admin who handled a consult, a licence or an identity review: a person's own copy shows
+  // the professional's name and licence number on the record, not their account id
+  "consults.pharmacist_id",
+  "consult_records.pharmacist_id",
+  "consult_access_log.actor_id",
+  "pharmacists.license_verified_by",
+  "ekyc_verifications.reviewed_by",
+  "ekyc_settings.updated_by",
+  "telepharmacy_settings.updated_by",
 ];
