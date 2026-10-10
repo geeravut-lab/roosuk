@@ -1,0 +1,1140 @@
+ได้ครับ และผมคิดว่า **Liver Health Module เป็นฟีเจอร์ที่เหมาะกับ RooSuk มาก** เพราะระบบที่คุณมีอยู่แล้วมี Lab Scan, Health Profile, Timeline, AI, Health Passport และ Doctor Brief ซึ่งสามารถต่อยอดได้โดยไม่ต้องสร้างระบบใหม่แยกออกมา
+
+แต่มีหลักสำคัญมากข้อหนึ่ง:
+
+> **RooSuk ควรทำ “Liver Risk Screening & Care Navigation” ไม่ใช่ “AI วินิจฉัยโรคตับ”**
+
+เป้าหมายคือ **รวบรวมข้อมูล → ประเมินปัจจัยเสี่ยง → วิเคราะห์ผลตรวจ → จับสัญญาณที่ควรตรวจเพิ่ม → แจ้งระดับความเร่งด่วน → เตรียมข้อมูลให้แพทย์** ไม่ใช่บอกผู้ใช้ว่าเป็นตับอักเสบ ไขมันพอกตับ ตับแข็ง หรือมะเร็ง
+
+แนวทางนี้สอดคล้องกับการใช้ non-invasive risk scores เช่น FIB-4 เพื่อช่วยคัดกรองผู้ที่ควรได้รับการประเมินเพิ่มเติม และกับแนวทาง WHO ที่เน้นการตรวจและเชื่อมต่อผู้ที่มีความเสี่ยงเข้าสู่การรักษา ([AASLD][1])
+
+---
+
+# 1. ก่อนอื่นต้องเข้าใจก่อนว่า "โรคตับ" ไม่ใช่เรื่องเดียว
+
+ผมไม่แนะนำให้ RooSuk สร้างเพียง
+
+> **"คุณเสี่ยงไขมันพอกตับหรือไม่?"**
+
+แต่ควรสร้างเป็น **Liver Health Risk Engine** ที่มองอย่างน้อย 5 กลุ่ม
+
+### ① Metabolic / Fatty Liver
+
+ปัจจุบันใช้คำว่า **MASLD (Metabolic dysfunction-associated steatotic liver disease)** เป็นหลักในแนวทางใหม่ แทนคำว่า NAFLD และครอบคลุมตั้งแต่ steatosis → MASH → fibrosis → cirrhosis → HCC ([EASL][2])
+
+### ② Viral Hepatitis
+
+* Hepatitis B
+* Hepatitis C
+* และในบางกรณี Hepatitis D
+
+สิ่งสำคัญคือผู้ติดเชื้อจำนวนมากอาจ **ไม่มีอาการในระยะแรก** ดังนั้น RooSuk ห้ามใช้ "ไม่มีอาการ = ไม่เสี่ยง" ([องค์การอนามัยโลก][3])
+
+### ③ Alcohol / Medication / Supplement-related Liver Injury
+
+ต้องมีประวัติเรื่องยาและ supplement เพราะความผิดปกติของ liver tests อาจเกี่ยวข้องกับยาและสารต่าง ๆ ได้ ([AASLD][4])
+
+### ④ Fibrosis / Cirrhosis Risk
+
+อันนี้สำคัญมาก เพราะเป้าหมายของ screening ไม่ใช่แค่รู้ว่า "ALT สูง"
+
+แต่คือ
+
+> **มีโอกาสเกิดพังผืด/advanced fibrosis หรือไม่?**
+
+FIB-4 เป็นหนึ่งในเครื่องมือที่ใช้กันแพร่หลายและคำนวณจากอายุ AST ALT และ platelet count ([AASLD][1])
+
+### ⑤ Red Flags / Possible Acute Liver Problem
+
+ต้องมีระบบตรวจจับอาการหรือข้อมูลที่ไม่ควรรอ AI วิเคราะห์ต่อ เช่น jaundice ร่วมกับอาการรุนแรง หรือข้อมูล lab ที่ผิดปกติมาก
+
+AASLD ระบุว่าการประเมิน liver injury ต้องดูทั้ง AST/ALT, ALP, bilirubin รวมถึง markers ของ hepatic synthetic function เช่น albumin และ PT/INR และบางกรณีต้องประเมินเร่งด่วน ([AASLD][4])
+
+---
+
+# 2. ผมเสนอให้เพิ่มเมนูใหม่ใน RooSuk
+
+## 🫀 Liver Health
+
+อยู่ในเมนู
+
+**Health Check → Liver Health**
+
+หน้าหลักควรมี:
+
+```text
+LIVER HEALTH
+สุขภาพตับของคุณ
+
+┌──────────────────────┐
+│ Liver Risk Status    │
+│                      │
+│ 🟢 Low Concern       │
+│ 🟡 Needs Follow-up   │
+│ 🔴 Medical Review    │
+└──────────────────────┘
+
+[ Check My Liver Health ]
+
+ข้อมูลล่าสุด
+• ALT
+• AST
+• ALP
+• Bilirubin
+• Platelets
+• FIB-4
+
+ปัจจัยเสี่ยง
+• Metabolic
+• Hepatitis
+• Alcohol
+• Medication
+• Family History
+
+[ View My Liver Timeline ]
+```
+
+**ไม่ควรแสดงคำว่า "คุณเป็นโรค..."**
+
+---
+
+# 3. เพิ่ม "Liver Health Check" แบบ Quiz
+
+ผมจะไม่ให้ผู้ใช้ตอบคำถาม 30–40 ข้อ
+
+ทำประมาณ **10–15 ข้อแบบ adaptive questionnaire**
+
+เช่น
+
+### Basic
+
+* อายุ
+* เพศ
+* ส่วนสูง
+* น้ำหนัก
+* รอบเอว ถ้ามี
+* ประวัติเบาหวาน
+* ความดัน
+* ไขมันในเลือด
+
+### Liver history
+
+* เคยได้รับการบอกว่ามีไขมันพอกตับหรือไม่
+* เคยตรวจพบ hepatitis B/C หรือไม่
+* เคยมีผล liver test ผิดปกติหรือไม่
+* เคยมีโรคตับหรือไม่
+* มีคนในครอบครัวเป็นโรคตับ/มะเร็งตับหรือไม่
+
+### Medication / Supplement
+
+ถามว่า
+
+> "ปัจจุบันใช้ยา วิตามิน หรือผลิตภัณฑ์เสริมอาหารเป็นประจำหรือไม่"
+
+ไม่ควรให้ AI ตัดสินว่าสารใด "ทำลายตับ" จากคำตอบเพียงอย่างเดียว แต่ให้ระบบ flag เพื่อให้แพทย์ประเมิน
+
+### Lifestyle
+
+* การดื่มแอลกอฮอล์
+* การออกกำลังกาย
+* อาหาร
+* metabolic risk
+
+---
+
+# 4. จุดสำคัญที่สุด: เชื่อมกับ Lab Scan เดิมของ RooSuk
+
+นี่เป็นจุดที่ผมคิดว่า **คุณไม่ควรสร้างใหม่**
+
+RooSuk มี Lab Scan อยู่แล้ว ซึ่งอ่านชื่อรายการ ค่า หน่วย และ reference range ได้ 
+
+ให้เพิ่ม **Liver Lab Intelligence Layer**
+
+โดยตรวจจับรายการสำคัญ เช่น
+
+### Liver injury
+
+* ALT
+* AST
+* ALP
+* GGT
+
+### Bilirubin
+
+* Total bilirubin
+* Direct bilirubin
+
+### Liver synthetic function
+
+* Albumin
+* PT/INR
+
+### Supporting data
+
+* CBC
+* Platelet
+* glucose
+* HbA1c
+* lipid profile
+
+AASLD อธิบายว่า AST/ALT/ALP และ bilirubin ช่วยประเมิน pattern ของ liver injury ขณะที่ albumin และ PT/INR สะท้อน hepatic synthetic function มากกว่า ([AASLD][4])
+
+---
+
+# 5. เพิ่ม FIB-4 Calculator
+
+นี่ผมให้เป็น **Priority สูงมาก**
+
+สูตรคือ
+
+**FIB-4 = (Age × AST) / (Platelets × √ALT)**
+
+โดยต้องใช้หน่วยตามสูตรมาตรฐาน
+
+แล้ว RooSuk สามารถคำนวณอัตโนมัติเมื่อมี:
+
+* Age
+* AST
+* ALT
+* Platelets
+
+AASLD ระบุว่า FIB-4 <1.3 สามารถใช้เป็นกลุ่มที่มีความเสี่ยงต่ำสำหรับ advanced fibrosis ในบริบทที่เหมาะสม ขณะที่ ≥1.3 ควรได้รับ secondary risk assessment และ >2.67 ทำให้ advanced fibrosis มีความเป็นไปได้สูงขึ้น ([AASLD][1])
+
+**แต่สำคัญ:** ไม่ควรนำ threshold นี้ไปใช้เป็น universal diagnosis rule กับทุกคน
+
+โดยเฉพาะผู้ที่อายุน้อยมากหรืออายุมากกว่า 65 ปี การแปลผล FIB-4 ต้องระวังมากขึ้น ([AASLD][1])
+
+---
+
+# 6. อย่าทำ FIB-4 เป็น "คะแนนตับ"
+
+ผมแนะนำ UX แบบนี้:
+
+### ❌ ไม่ควร
+
+> FIB-4 = 2.1
+> คุณมีโรคตับระดับปานกลาง
+
+เพราะผิด concept
+
+### ✅ ควร
+
+> **FIB-4: ต้องประเมินเพิ่มเติม**
+>
+> ค่านี้เป็นเครื่องมือประเมินความเสี่ยงของพังผืดในตับ ไม่ใช่การวินิจฉัยโรค
+>
+> RooSuk แนะนำให้ปรึกษาแพทย์เพื่อพิจารณาการตรวจเพิ่มเติม
+
+นี่จะปลอดภัยกว่ามาก
+
+---
+
+# 7. เพิ่ม "Liver Risk Engine"
+
+ผมจะออกแบบเป็น rule engine ไม่ใช่ให้ LLM เป็นคนตัดสินเอง
+
+Architecture:
+
+```text
+USER DATA
+   │
+   ├── Health Profile
+   ├── Symptoms
+   ├── Food
+   ├── Body
+   ├── Lifestyle
+   ├── Medication
+   └── Lab Results
+           │
+           ▼
+    Liver Data Normalizer
+           │
+           ▼
+    Clinical Rule Engine
+           │
+    ┌──────┼─────────┐
+    ▼      ▼         ▼
+Metabolic Viral   Liver Injury
+Risk     Risk      Pattern
+    │      │         │
+    └──────┼─────────┘
+           ▼
+     Fibrosis Risk
+       FIB-4
+           │
+           ▼
+    Urgency Engine
+           │
+    ┌──────┼───────┐
+    ▼      ▼       ▼
+  Routine Follow-up
+           │
+           ▼
+     AI Explanation
+           │
+           ▼
+    Doctor Brief
+```
+
+**LLM อยู่หลัง Clinical Rule Engine**
+
+ไม่ใช่
+
+> User → ChatGPT → ตัดสินใจ
+
+---
+
+# 8. แบ่ง Risk เป็น 4 ระดับ
+
+ผมแนะนำ 4 ระดับแทน Low/Medium/High อย่างเดียว
+
+### 🟢 Level 0 — No Current Concern
+
+ข้อมูลที่มีไม่พบสัญญาณที่ต้องดำเนินการเร่งด่วน
+
+แต่ข้อความต้องบอกว่า:
+
+> "ผลนี้ไม่สามารถยืนยันได้ว่าตับปกติ"
+
+---
+
+### 🟡 Level 1 — Risk Factors Present
+
+ตัวอย่าง:
+
+* metabolic risk
+* overweight/obesity
+* diabetes
+* abnormal lipid
+* history of fatty liver
+* hepatitis risk
+
+CTA:
+
+> **ติดตามสุขภาพตับและพิจารณาตรวจตามคำแนะนำของแพทย์**
+
+---
+
+### 🟠 Level 2 — Needs Medical Follow-up
+
+ตัวอย่าง:
+
+* abnormal liver tests
+* FIB-4 อยู่ในช่วงที่ต้องประเมินเพิ่มเติม
+* hepatitis test positive/unclear
+* persistent abnormal trend
+* multiple risk factors
+
+CTA:
+
+> **แนะนำให้พบแพทย์เพื่อตรวจประเมินเพิ่มเติม**
+
+---
+
+### 🔴 Level 3 — Urgent Medical Assessment
+
+ถ้ามี red flags ที่เข้าเกณฑ์ต้องได้รับการประเมินอย่างเร่งด่วน
+
+ระบบไม่ควรให้ผู้ใช้คุยกับ AI ต่อเป็นหลัก แต่ควรแสดง:
+
+> **ข้อมูลนี้อาจต้องได้รับการประเมินทางการแพทย์โดยเร็ว**
+
+และพาไปยังช่องทางบริการฉุกเฉิน/โรงพยาบาลตามบริบทประเทศ
+
+---
+
+# 9. ต้องมี Symptom Engine ด้วย
+
+WHO ระบุอาการที่อาจพบใน viral hepatitis เช่น
+
+* fatigue
+* loss of appetite
+* nausea/vomiting
+* abdominal discomfort/pain
+* dark urine
+* jaundice
+
+แต่ประเด็นสำคัญคือ **hepatitis จำนวนมากไม่มีอาการในช่วงแรก** ([องค์การอนามัยโลก][3])
+
+ดังนั้น RooSuk ควรมี:
+
+### "มีอาการอะไรบ้าง?"
+
+☐ เหนื่อยผิดปกติ
+☐ เบื่ออาหาร
+☐ คลื่นไส้
+☐ อาเจียน
+☐ ปวด/ไม่สบายบริเวณท้อง
+☐ ปัสสาวะสีเข้มผิดปกติ
+☐ อุจจาระสีซีด
+☐ ตัวเหลือง/ตาเหลือง
+☐ คัน
+☐ บวม/ท้องโต
+☐ อาการอื่น ๆ
+
+แล้วใช้ **rule-based triage**
+
+ไม่ใช่ AI diagnosis
+
+---
+
+# 10. Hepatitis B/C ต้องแยกเป็น Module
+
+ผมแนะนำให้มี
+
+## "Viral Hepatitis Check"
+
+เพราะการดู ALT/AST อย่างเดียว **ไม่สามารถคัดกรอง hepatitis B/C ได้เพียงพอ**
+
+WHO ระบุว่า HCV จำนวนมากไม่มีอาการ และการวินิจฉัยใช้ anti-HCV antibody ก่อน และหากเป็นบวกจึงตรวจ HCV RNA เพื่อยืนยันการติดเชื้อที่ยังคงอยู่ ([องค์การอนามัยโลก][5])
+
+ส่วน HBV มีทั้ง acute และ chronic infection และคนจำนวนมากไม่มีอาการในช่วงแรก ([องค์การอนามัยโลก][6])
+
+ดังนั้น UI ควรมี:
+
+```text
+Hepatitis Status
+
+Hepatitis B
+○ ไม่เคยตรวจ
+○ ผลลบ
+○ ผลบวก
+○ ไม่แน่ใจ
+
+Hepatitis C
+○ ไม่เคยตรวจ
+○ ผลลบ
+○ ผลบวก
+○ ไม่แน่ใจ
+
+[ ตรวจสอบสิ่งที่ควรทำต่อ ]
+```
+
+**ห้าม RooSuk บอกว่า "คุณไม่มี Hepatitis" เพียงเพราะไม่มีอาการ**
+
+---
+
+# 11. Lab Scan ควรมี "Liver Panel Detection"
+
+นี่คือ feature ที่ผมคิดว่าเพิ่มได้เร็วมาก
+
+เมื่อผู้ใช้ upload PDF:
+
+> **RooSuk พบข้อมูลที่เกี่ยวข้องกับสุขภาพตับ 8 รายการ**
+
+เช่น
+
+| Test      | Result | Trend |
+| --------- | -----: | ----- |
+| ALT       |    ... | ↑     |
+| AST       |    ... | ↑     |
+| ALP       |    ... | →     |
+| GGT       |    ... | ↑     |
+| Bilirubin |    ... | →     |
+| Albumin   |    ... | →     |
+| Platelet  |    ... | ↓     |
+| INR       |    ... | →     |
+
+แล้วมี
+
+### "AI Liver Insight"
+
+> "ผลตรวจบางรายการเกี่ยวข้องกับการประเมินสุขภาพตับ แต่ผลเหล่านี้ไม่สามารถใช้วินิจฉัยโรคได้จากข้อมูลเพียงครั้งเดียว"
+
+---
+
+# 12. Trend สำคัญกว่า Single Test
+
+นี่คือข้อได้เปรียบของ RooSuk
+
+เพราะคุณมี **Timeline** อยู่แล้ว 
+
+ดังนั้นอย่าแสดงแค่:
+
+> ALT = 65
+
+ให้แสดง:
+
+```text
+ALT
+
+Jan     28
+Apr     31
+Jul     47
+Oct     65
+        ↑
+   Increasing trend
+```
+
+แล้ว:
+
+> **"RooSuk พบว่าค่า ALT มีแนวโน้มเพิ่มขึ้นจากข้อมูลที่บันทึกไว้"**
+
+ไม่ใช่
+
+> "ตับกำลังแย่ลง"
+
+เพราะ causal interpretation ต้องใช้ clinical context
+
+---
+
+# 13. สร้าง "Liver Timeline"
+
+นี่จะเป็น Killer Feature
+
+```text
+MY LIVER JOURNEY
+
+2026
+│
+├── Jan
+│   Blood Test
+│   ALT 28
+│
+├── Mar
+│   Health Check
+│   BMI...
+│
+├── Jun
+│   Food Pattern
+│   High-fat meals ↑
+│
+├── Jul
+│   Blood Test
+│   ALT 47
+│
+├── Oct
+│   Blood Test
+│   ALT 65
+│
+└── RooSuk Insight
+    "มีการเปลี่ยนแปลงของค่า
+     liver-related tests
+     ควรนำข้อมูลไปปรึกษาแพทย์"
+```
+
+นี่คือ **Data Moat ของ RooSuk**
+
+เพราะ WHOOP/Oura มี wearable longitudinal data
+
+แต่ RooSuk สามารถสร้าง
+
+> **Longitudinal Health Record ของคนไทย**
+
+---
+
+# 14. เพิ่ม "Liver Risk Factors" จากข้อมูลที่ RooSuk มีอยู่แล้ว
+
+ไม่ต้องถามทั้งหมดใหม่
+
+ระบบเอาข้อมูลจาก:
+
+### Health Profile
+
+↓
+
+### Body Scan
+
+↓
+
+### Food Scan
+
+↓
+
+### Daily Check-in
+
+↓
+
+### Lab
+
+↓
+
+### Timeline
+
+มาประกอบกัน
+
+ตัวอย่าง:
+
+> มี metabolic risk + abnormal liver tests + elevated FIB-4
+
+ระบบจึงขึ้น:
+
+### "ควรได้รับการประเมินสุขภาพตับเพิ่มเติม"
+
+แทนที่จะวินิจฉัย
+
+> "คุณเป็น MASH"
+
+---
+
+# 15. AI ต้องอธิบายแบบ 4 ชั้น
+
+ผมเห็นว่า RooSuk มีแนวทาง AI safety อยู่แล้ว เช่น 4-layer safety และ emergency terms bypass AI ในระบบปัจจุบัน 
+
+ให้เอาหลักนี้มาขยายกับ Liver Module:
+
+### Layer 1 — Data Validation
+
+เช็กว่า
+
+* unit ถูกหรือไม่
+* value สมเหตุสมผลหรือไม่
+* วันที่ตรวจ
+* reference range
+* duplicate result
+
+### Layer 2 — Clinical Rules
+
+คำนวณ
+
+* FIB-4
+* liver test pattern
+* trend
+* risk factors
+
+### Layer 3 — AI Explanation
+
+LLM ทำหน้าที่:
+
+> อธิบายภาษาคน
+
+### Layer 4 — Safety / Triage
+
+ตรวจว่า response:
+
+* วินิจฉัยหรือไม่
+* ให้คำแนะนำอันตรายหรือไม่
+* ทำให้ผู้ใช้ชะลอการรักษาหรือไม่
+* มี red flag หรือไม่
+
+ถ้าไม่ผ่าน → **ไม่แสดงคำตอบ AI**
+
+---
+
+# 16. เพิ่ม "Doctor Brief" โดยเฉพาะโรคตับ
+
+นี่เป็น feature ที่ผมคิดว่า **ควรทำมากที่สุด**
+
+RooSuk มี Health Passport + AI Pre-Doctor Brief อยู่แล้ว 
+
+เพิ่ม:
+
+## Liver Doctor Brief
+
+ก่อนพบแพทย์กด
+
+> **Prepare for My Liver Check-up**
+
+แล้วสร้าง:
+
+### Patient summary
+
+* Age
+* relevant history
+* symptoms
+* medications/supplements
+* risk factors
+
+### Lab
+
+* ALT
+* AST
+* ALP
+* GGT
+* bilirubin
+* albumin
+* INR
+* platelet
+
+### Trends
+
+* 3 months
+* 6 months
+* 1 year
+
+### Risk calculations
+
+* FIB-4
+
+### Questions to ask doctor
+
+เช่น:
+
+> "ควรตรวจ liver ultrasound หรือไม่?"
+
+> "ควรตรวจ hepatitis B/C หรือไม่?"
+
+> "จำเป็นต้องประเมิน liver fibrosis เพิ่มหรือไม่?"
+
+นี่คือ **AI ที่ช่วยคนเตรียมพบแพทย์** ไม่ใช่ AI ที่พยายามแทนแพทย์
+
+---
+
+# 17. เพิ่ม "Next Best Action"
+
+นี่คือสิ่งที่จะทำให้ RooSuk แตกต่าง
+
+ไม่ใช่:
+
+> "ALT สูง"
+
+แต่:
+
+### สิ่งที่ควรทำต่อ
+
+**1. ตรวจสอบผลตรวจเดิม**
+
+**2. หากค่าผิดปกติซ้ำ/มีปัจจัยเสี่ยง → นัดพบแพทย์**
+
+**3. นำ Liver Doctor Brief ไปพบแพทย์**
+
+**4. แพทย์อาจพิจารณาการตรวจเพิ่มเติมตามสาเหตุ**
+
+AASLD ระบุว่าการประเมิน abnormal liver tests อาจต้องใช้ blood tests เพิ่มเติมและ imaging เช่น abdominal ultrasound หรือ fibrosis assessment ตาม pattern และ clinical context ([AASLD][4])
+
+---
+
+# 18. เพิ่ม Liver Ultrasound / FibroScan Integration ในอนาคต
+
+นี่คือ Phase ต่อไป
+
+ให้ผู้ใช้สามารถบันทึก:
+
+### Ultrasound
+
+* Fatty liver
+* liver size
+* lesion
+* bile duct
+* spleen
+* etc.
+
+### FibroScan / VCTE
+
+* Liver stiffness
+* CAP
+
+AASLD ระบุว่า VCTE สามารถใช้เป็น secondary risk assessment และให้ข้อมูลทั้ง liver stiffness และ steatosis-related CAP ([AASLD][1])
+
+ดังนั้น RooSuk สามารถสร้าง:
+
+```text
+LAB
+ +
+ULTRASOUND
+ +
+FIBROSCAN
+ +
+LIFESTYLE
+ +
+TIMELINE
+        ↓
+LIVER HEALTH PROFILE
+```
+
+---
+
+# 19. HCC / Liver Cancer ต้องทำอย่างระมัดระวัง
+
+ผม **ไม่แนะนำให้ RooSuk สร้าง "AI ตรวจมะเร็งตับ"**
+
+แต่สามารถทำ:
+
+## Liver Cancer Surveillance Reminder
+
+สำหรับผู้ที่ **แพทย์วินิจฉัยแล้ว** ว่าอยู่ในกลุ่มที่ควร surveillance
+
+AASLD ระบุว่าผู้ป่วย cirrhosis และบางกลุ่มของ chronic hepatitis B ควรได้รับ HCC surveillance ทุก 6 เดือน โดย ultrasound และ AFP ตามเกณฑ์ที่เหมาะสม ([AASLD][7])
+
+ดังนั้น RooSuk ทำหน้าที่:
+
+> "ถึงกำหนดติดตามการตรวจตามแผนที่แพทย์ให้ไว้"
+
+ไม่ใช่
+
+> "RooSuk ตรวจพบว่าคุณไม่มีมะเร็ง"
+
+---
+
+# 20. Liver Health Dashboard ที่ผมแนะนำ
+
+สุดท้ายหน้า dashboard ควรออกมาประมาณนี้:
+
+```text
+╔════════════════════════════╗
+║       🫀 LIVER HEALTH      ║
+╠════════════════════════════╣
+║                            ║
+║  Current Status            ║
+║  🟡 Needs Follow-up        ║
+║                            ║
+║  FIB-4                     ║
+║  1.8                       ║
+║  Further assessment may    ║
+║  be appropriate            ║
+║                            ║
+╠════════════════════════════╣
+║ LAB                         ║
+║ ALT       ↑                ║
+║ AST       →                ║
+║ GGT       ↑                ║
+║ Bilirubin →                ║
+║ Platelet  →                ║
+╠════════════════════════════╣
+║ RISK FACTORS               ║
+║ 🟡 Metabolic               ║
+║ 🟢 Hepatitis data          ║
+║ 🟢 Lifestyle               ║
+╠════════════════════════════╣
+║ TREND                      ║
+║ ALT   ─────╱──╱            ║
+║                            ║
+╠════════════════════════════╣
+║ NEXT STEP                  ║
+║                            ║
+║ พบแพทย์เพื่อประเมินข้อมูล  ║
+║ สุขภาพตับเพิ่มเติม          ║
+║                            ║
+║ [ Prepare Doctor Brief ]   ║
+║ [ View My Liver Timeline ] ║
+╚════════════════════════════╝
+```
+
+---
+
+# 21. Architecture ที่ผมแนะนำสำหรับ RooSuk
+
+จาก architecture เดิมของคุณ ผมจะเพิ่มแค่ layer นี้:
+
+```text
+                 RooSuk
+                    │
+        ┌───────────┴───────────┐
+        │                       │
+   Existing AI              Liver AI
+        │                       │
+        │               ┌───────┴────────┐
+        │               │                │
+        │        Liver Data Engine   Clinical Rules
+        │               │                │
+        │        ┌──────┼───────┐        │
+        │        │      │       │        │
+        │       Lab   Symptom  Risk    FIB-4
+        │        │      │       │        │
+        │        └──────┼───────┘        │
+        │               │                │
+        │               └───────┬────────┘
+        │                       │
+        │                Liver Risk State
+        │                       │
+        └──────────────┬────────┘
+                       │
+                AI Explanation
+                       │
+              ┌────────┴────────┐
+              │                 │
+          User Action       Doctor Brief
+```
+
+---
+
+# 22. Database ที่ควรเพิ่ม
+
+ผมแนะนำประมาณนี้:
+
+### `liver_assessments`
+
+```text
+id
+user_id
+assessment_date
+risk_level
+fib4_score
+metabolic_risk
+viral_hepatitis_risk
+medication_risk
+symptom_risk
+clinical_flags
+engine_version
+```
+
+### `liver_lab_results`
+
+```text
+id
+user_id
+lab_date
+alt
+ast
+alp
+ggt
+bilirubin_total
+bilirubin_direct
+albumin
+inr
+platelets
+source_lab_document_id
+```
+
+### `liver_symptoms`
+
+```text
+user_id
+assessment_id
+jaundice
+dark_urine
+pale_stool
+fatigue
+nausea
+vomiting
+abdominal_pain
+itching
+etc
+```
+
+### `liver_risk_factors`
+
+```text
+metabolic
+diabetes
+dyslipidemia
+hypertension
+hepatitis_b
+hepatitis_c
+family_history
+medication
+supplement
+alcohol
+previous_liver_disease
+```
+
+### `liver_followups`
+
+```text
+recommended_action
+priority
+due_date
+completed
+doctor_visit
+test_result
+```
+
+---
+
+# 23. สิ่งที่ผม "ไม่แนะนำ" ให้ทำ
+
+มี 6 อย่างที่ผมอยากให้คุณล็อกไว้ตั้งแต่ architecture
+
+### ❌ 1. อย่าให้ AI วินิจฉัย
+
+เช่น
+
+> "คุณเป็นไขมันพอกตับ"
+
+### ❌ 2. อย่าใช้ ALT ตัวเดียวตัดสิน
+
+Liver tests ต้องดู pattern และ clinical context ([AASLD][4])
+
+### ❌ 3. อย่าใช้ภาพหน้า/ตาเพื่อบอกว่าเป็นโรคตับ
+
+โดยเฉพาะ
+
+> "AI วิเคราะห์ตาเหลืองจากกล้อง"
+
+ไม่ควรนำไปเป็น diagnostic signal หลัก
+
+### ❌ 4. อย่าใช้ FIB-4 เป็น diagnosis
+
+มันคือ **risk stratification tool**
+
+### ❌ 5. อย่าให้ LLM คำนวณ clinical score เอง
+
+ใช้ deterministic code:
+
+```text
+Lab
+ ↓
+validated formula
+ ↓
+risk engine
+ ↓
+LLM explanation
+```
+
+### ❌ 6. อย่าบอกว่า "ไม่พบความเสี่ยง = ไม่มีโรค"
+
+เพราะ hepatitis และโรคตับหลายชนิดอาจไม่มีอาการหรือไม่แสดงความผิดปกติชัดในช่วงต้น ([องค์การอนามัยโลก][3])
+
+---
+
+# 24. ผมมองว่า Feature นี้สามารถกลายเป็น "Liver Health Journey" ของ RooSuk
+
+และนี่สำคัญกว่าการเพิ่มแค่ Liver Check
+
+ผมจะออกแบบเป็น:
+
+### STEP 1
+
+**Check**
+
+↓
+
+### STEP 2
+
+**Understand**
+
+↓
+
+### STEP 3
+
+**Monitor**
+
+↓
+
+### STEP 4
+
+**Improve**
+
+↓
+
+### STEP 5
+
+**Follow-up**
+
+↓
+
+### STEP 6
+
+**Prepare for Doctor**
+
+↓
+
+### STEP 7
+
+**Continue Monitoring**
+
+ดังนั้น RooSuk จะไม่ได้เป็นแค่
+
+> "แอปอ่านผลเลือด"
+
+แต่เป็น
+
+> **Personal Liver Health Companion**
+
+---
+
+# 25. Roadmap ที่ผมแนะนำ
+
+ถ้าคุณต้องการทำจริง ผมจะไม่ทำทุกอย่างพร้อมกัน
+
+### Phase L1 — MVP ⭐⭐⭐⭐⭐
+
+เพิ่มทันที:
+
+* Liver Health Check
+* Liver symptoms
+* Liver risk factors
+* Liver lab detection
+* ALT/AST/ALP/GGT/Bilirubin
+* Platelet
+* FIB-4
+* Liver trend
+* Risk explanation
+* Medical follow-up CTA
+* Doctor Brief
+
+**นี่คือ MVP ที่ผมคิดว่าคุ้มที่สุด**
+
+---
+
+### Phase L2 — Intelligence
+
+เพิ่ม:
+
+* MASLD risk pathway
+* metabolic risk engine
+* hepatitis B/C pathway
+* medication/supplement review
+* ultrasound record
+* FibroScan record
+* longitudinal liver trend
+* personalized reminders
+
+---
+
+### Phase L3 — Healthcare Integration
+
+เพิ่ม:
+
+* นัดตรวจ Liver Check
+* Lab partner
+* Ultrasound
+* FibroScan
+* Telemedicine
+* Gastroenterologist/Hepatologist
+* hospital referral
+
+---
+
+### Phase L4 — Advanced Precision Health
+
+เพิ่ม:
+
+* Health Age
+* liver-specific biological age research
+* genomics
+* advanced biomarkers
+* wearable correlations
+* predictive longitudinal models
+
+แต่ **L4 ต้องมี clinical validation ก่อนเอาไปใช้เป็น medical claim**
+
+---
+
+# 26. และผมมีข้อเสนอที่ใหญ่กว่านั้นสำหรับ RooSuk
+
+จากสิ่งที่คุณสร้างไว้ ผมคิดว่าไม่ควรหยุดแค่ **Liver Health**
+
+ควรสร้าง architecture กลางชื่อ:
+
+# **RooSuk Health Risk Engine™**
+
+แล้วทำ organ-specific modules:
+
+```text
+              RooSuk
+                 │
+        Health Risk Engine
+                 │
+    ┌────────────┼────────────┐
+    │            │            │
+  Liver        Heart       Diabetes
+    │            │            │
+  Kidney       Metabolic    Cancer
+    │            │            │
+    └────────────┼────────────┘
+                 │
+          Risk → Action
+                 │
+          Doctor Brief
+```
+
+โดย **Liver เป็น module แรก**
+
+เพราะมันเข้ากับสิ่งที่ RooSuk มีอยู่แล้วอย่างมาก:
+
+**Lab Scan + Timeline + Food Scan + Body Scan + AI + Health Passport + Doctor Brief**
+
+และยังสามารถสร้าง recurring use case ได้ดีมาก เพราะผู้ใช้ไม่ได้เข้ามาแค่ครั้งเดียวเพื่อ "ตรวจโรค" แต่กลับมาติดตาม **trend → action → next test → doctor → follow-up**
+
+สุดท้าย ผมอยากเน้นอีกครั้งว่า **ระบบนี้ควรผ่านการ review โดยแพทย์โรคตับ/อายุรแพทย์ก่อนนำ clinical rules และข้อความแจ้งเตือนไปใช้จริง** โดยเฉพาะ threshold, red flags, referral criteria และคำแนะนำเกี่ยวกับการตรวจเพิ่มเติม เพราะ AASLD เองระบุว่าการประเมิน abnormal liver tests ต้องพิจารณาหลาย pattern และหลายสาเหตุ ไม่ใช่ค่าเดียว ([AASLD][4])
+
+ถ้าทำตามแนวทางนี้ ผมมองว่า **Liver Health จะไม่ใช่แค่ feature เพิ่มของ RooSuk แต่สามารถเป็นต้นแบบของ "AI Health Risk Engine" ที่คุณนำไปขยายเป็น Heart, Diabetes, Kidney และ Metabolic Health ได้ในอนาคต** ครับ
+
+[1]: https://www.aasld.org/liver-fellow-network/core-series/clinical-pearls/spare-me-jab-noninvasive-assessment-patients-masld?utm_source=chatgpt.com "Spare Me the Jab: Noninvasive Assessment of Patients with MASLD | AASLD"
+[2]: https://easl.eu/publication-category/clinical-practice-guidelines/page/2/?utm_source=chatgpt.com "Clinical Practice Guidelines Archives - Page 2 of 6 - EASL-The Home of Hepatology."
+[3]: https://www.who.int/health-topics/hepatitis?utm_source=chatgpt.com "Hepatitis"
+[4]: https://www.aasld.org/liver-fellow-network/core-series/back-basics/how-approach-elevated-liver-enzymes?utm_source=chatgpt.com "How to approach elevated liver enzymes? | AASLD"
+[5]: https://www.who.int/news-room/fact-sheets/detail/hepatitis-c?utm_source=chatgpt.com "Hepatitis C"
+[6]: https://www.who.int/news-room/fact-sheets/detail/hepatitis-b%20%20%E2%80%A8?utm_source=chatgpt.com "Hepatitis B"
+[7]: https://www.aasld.org/liver-fellow-network/core-series/back-basics/back-basics-outpatient-management-cirrhosis?utm_source=chatgpt.com "Back to Basics: Outpatient Management of Cirrhosis | AASLD"
