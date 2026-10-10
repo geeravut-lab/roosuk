@@ -53,11 +53,18 @@ export function normalizeUnit(unit: string): string {
       .replace(/[µμ]/g, "u")
       .replace(/\s+/g, "")
       // 10^3/uL, x10e3/uL, ×10³/µL → K/uL; 10^6/uL → M/uL; 10^9/L → K/uL; 10^12/L → M/uL
-      .replace(/^[x×]?10(\^3|\*\*3|e3|³)\//, "k/")
+      .replace(/^[x×]?10(\^3|\*\*3|\*3|e3|³)\//, "k/")
+      // x1000/uL, thousand/uL
+      .replace(/^[x×]?1000\//, "k/")
+      .replace(/^thousand\//, "k/")
       .replace(/^[x×]?10(\^6|\*\*6|e6|⁶)\//, "m/")
       .replace(/^[x×]?10(\^9|\*\*9|e9|⁹)\/l$/, "k/ul")
       .replace(/^[x×]?10(\^12|\*\*12|e12)\/l$/, "m/ul")
       .replace(/^thou\//, "k/")
+      // report spellings of the same unit: gm/dL, g%, mg%, IU/L, units/L
+      .replace(/^gm\//, "g/")
+      .replace(/^(g|mg)%$/, (_m, u) => `${u}/dl`)
+      .replace(/^(iu|units?)\/l$/, "u/l")
       .replace(/²/g, "2")
       .replace(/³/g, "3")
       .replace(/\^/g, "")
@@ -74,6 +81,8 @@ export function toCatalogUnit(
 ): number | null {
   const u = normalizeUnit(unit);
   if (u === normalizeUnit(marker.unit)) return value;
+  if (marker.unitless && (u === "" || u === "ratio" || u === marker.key))
+    return value;
   const c = marker.conversions?.find((x) => normalizeUnit(x.unit) === u);
   return c ? Math.round(value * c.factor * 1000) / 1000 : null;
 }
