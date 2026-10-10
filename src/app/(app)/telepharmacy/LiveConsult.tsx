@@ -1,16 +1,20 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Video } from "lucide-react";
-import { cancelConsultAction, rekeyConsultAction } from "@/app/actions/telepharmacy";
+import {
+  cancelConsultAction,
+  rekeyConsultAction,
+} from "@/app/actions/telepharmacy";
 import { Spinner } from "@/components/Spinner";
 import { SubmitButton } from "@/components/SubmitButton";
 import { fmt } from "@/lib/i18n/dict";
 import { useI18n } from "@/lib/i18n/provider";
 import { keyStore } from "./RequestDialog";
 
-type Status = "waiting" | "booked" | "accepted" | "done" | "missed" | "cancelled";
+type Status =
+  "waiting" | "booked" | "accepted" | "done" | "missed" | "cancelled";
 interface View {
   status: Status;
   pharmacistName: string | null;
@@ -52,50 +56,52 @@ export function LiveConsult({
   const [waited, setWaited] = useState(0);
   const [renewing, setRenewing] = useState(false);
   const key = useRef<string | null>(null);
-  const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
-  const stopped = useRef(false);
-
-  const poll = useCallback(async () => {
-    if (stopped.current) return;
-    try {
-      if (key.current === null) {
-        try {
-          key.current = sessionStorage.getItem(keyStore(id));
-        } catch {
-          key.current = null;
-        }
-      }
-      const res = await fetch("/api/telepharmacy/status", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id, key: key.current }),
-        cache: "no-store",
-      });
-      if (res.ok) {
-        const next = (await res.json()) as View;
-        setView(next);
-        if (next.status !== status) router.refresh();
-        if (TERMINAL.includes(next.status)) return;
-      }
-    } catch {
-      /* a dropped connection: try again */
-    }
-    timer.current = setTimeout(poll, document.hidden ? 10_000 : 3_000);
-  }, [id, router, status]);
+  // bumping this restarts the polling loop (after a new key was fetched)
+  const [epoch, setEpoch] = useState(0);
 
   useEffect(() => {
-    stopped.current = false;
+    let stopped = false;
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    async function poll() {
+      if (stopped) return;
+      try {
+        if (key.current === null) {
+          try {
+            key.current = sessionStorage.getItem(keyStore(id));
+          } catch {
+            key.current = null;
+          }
+        }
+        const res = await fetch("/api/telepharmacy/status", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ id, key: key.current }),
+          cache: "no-store",
+        });
+        if (res.ok && !stopped) {
+          const next = (await res.json()) as View;
+          setView(next);
+          if (next.status !== status) router.refresh();
+          if (TERMINAL.includes(next.status)) return;
+        }
+      } catch {
+        /* a dropped connection: try again */
+      }
+      if (!stopped) timer = setTimeout(poll, document.hidden ? 10_000 : 3_000);
+    }
     void poll();
     return () => {
-      stopped.current = true;
-      clearTimeout(timer.current);
+      stopped = true;
+      clearTimeout(timer);
     };
-  }, [poll]);
+  }, [id, router, status, epoch]);
 
   useEffect(() => {
     if (view.status !== "waiting") return;
     const tick = () =>
-      setWaited(Math.max(0, Math.floor((Date.now() - Date.parse(createdAt)) / 1000)));
+      setWaited(
+        Math.max(0, Math.floor((Date.now() - Date.parse(createdAt)) / 1000)),
+      );
     tick();
     const h = setInterval(tick, 1000);
     return () => clearInterval(h);
@@ -112,8 +118,7 @@ export function LiveConsult({
       } catch {
         /* kept in memory for this page */
       }
-      clearTimeout(timer.current);
-      void poll();
+      setEpoch((n) => n + 1);
     }
   }
 
@@ -125,7 +130,11 @@ export function LiveConsult({
   );
 
   return (
-    <section className="card space-y-3" aria-labelledby="tele-live-h" aria-live="polite">
+    <section
+      className="card space-y-3"
+      aria-labelledby="tele-live-h"
+      aria-live="polite"
+    >
       <h2 id="tele-live-h" className="text-lg font-bold">
         {view.status === "accepted"
           ? fmt(t.teleAcceptedTitle, { name: view.pharmacistName ?? "" })
@@ -151,7 +160,9 @@ export function LiveConsult({
       {view.status === "booked" ? (
         <>
           {whenLabel ? (
-            <p className="font-semibold">{fmt(t.teleBookedAt, { when: whenLabel })}</p>
+            <p className="font-semibold">
+              {fmt(t.teleBookedAt, { when: whenLabel })}
+            </p>
           ) : null}
           <p className="text-muted text-sm">{t.teleBookedNote}</p>
           {cancel(t.teleCancelBooking)}
@@ -174,7 +185,12 @@ export function LiveConsult({
         ) : view.needsKey ? (
           <>
             <p className="text-sm">{t.teleKeyLost}</p>
-            <button type="button" onClick={renew} disabled={renewing} className="btn btn-primary w-full">
+            <button
+              type="button"
+              onClick={renew}
+              disabled={renewing}
+              className="btn btn-primary w-full"
+            >
               {renewing ? <Spinner /> : null}
               {t.teleKeyRenew}
             </button>
@@ -191,10 +207,16 @@ export function LiveConsult({
         <p className="text-sm">{t.teleMissedBody}</p>
       ) : null}
 
-      {(view.status === "waiting" || view.status === "booked") && view.needsKey ? (
+      {(view.status === "waiting" || view.status === "booked") &&
+      view.needsKey ? (
         <div className="border-line space-y-2 border-t pt-3">
           <p className="text-muted text-xs">{t.teleKeyLost}</p>
-          <button type="button" onClick={renew} disabled={renewing} className="btn btn-secondary w-full">
+          <button
+            type="button"
+            onClick={renew}
+            disabled={renewing}
+            className="btn btn-secondary w-full"
+          >
             {renewing ? <Spinner /> : null}
             {t.teleKeyRenew}
           </button>

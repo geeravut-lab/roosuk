@@ -4,10 +4,7 @@ import { dict, type ErrorKey, type Lang } from "@/lib/i18n/dict";
 import { bangkokDate } from "@/lib/health/dates";
 import { isKycVerified } from "@/lib/ekyc/server";
 import { dictFor, notifyUser } from "@/lib/notify/server";
-import {
-  buildSnapshot,
-  type PassportSnapshot,
-} from "@/lib/passport/passport";
+import { buildSnapshot, type PassportSnapshot } from "@/lib/passport/passport";
 import { loadSnapshotInput } from "@/lib/passport/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import {
@@ -50,7 +47,10 @@ export async function loadTeleSettings(): Promise<TeleSettings> {
     if (error) throw error;
     return parseTeleSettings(data);
   } catch (err) {
-    console.warn("[telepharmacy] could not read settings, treating as off:", err);
+    console.warn(
+      "[telepharmacy] could not read settings, treating as off:",
+      err,
+    );
     return parseTeleSettings(null);
   }
 }
@@ -92,7 +92,11 @@ export async function sweepConsults(now = new Date()): Promise<number> {
     return 0;
   }
   const r = (data ?? {}) as {
-    missed?: { id: string; patient_id: string | null; mode: "instant" | "scheduled" }[];
+    missed?: {
+      id: string;
+      patient_id: string | null;
+      mode: "instant" | "scheduled";
+    }[];
     ended?: number;
     offline?: number;
   };
@@ -224,8 +228,7 @@ async function buildConsultSnapshot(
 }
 
 export type StartResult =
-  | { ok: true; id: string; key: string }
-  | { ok: false; error: ErrorKey };
+  { ok: true; id: string; key: string } | { ok: false; error: ErrorKey };
 
 /**
  * Open a consult, instant or booked. The database function decides (hours, queue,
@@ -265,9 +268,15 @@ export async function startConsult(args: {
       .from("shop_products")
       .select("name_th, name_en, active")
       .eq("id", args.input.productId)
-      .maybeSingle<{ name_th: string; name_en: string | null; active: boolean }>();
+      .maybeSingle<{
+        name_th: string;
+        name_en: string | null;
+        active: boolean;
+      }>();
     if (!data?.active) return { ok: false, error: "err_invalid_input" };
-    productName = (args.lang === "en" && data.name_en ? data.name_en : data.name_th).slice(0, 120);
+    productName = (
+      args.lang === "en" && data.name_en ? data.name_en : data.name_th
+    ).slice(0, 120);
   }
 
   // the text the person was shown, kept by its hash
@@ -291,7 +300,11 @@ export async function startConsult(args: {
       { onConflict: "text_hash", ignoreDuplicates: true },
     );
 
-  const snapshot = await buildConsultSnapshot(args.userId, args.input.consentItems, now);
+  const snapshot = await buildConsultSnapshot(
+    args.userId,
+    args.input.consentItems,
+    now,
+  );
   const sections = [
     ...(args.input.consentItems.share_profile ? ["profile"] : []),
     ...(args.input.consentItems.share_labs ? ["labs"] : []),
@@ -387,7 +400,9 @@ export interface PatientRecord {
 const RECORD_COLS =
   "consult_id, service_at, duration_sec, pharmacist_name, license_no, advice, refer_doctor, products, follow_up_on, follow_up_note, follow_up_outcome, follow_up_reply, follow_up_done_at";
 
-export async function loadPatientConsults(userId: string): Promise<PatientConsult[]> {
+export async function loadPatientConsults(
+  userId: string,
+): Promise<PatientConsult[]> {
   const { data } = await db()
     .from("consults")
     .select(CONSULT_COLS)
@@ -398,7 +413,9 @@ export async function loadPatientConsults(userId: string): Promise<PatientConsul
   return data ?? [];
 }
 
-export async function loadPatientRecords(userId: string): Promise<Map<string, PatientRecord>> {
+export async function loadPatientRecords(
+  userId: string,
+): Promise<Map<string, PatientRecord>> {
   const { data } = await db()
     .from("consult_records")
     .select(RECORD_COLS)
@@ -423,7 +440,9 @@ export async function loadAccessLog(userId: string): Promise<AccessEntry[]> {
     .eq("patient_id", userId)
     .order("at", { ascending: false })
     .limit(30)
-    .returns<{ consult_id: string; actor_role: string; action: string; at: string }[]>();
+    .returns<
+      { consult_id: string; actor_role: string; action: string; at: string }[]
+    >();
   return (data ?? []).map((r) => ({
     at: r.at,
     role: r.actor_role,
@@ -450,7 +469,10 @@ export async function logAccess(
 }
 
 /** The customer withdraws before it starts. */
-export async function cancelConsult(userId: string, consultId: string): Promise<ErrorKey | null> {
+export async function cancelConsult(
+  userId: string,
+  consultId: string,
+): Promise<ErrorKey | null> {
   const { data, error } = await db().rpc("cancel_consult", {
     p_patient: userId,
     p_consult: consultId,
@@ -460,7 +482,10 @@ export async function cancelConsult(userId: string, consultId: string): Promise<
 }
 
 /** A new access key for a consult that is still live (the old one is gone). Only the signed-in owner can ask. */
-export async function rekeyConsult(userId: string, consultId: string): Promise<string | null> {
+export async function rekeyConsult(
+  userId: string,
+  consultId: string,
+): Promise<string | null> {
   const key = newAccessKey();
   const { data, error } = await db()
     .from("consults")
@@ -530,10 +555,14 @@ export interface PharmacistRow {
   active_consult_id: string | null;
 }
 
-export async function loadPharmacist(userId: string): Promise<PharmacistRow | null> {
+export async function loadPharmacist(
+  userId: string,
+): Promise<PharmacistRow | null> {
   const { data } = await db()
     .from("pharmacists")
-    .select("user_id, display_name, license_no, license_verified, online, last_seen, active_consult_id")
+    .select(
+      "user_id, display_name, license_no, license_verified, online, last_seen, active_consult_id",
+    )
     .eq("user_id", userId)
     .maybeSingle<PharmacistRow>();
   return data;
@@ -554,15 +583,24 @@ export interface QueueItem {
   scheduled_at: string | null;
   created_at: string;
 }
-const QUEUE_COLS = "id, mode, status, patient_name, topic, product_name, scheduled_at, created_at";
+const QUEUE_COLS =
+  "id, mode, status, patient_name, topic, product_name, scheduled_at, created_at";
 
-export async function loadQueue(now = new Date()): Promise<{ waiting: QueueItem[]; today: QueueItem[] }> {
+export async function loadQueue(
+  now = new Date(),
+): Promise<{ waiting: QueueItem[]; today: QueueItem[] }> {
   await sweepConsults(now);
   const day = bangkokDate(now);
   const start = new Date(`${day}T00:00:00+07:00`);
   const end = new Date(start.getTime() + 86_400_000);
   const [w, b] = await Promise.all([
-    db().from("consults").select(QUEUE_COLS).eq("status", "waiting").order("created_at", { ascending: true }).limit(50).returns<QueueItem[]>(),
+    db()
+      .from("consults")
+      .select(QUEUE_COLS)
+      .eq("status", "waiting")
+      .order("created_at", { ascending: true })
+      .limit(50)
+      .returns<QueueItem[]>(),
     db()
       .from("consults")
       .select(QUEUE_COLS)
@@ -594,7 +632,9 @@ export async function loadConsultForPharmacist(
 ): Promise<PharmacistConsult | null> {
   const { data } = await db()
     .from("consults")
-    .select(`${CONSULT_COLS}, patient_name, intake, shared_sections, snapshot, room_name, provider, consent_items`)
+    .select(
+      `${CONSULT_COLS}, patient_name, intake, shared_sections, snapshot, room_name, provider, consent_items`,
+    )
     .eq("id", consultId)
     .eq("pharmacist_id", userId)
     .maybeSingle<PharmacistConsult>();
@@ -603,7 +643,10 @@ export async function loadConsultForPharmacist(
   return data;
 }
 
-export async function claimConsult(userId: string, consultId: string): Promise<{ ok: true } | { ok: false; error: ErrorKey }> {
+export async function claimConsult(
+  userId: string,
+  consultId: string,
+): Promise<{ ok: true } | { ok: false; error: ErrorKey }> {
   const { data, error } = await db().rpc("claim_consult", {
     p_pharmacist: userId,
     p_consult: consultId,
@@ -626,7 +669,10 @@ export async function claimConsult(userId: string, consultId: string): Promise<{
   return { ok: false, error: map[r.reason ?? ""] ?? "err_save_failed" };
 }
 
-export async function endConsult(userId: string, consultId: string): Promise<ErrorKey | null> {
+export async function endConsult(
+  userId: string,
+  consultId: string,
+): Promise<ErrorKey | null> {
   const { data, error } = await db().rpc("end_consult", {
     p_actor: userId,
     p_consult: consultId,
@@ -645,7 +691,10 @@ export interface RecordRow extends PatientRecord {
   finalized_at: string | null;
 }
 
-export async function loadRecordFor(consultId: string, pharmacistId: string): Promise<RecordRow | null> {
+export async function loadRecordFor(
+  consultId: string,
+  pharmacistId: string,
+): Promise<RecordRow | null> {
   const { data } = await db()
     .from("consult_records")
     .select(`id, finalized_at, ${RECORD_COLS}`)
@@ -668,9 +717,12 @@ export async function saveRecord(args: {
 }): Promise<ErrorKey | null> {
   const { pharmacistId, consultId, input, finalize } = args;
   const c = await loadConsultForPharmacist(pharmacistId, consultId, false);
-  if (!c || (c.status !== "accepted" && c.status !== "done")) return "err_tele_state";
+  if (!c || (c.status !== "accepted" && c.status !== "done"))
+    return "err_tele_state";
   if (finalize && (c.status !== "done" || input.advice.length === 0))
-    return c.status !== "done" ? "err_tele_end_first" : "err_tele_advice_required";
+    return c.status !== "done"
+      ? "err_tele_end_first"
+      : "err_tele_advice_required";
   const existing = await loadRecordFor(consultId, pharmacistId);
   if (existing?.finalized_at) return "err_tele_record_final";
   const now = new Date().toISOString();
@@ -684,7 +736,12 @@ export async function saveRecord(args: {
     ...(finalize ? { finalized_at: now } : {}),
   };
   const { data, error } = existing
-    ? await db().from("consult_records").update(fields).eq("id", existing.id).is("finalized_at", null).select("id")
+    ? await db()
+        .from("consult_records")
+        .update(fields)
+        .eq("id", existing.id)
+        .is("finalized_at", null)
+        .select("id")
     : await db()
         .from("consult_records")
         .insert({
@@ -695,7 +752,11 @@ export async function saveRecord(args: {
           license_no: c.pharmacist_license_no,
           service_at: c.accepted_at ?? c.created_at,
           // the history as it was shared, copied once: the record never reads the person's data again
-          patient_context: { intake: c.intake, shared: c.shared_sections, snapshot: c.snapshot },
+          patient_context: {
+            intake: c.intake,
+            shared: c.shared_sections,
+            snapshot: c.snapshot,
+          },
           ...fields,
         })
         .select("id");
@@ -703,7 +764,12 @@ export async function saveRecord(args: {
     console.error("[telepharmacy] saving the record failed:", error?.message);
     return "err_save_failed";
   }
-  await logAccess(consultId, pharmacistId, "pharmacist", finalize ? "finalize_record" : "save_record");
+  await logAccess(
+    consultId,
+    pharmacistId,
+    "pharmacist",
+    finalize ? "finalize_record" : "save_record",
+  );
   return null;
 }
 
@@ -717,11 +783,20 @@ async function patientOf(consultId: string): Promise<string | null> {
 }
 
 /** The link the pharmacist opens, only for the call they hold. */
-export async function pharmacistJoinUrl(userId: string, consultId: string, name: string): Promise<string | null> {
+export async function pharmacistJoinUrl(
+  userId: string,
+  consultId: string,
+  name: string,
+): Promise<string | null> {
   const c = await loadConsultForPharmacist(userId, consultId, false);
   if (!c || c.status !== "accepted") return null;
   await logAccess(consultId, userId, "pharmacist", "join_link");
-  return joinUrl({ provider: c.provider, room: c.room_name, role: "pharmacist", name });
+  return joinUrl({
+    provider: c.provider,
+    room: c.room_name,
+    role: "pharmacist",
+    name,
+  });
 }
 
 export interface HistoryRow {
@@ -734,7 +809,9 @@ export interface HistoryRow {
   recordFinal: boolean;
 }
 
-export async function loadPharmacistHistory(userId: string): Promise<HistoryRow[]> {
+export async function loadPharmacistHistory(
+  userId: string,
+): Promise<HistoryRow[]> {
   const { data } = await db()
     .from("consults")
     .select("id, status, mode, created_at, accepted_at, duration_sec")
@@ -747,7 +824,10 @@ export async function loadPharmacistHistory(userId: string): Promise<HistoryRow[
   const { data: recs } = await db()
     .from("consult_records")
     .select("consult_id")
-    .in("consult_id", rows.map((r) => r.id))
+    .in(
+      "consult_id",
+      rows.map((r) => r.id),
+    )
     .not("finalized_at", "is", null)
     .returns<{ consult_id: string }[]>();
   const final = new Set((recs ?? []).map((r) => r.consult_id));
@@ -756,7 +836,10 @@ export async function loadPharmacistHistory(userId: string): Promise<HistoryRow[
 
 // ── scheduled reminders (from the tick) ─────────────────────────────────────
 /** A reminder to each customer whose booked time is close; once per booking. */
-export async function sendConsultReminders(minutesBefore: number, now = new Date()): Promise<number> {
+export async function sendConsultReminders(
+  minutesBefore: number,
+  now = new Date(),
+): Promise<number> {
   const until = new Date(now.getTime() + minutesBefore * 60_000).toISOString();
   const { data } = await db()
     .from("consults")
@@ -767,13 +850,23 @@ export async function sendConsultReminders(minutesBefore: number, now = new Date
     .gt("scheduled_at", now.toISOString())
     .lte("scheduled_at", until)
     .limit(200)
-    .returns<{ id: string; patient_id: string | null; scheduled_at: string }[]>();
+    .returns<
+      { id: string; patient_id: string | null; scheduled_at: string }[]
+    >();
   let n = 0;
   for (const c of data ?? []) {
     if (!c.patient_id) continue;
     const { t, lang } = await dictFor(c.patient_id);
-    await notifyUser(c.patient_id, consultReminderNotice(t, lang, c.id, new Date(c.scheduled_at)));
-    const { data: upd } = await db().from("consults").update({ reminded_at: now.toISOString() }).eq("id", c.id).is("reminded_at", null).select("id");
+    await notifyUser(
+      c.patient_id,
+      consultReminderNotice(t, lang, c.id, new Date(c.scheduled_at)),
+    );
+    const { data: upd } = await db()
+      .from("consults")
+      .update({ reminded_at: now.toISOString() })
+      .eq("id", c.id)
+      .is("reminded_at", null)
+      .select("id");
     if (upd?.length === 1) n++;
   }
   return n;
@@ -795,7 +888,12 @@ export async function sendFollowUpNotices(now = new Date()): Promise<number> {
   for (const r of data ?? []) {
     const { t } = await dictFor(r.patient_id);
     await notifyUser(r.patient_id, followUpNotice(t, r.consult_id));
-    const { data: upd } = await db().from("consult_records").update({ follow_up_notified_at: now.toISOString() }).eq("id", r.id).is("follow_up_notified_at", null).select("id");
+    const { data: upd } = await db()
+      .from("consult_records")
+      .update({ follow_up_notified_at: now.toISOString() })
+      .eq("id", r.id)
+      .is("follow_up_notified_at", null)
+      .select("id");
     if (upd?.length === 1) n++;
   }
   return n;

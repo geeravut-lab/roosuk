@@ -287,7 +287,12 @@ export const OWNED_TABLES: readonly OwnedTable[] = [
   {
     table: "consults",
     column: "patient_id",
-    omit: ["pharmacist_id", "room_name", "access_key_hash", "consent_text_hash"],
+    omit: [
+      "pharmacist_id",
+      "room_name",
+      "access_key_hash",
+      "consent_text_hash",
+    ],
     onDelete: "retained",
     countable: true,
   },

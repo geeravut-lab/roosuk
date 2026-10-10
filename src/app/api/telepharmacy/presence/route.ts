@@ -14,19 +14,36 @@ const NO_STORE = { "Cache-Control": "private, no-store" };
  */
 export async function POST(req: NextRequest) {
   if (!(await featureEnabled("telepharmacy")))
-    return NextResponse.json({ ok: false, reason: "off" }, { status: 404, headers: NO_STORE });
+    return NextResponse.json(
+      { ok: false, reason: "off" },
+      { status: 404, headers: NO_STORE },
+    );
   const { data: auth } = await (await createClient()).auth.getUser();
   if (!auth.user)
-    return NextResponse.json({ ok: false, reason: "auth" }, { status: 401, headers: NO_STORE });
-  const body = (await req.json().catch(() => null)) as { online?: unknown } | null;
+    return NextResponse.json(
+      { ok: false, reason: "auth" },
+      { status: 401, headers: NO_STORE },
+    );
+  const body = (await req.json().catch(() => null)) as {
+    online?: unknown;
+  } | null;
   if (!body || typeof body.online !== "boolean")
-    return NextResponse.json({ ok: false, reason: "input" }, { status: 400, headers: NO_STORE });
-  const { data, error } = await createAdminClient().rpc("pharmacist_set_presence", {
-    p_user: auth.user.id,
-    p_online: body.online,
-  });
+    return NextResponse.json(
+      { ok: false, reason: "input" },
+      { status: 400, headers: NO_STORE },
+    );
+  const { data, error } = await createAdminClient().rpc(
+    "pharmacist_set_presence",
+    {
+      p_user: auth.user.id,
+      p_online: body.online,
+    },
+  );
   if (error)
-    return NextResponse.json({ ok: false, reason: "error" }, { status: 500, headers: NO_STORE });
+    return NextResponse.json(
+      { ok: false, reason: "error" },
+      { status: 500, headers: NO_STORE },
+    );
   return NextResponse.json(
     { ok: data === "ok", reason: data },
     { status: data === "not_pharmacist" ? 404 : 200, headers: NO_STORE },

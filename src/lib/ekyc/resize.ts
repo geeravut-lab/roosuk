@@ -42,7 +42,8 @@ function encode(
         // give the memory back right away
         canvas.width = 0;
         canvas.height = 0;
-        blob ? resolve(blob) : reject(new Error("encode failed"));
+        if (blob) resolve(blob);
+        else reject(new Error("encode failed"));
       },
       "image/jpeg",
       quality,

@@ -418,10 +418,15 @@ async function consultSweep(c: TickCtx): Promise<number> {
 
 async function consultReminders(c: TickCtx): Promise<number> {
   if (!(await featureEnabled("telepharmacy"))) return 0;
-  const { sendConsultReminders, sendFollowUpNotices } = await import(
-    "@/lib/telepharmacy/server"
+  const { sendConsultReminders, sendFollowUpNotices } =
+    await import("@/lib/telepharmacy/server");
+  const minutes = ruleNumber(
+    c.rules,
+    "consult_reminders",
+    "minutes_before",
+    60,
+    1440,
   );
-  const minutes = ruleNumber(c.rules, "consult_reminders", "minutes_before", 60, 1440);
   return (
     (await sendConsultReminders(minutes, c.now)) +
     (await sendFollowUpNotices(c.now))

@@ -60,8 +60,7 @@ export function accessKeyMatches(
 }
 
 // ── JaaS (8x8 Jitsi as a Service) ───────────────────────────────────────────
-const b64u = (v: Buffer | string) =>
-  Buffer.from(v).toString("base64url");
+const b64u = (v: Buffer | string) => Buffer.from(v).toString("base64url");
 
 /** An RS256 JWT for JaaS: only the pharmacist is a moderator; no recording or streaming. */
 export function signJaasJwt(args: {
@@ -75,7 +74,11 @@ export function signJaasJwt(args: {
   ttlMinutes?: number;
 }): string {
   const nowS = Math.floor((args.now ?? new Date()).getTime() / 1000);
-  const header = { alg: "RS256", typ: "JWT", kid: `${args.appId}/${args.keyId}` };
+  const header = {
+    alg: "RS256",
+    typ: "JWT",
+    kid: `${args.appId}/${args.keyId}`,
+  };
   const payload = {
     aud: "jitsi",
     iss: "chat",

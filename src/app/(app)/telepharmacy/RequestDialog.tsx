@@ -3,7 +3,10 @@
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { CalendarClock, Video, X } from "lucide-react";
-import { requestConsultAction, type RequestState } from "@/app/actions/telepharmacy";
+import {
+  requestConsultAction,
+  type RequestState,
+} from "@/app/actions/telepharmacy";
 import { Spinner } from "@/components/Spinner";
 import { TOPICS } from "@/lib/telepharmacy/telepharmacy";
 import { errorText, fmt } from "@/lib/i18n/dict";
@@ -53,7 +56,19 @@ export function RequestDialog({
   const dialog = useRef<HTMLDialogElement>(null);
   const [mode, setMode] = useState<Mode | null>(null);
   const [state, onSubmit, pending] = useFormAction(
-    requestConsultAction,
+    async (prev: RequestState, data: FormData) => {
+      const r = await requestConsultAction(prev, data);
+      if (r.started) {
+        try {
+          sessionStorage.setItem(keyStore(r.started.id), r.started.key);
+        } catch {
+          /* private mode: the page offers to renew the key */
+        }
+        setMode(null);
+        router.refresh();
+      }
+      return r;
+    },
     initial,
   );
 
@@ -63,17 +78,6 @@ export function RequestDialog({
     if (mode && !d.open) d.showModal();
     if (!mode && d.open) d.close();
   }, [mode]);
-
-  useEffect(() => {
-    if (!state.started) return;
-    try {
-      sessionStorage.setItem(keyStore(state.started.id), state.started.key);
-    } catch {
-      /* private mode: the page offers to renew the key */
-    }
-    setMode(null);
-    router.refresh();
-  }, [state.started, router]);
 
   const hasSlots = slotGroups.some((g) => g.slots.some((s) => !s.full));
 
@@ -85,7 +89,9 @@ export function RequestDialog({
             <Video className="text-primary-strong size-5" aria-hidden />
             {t.teleTalkNow}
           </h2>
-          <p className="text-muted text-sm">{instantNote ?? t.teleTalkNowHint}</p>
+          <p className="text-muted text-sm">
+            {instantNote ?? t.teleTalkNowHint}
+          </p>
           <button
             type="button"
             disabled={!canInstant}
@@ -149,7 +155,13 @@ export function RequestDialog({
                 <label htmlFor="tele-slot" className="label">
                   {t.teleSlotLabel}
                 </label>
-                <select id="tele-slot" name="slot" required defaultValue="" className="field">
+                <select
+                  id="tele-slot"
+                  name="slot"
+                  required
+                  defaultValue=""
+                  className="field"
+                >
                   <option value="" disabled>
                     —
                   </option>
@@ -188,30 +200,44 @@ export function RequestDialog({
               <label htmlFor="tele-meds" className="label">
                 {t.teleMedicines}
               </label>
-              <input id="tele-meds" name="medicines" maxLength={300} autoComplete="off" className="field" />
+              <input
+                id="tele-meds"
+                name="medicines"
+                maxLength={300}
+                autoComplete="off"
+                className="field"
+              />
             </div>
             <div>
               <label htmlFor="tele-allergy" className="label">
                 {t.teleAllergies}
               </label>
-              <input id="tele-allergy" name="allergies" maxLength={300} autoComplete="off" className="field" />
+              <input
+                id="tele-allergy"
+                name="allergies"
+                maxLength={300}
+                autoComplete="off"
+                className="field"
+              />
               <p className="text-muted mt-1 text-xs">{t.teleIntakeHint}</p>
             </div>
 
             <fieldset className="space-y-1">
               <legend className="label">{t.teleShareTitle}</legend>
-              {(["share_profile", "share_labs", "share_history"] as const).map((k) => (
-                <label key={k} className="flex min-h-11 items-start gap-3">
-                  <input type="checkbox" name={k} className="mt-1 size-5" />
-                  <span className="text-sm">
-                    {k === "share_profile"
-                      ? t.teleShareProfile
-                      : k === "share_labs"
-                        ? t.teleShareLabs
-                        : t.teleShareHistory}
-                  </span>
-                </label>
-              ))}
+              {(["share_profile", "share_labs", "share_history"] as const).map(
+                (k) => (
+                  <label key={k} className="flex min-h-11 items-start gap-3">
+                    <input type="checkbox" name={k} className="mt-1 size-5" />
+                    <span className="text-sm">
+                      {k === "share_profile"
+                        ? t.teleShareProfile
+                        : k === "share_labs"
+                          ? t.teleShareLabs
+                          : t.teleShareHistory}
+                    </span>
+                  </label>
+                ),
+              )}
               <p className="text-muted text-xs">{t.teleShareNote}</p>
             </fieldset>
 
@@ -231,21 +257,39 @@ export function RequestDialog({
                 {consentText}
               </div>
               <label className="flex min-h-11 items-start gap-3">
-                <input type="checkbox" name="consent_consult" required className="mt-1 size-5" />
+                <input
+                  type="checkbox"
+                  name="consent_consult"
+                  required
+                  className="mt-1 size-5"
+                />
                 <span className="text-sm">{t.teleConsentConsult}</span>
               </label>
               <label className="flex min-h-11 items-start gap-3">
-                <input type="checkbox" name="consent_record" required className="mt-1 size-5" />
+                <input
+                  type="checkbox"
+                  name="consent_record"
+                  required
+                  className="mt-1 size-5"
+                />
                 <span className="text-sm">{t.teleConsentRecord}</span>
               </label>
             </section>
 
             {state.error ? (
-              <p role="alert" className="bg-tint-warn rounded-xl px-3 py-2 text-sm font-medium">
+              <p
+                role="alert"
+                className="bg-tint-warn rounded-xl px-3 py-2 text-sm font-medium"
+              >
                 {errorText(state.error, t)}
               </p>
             ) : null}
-            <button type="submit" disabled={pending} aria-busy={pending || undefined} className="btn btn-primary w-full">
+            <button
+              type="submit"
+              disabled={pending}
+              aria-busy={pending || undefined}
+              className="btn btn-primary w-full"
+            >
               {pending ? <Spinner /> : null}
               {pending
                 ? t.teleSending

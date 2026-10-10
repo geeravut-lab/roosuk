@@ -228,7 +228,6 @@ export function EkycFlow({
           />
           {cameraOn ? (
             <div className="space-y-2">
-              {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
               <video
                 ref={video}
                 playsInline

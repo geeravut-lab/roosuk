@@ -58,11 +58,14 @@ export async function addPharmacistAction(formData: FormData): Promise<void> {
     .replace(/\s+/g, " ")
     .trim()
     .slice(0, 80);
-  const { data, error } = await createAdminClient().rpc("admin_add_pharmacist", {
-    p_actor: admin.id,
-    p_email: email,
-    p_name: name,
-  });
+  const { data, error } = await createAdminClient().rpc(
+    "admin_add_pharmacist",
+    {
+      p_actor: admin.id,
+      p_email: email,
+      p_name: name,
+    },
+  );
   if (error) back("error=err_save_failed");
   if (data === "not_found") back("error=err_admin_not_found");
   if (data === "already") back("error=err_tele_pharmacist_already");
@@ -71,15 +74,20 @@ export async function addPharmacistAction(formData: FormData): Promise<void> {
   back("done=added");
 }
 
-export async function removePharmacistAction(formData: FormData): Promise<void> {
+export async function removePharmacistAction(
+  formData: FormData,
+): Promise<void> {
   await assertFeature("telepharmacy");
   const admin = await requireAdmin();
   const id = String(formData.get("id") ?? "");
   if (!UUID.test(id)) throw new AppError("err_invalid_input");
-  const { data, error } = await createAdminClient().rpc("admin_remove_pharmacist", {
-    p_actor: admin.id,
-    p_user: id,
-  });
+  const { data, error } = await createAdminClient().rpc(
+    "admin_remove_pharmacist",
+    {
+      p_actor: admin.id,
+      p_user: id,
+    },
+  );
   if (error) back("error=err_save_failed");
   if (data === "busy") back("error=err_tele_busy");
   if (data !== "ok") back("error=err_forbidden");
@@ -94,11 +102,14 @@ export async function setLicenseAction(formData: FormData): Promise<void> {
   const id = String(formData.get("id") ?? "");
   if (!UUID.test(id)) throw new AppError("err_invalid_input");
   const verified = formData.get("verified") === "1";
-  const { data, error } = await createAdminClient().rpc("admin_set_license_verified", {
-    p_actor: admin.id,
-    p_user: id,
-    p_verified: verified,
-  });
+  const { data, error } = await createAdminClient().rpc(
+    "admin_set_license_verified",
+    {
+      p_actor: admin.id,
+      p_user: id,
+      p_verified: verified,
+    },
+  );
   if (error) back("error=err_save_failed");
   if (data === "no_license") back("error=err_tele_no_license");
   if (data !== "ok") back("error=err_forbidden");
@@ -114,10 +125,14 @@ export async function purgeConsultsAction(formData: FormData): Promise<void> {
   await assertFeature("telepharmacy");
   const admin = await requireAdmin();
   if (!isDeletePhrase(formData.get("confirm"))) back("error=err_tele_confirm");
-  const { data, error } = await createAdminClient().rpc("admin_purge_consults", {
-    p_actor: admin.id,
-  });
-  if (error || typeof data !== "number" || data < 0) back("error=err_save_failed");
+  const { data, error } = await createAdminClient().rpc(
+    "admin_purge_consults",
+    {
+      p_actor: admin.id,
+    },
+  );
+  if (error || typeof data !== "number" || data < 0)
+    back("error=err_save_failed");
   revalidatePath("/admin/telepharmacy");
   back(`done=purged&n=${data}`);
 }

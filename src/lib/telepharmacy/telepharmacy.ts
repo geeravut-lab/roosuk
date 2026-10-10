@@ -23,12 +23,7 @@ export const isTopic = (v: unknown): v is Topic =>
   typeof v === "string" && (TOPICS as readonly string[]).includes(v);
 
 export type ConsultStatus =
-  | "waiting"
-  | "booked"
-  | "accepted"
-  | "done"
-  | "missed"
-  | "cancelled";
+  "waiting" | "booked" | "accepted" | "done" | "missed" | "cancelled";
 
 /** Statuses that still need somebody to do something. */
 export const LIVE_STATUSES: readonly ConsultStatus[] = [
@@ -134,7 +129,8 @@ export function parseTeleSettings(
     videoProvider: isVideoProvider(row.video_provider)
       ? row.video_provider
       : d.videoProvider,
-    consentVersion: txt(row.consent_version, d.consentVersion) || d.consentVersion,
+    consentVersion:
+      txt(row.consent_version, d.consentVersion) || d.consentVersion,
     consentTextTh: txt(row.consent_text_th, ""),
     consentTextEn: txt(row.consent_text_en, ""),
     disclaimerTh: txt(row.disclaimer_th, ""),
@@ -205,7 +201,8 @@ export function parseTeleForm(
   | { ok: true; columns: Record<string, unknown> }
   | { ok: false; field: TeleField } {
   const on = (k: string) => get(k) === "on";
-  const s = (k: string) => (typeof get(k) === "string" ? (get(k) as string) : "");
+  const s = (k: string) =>
+    typeof get(k) === "string" ? (get(k) as string) : "";
   const columns: Record<string, unknown> = {
     enabled: on("enabled"),
     instant_enabled: on("instantEnabled"),
@@ -333,11 +330,7 @@ export function generateSlots(
 }
 
 /** True when `at` is exactly one of the bookable instants (used to refuse a made-up time before the database does). */
-export function isOfferedSlot(
-  s: TeleSettings,
-  now: Date,
-  at: string,
-): boolean {
+export function isOfferedSlot(s: TeleSettings, now: Date, at: string): boolean {
   const t = Date.parse(at);
   if (Number.isNaN(t)) return false;
   return generateSlots(s, now).some((x) => Date.parse(x.at) === t);
@@ -381,10 +374,12 @@ export function parseRequestForm(
     return { ok: false, error: "err_tele_consent" };
   const topic = get("topic");
   if (!isTopic(topic)) return { ok: false, error: "err_invalid_input" };
-  const product = typeof get("productId") === "string" ? (get("productId") as string) : "";
+  const product =
+    typeof get("productId") === "string" ? (get("productId") as string) : "";
   if (product && !UUID.test(product))
     return { ok: false, error: "err_invalid_input" };
-  const slotRaw = typeof get("slot") === "string" ? (get("slot") as string) : "";
+  const slotRaw =
+    typeof get("slot") === "string" ? (get("slot") as string) : "";
   return {
     ok: true,
     value: {
@@ -430,28 +425,32 @@ export function parseRecordForm(
 ):
   | { ok: true; value: RecordInput }
   | { ok: false; field: "advice" | "products" | "followUpOn" } {
-  const advice = (typeof get("advice") === "string" ? (get("advice") as string) : "")
+  const advice = (
+    typeof get("advice") === "string" ? (get("advice") as string) : ""
+  )
     .replace(/\r\n?/g, "\n")
     .trim();
   if (advice.length > 4000) return { ok: false, field: "advice" };
   const products: SuggestedProduct[] = [];
   for (let i = 0; i < MAX_SUGGESTED; i++) {
     const name = oneLine(get(`product_name_${i}`), 120);
-    const pid = typeof get(`product_id_${i}`) === "string" ? (get(`product_id_${i}`) as string) : "";
+    const pid =
+      typeof get(`product_id_${i}`) === "string"
+        ? (get(`product_id_${i}`) as string)
+        : "";
     const note = oneLine(get(`product_note_${i}`), 200);
     if (!name && !pid) continue;
     if (pid && !UUID.test(pid)) return { ok: false, field: "products" };
     if (!name) return { ok: false, field: "products" };
     products.push({ product_id: pid || null, name, note });
   }
-  const f = typeof get("followUpOn") === "string" ? (get("followUpOn") as string).trim() : "";
+  const f =
+    typeof get("followUpOn") === "string"
+      ? (get("followUpOn") as string).trim()
+      : "";
   let followUpOn: string | null = null;
   if (f) {
-    if (
-      !/^\d{4}-\d{2}-\d{2}$/.test(f) ||
-      f <= today ||
-      f > addDays(today, 365)
-    )
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(f) || f <= today || f > addDays(today, 365))
       return { ok: false, field: "followUpOn" };
     followUpOn = f;
   }

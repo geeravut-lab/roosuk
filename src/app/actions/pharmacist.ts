@@ -66,8 +66,12 @@ export async function saveRecordAction(
   const id = String(formData.get("id") ?? "");
   if (!UUID.test(id)) return { error: "err_invalid_input" };
   const finalize = formData.get("intent") === "final";
-  const parsed = parseRecordForm((k) => formData.get(k), bangkokDate(new Date()));
-  if (!parsed.ok) return { error: "err_tele_record_field", field: parsed.field };
+  const parsed = parseRecordForm(
+    (k) => formData.get(k),
+    bangkokDate(new Date()),
+  );
+  if (!parsed.ok)
+    return { error: "err_tele_record_field", field: parsed.field };
   const error = await saveRecord({
     pharmacistId: user.id,
     consultId: id,
@@ -80,7 +84,9 @@ export async function saveRecordAction(
 }
 
 /** The follow-up outcome the pharmacist notes after the person answers — the only part of a final record that can still change. */
-export async function saveFollowUpOutcomeAction(formData: FormData): Promise<void> {
+export async function saveFollowUpOutcomeAction(
+  formData: FormData,
+): Promise<void> {
   const { user } = await pharmacistOnly();
   const id = String(formData.get("id") ?? "");
   if (!UUID.test(id)) throw new AppError("err_invalid_input");
@@ -116,9 +122,14 @@ export async function savePharmacistProfileAction(
   formData: FormData,
 ): Promise<ProfileState> {
   const { user } = await pharmacistOnly();
-  const name = String(formData.get("displayName") ?? "").replace(/\s+/g, " ").trim();
-  const license = String(formData.get("licenseNo") ?? "").replace(/\s+/g, " ").trim();
-  if (name.length < 1 || name.length > 80) return { error: "err_invalid_input" };
+  const name = String(formData.get("displayName") ?? "")
+    .replace(/\s+/g, " ")
+    .trim();
+  const license = String(formData.get("licenseNo") ?? "")
+    .replace(/\s+/g, " ")
+    .trim();
+  if (name.length < 1 || name.length > 80)
+    return { error: "err_invalid_input" };
   if (license && (license.length < 3 || license.length > 40))
     return { error: "err_invalid_input" };
   const { data, error } = await createAdminClient()
