@@ -31,6 +31,7 @@ describe("parseBillingSettings", () => {
       fairUseCapTrial: 50,
       fairUseCapPremium: 0,
       planOverrides: { free: { aiChat: 8 }, gold: { aiChat: "unlimited" } },
+      planSpecs: {},
     });
   });
 

@@ -280,3 +280,28 @@ describe("access control on usage data", () => {
     ).toHaveLength(0);
   });
 });
+
+describe("plan_specs (admin-edited plan details)", () => {
+  it("is an empty object by default, must stay an object, and users cannot write it", async () => {
+    await actAsOwner(db);
+    const row = (
+      await db.query<{ plan_specs: unknown }>(
+        "select plan_specs from public.platform_settings",
+      )
+    ).rows[0];
+    expect(row.plan_specs).toEqual({});
+    expect(
+      await isRejected(
+        db,
+        "update public.platform_settings set plan_specs = '[]'::jsonb",
+      ),
+    ).toBe(true);
+    await actAs(db, alice);
+    expect(
+      await isRejected(
+        db,
+        `update public.platform_settings set plan_specs = '{"gold":{"vaultMaxFiles":99}}'::jsonb`,
+      ),
+    ).toBe(true);
+  });
+});

@@ -2,7 +2,7 @@
 
 import QRCode from "qrcode";
 import { revalidatePath } from "next/cache";
-import { PLANS } from "@/config/plans";
+import { planSpec } from "@/lib/billing/specs.server";
 import { runAi } from "@/lib/ai/server";
 import { AiError } from "@/lib/ai/types";
 import { trackEvent } from "@/lib/analytics/server";
@@ -49,7 +49,7 @@ export async function createPassportAction(
   try {
     await assertFeature("health_passport");
     const user = await requireUser();
-    if (!PLANS[await tierFor(user.id)].healthPassport)
+    if (!(await planSpec(await tierFor(user.id))).healthPassport)
       return { error: "err_passport_plan" };
 
     const parsed = parsePassportForm(formData);

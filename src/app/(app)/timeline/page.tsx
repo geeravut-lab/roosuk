@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { TrendChart } from "@/components/charts/TrendChart";
 import { biomarkerByKey } from "@/config/biomarkers";
-import { PLANS } from "@/config/plans";
+import { planSpec } from "@/lib/billing/specs.server";
 import { requireUser } from "@/lib/auth/server";
 import { featureEnabled } from "@/lib/flags/server";
 import { dailySeries } from "@/lib/wearables/series";
@@ -128,7 +128,7 @@ export default async function TimelinePage({
   ]);
 
   const tier = billing ? resolvePlan(billing, now).tier : "free";
-  const months = PLANS[tier].timelineHistoryMonths;
+  const months = (await planSpec(tier)).timelineHistoryMonths;
   // Months → days (30 per month) is close enough for a visibility window.
   const planDays = months === "unlimited" ? null : 30 * months;
   const planCutoff = planDays === null ? null : addDays(today, -planDays);
@@ -155,7 +155,8 @@ export default async function TimelinePage({
   // Device data (steps, resting heart rate, sleep) next to the check-ins, when the plan stores it and there is some.
   const wearTypes = ["steps", "resting_heart_rate", "sleep_minutes"] as const;
   const wearSeries =
-    PLANS[tier].wearables !== "none" && (await featureEnabled("wearables"))
+    (await planSpec(tier)).wearables !== "none" &&
+    (await featureEnabled("wearables"))
       ? dailySeries(await loadObservations(shownFrom, wearTypes))
       : {};
   const wearShown = wearTypes.filter((k) => wearSeries[k]?.length);

@@ -3,7 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { FileText, Image as ImageIcon } from "lucide-react";
 import { deleteVaultFileAction } from "@/app/actions/vault";
-import { PLANS } from "@/config/plans";
+import { planSpec } from "@/lib/billing/specs.server";
 import { requireUser } from "@/lib/auth/server";
 import { resolvePlan } from "@/lib/billing/plan";
 import { getBillingProfile } from "@/lib/billing/profile.server";
@@ -52,7 +52,7 @@ export default async function VaultPage() {
   const docs = files.filter((f) => f.kind === "doc");
   const scans = files.filter((f) => f.kind !== "doc");
   const tier = billing ? resolvePlan(billing, new Date()).tier : "free";
-  const max = PLANS[tier].vaultMaxFiles;
+  const max = (await planSpec(tier)).vaultMaxFiles;
   const full = vaultFull(docs.length, max);
 
   // Where each scan file belongs, so the person can jump to the result.

@@ -11,7 +11,7 @@ import {
 } from "@/app/actions/family";
 import { CopyButton } from "@/components/CopyButton";
 import { SubmitButton } from "@/components/SubmitButton";
-import { PLANS } from "@/config/plans";
+import { planSpec } from "@/lib/billing/specs.server";
 import { requireUser } from "@/lib/auth/server";
 import { tierFor } from "@/lib/billing/entitlement.server";
 import { FAMILY_SCOPES, cleanInviteCode } from "@/lib/family/family";
@@ -44,7 +44,8 @@ export default async function FamilyPage({
     getOrigin(),
   ]);
   const shared = await loadSharedWithMe(state);
-  const canInvite = PLANS[tier].familyMembers >= 1 && state.role !== "member";
+  const canInvite =
+    (await planSpec(tier)).familyMembers >= 1 && state.role !== "member";
   const other = state.other;
   const who = other?.name ?? other?.email ?? t.familyPerson;
 

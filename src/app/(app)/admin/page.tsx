@@ -13,6 +13,7 @@ import {
   Building2,
   Megaphone,
   Stethoscope,
+  Tags,
   Timer,
   ToggleLeft,
 } from "lucide-react";
@@ -113,6 +114,13 @@ export default async function AdminHome({ searchParams }: PageProps<"/admin">) {
       >
         <Gift className="text-primary-strong size-6" aria-hidden />
         <span className="font-semibold">{t.adminRewardsTitle}</span>
+      </Link>
+      <Link
+        href="/admin/plans"
+        className="card hover:bg-tint-primary flex items-center gap-3"
+      >
+        <Tags className="text-primary-strong size-6" aria-hidden />
+        <span className="font-semibold">{t.adminPlansTitle}</span>
       </Link>
       <Link
         href="/admin/paywall"

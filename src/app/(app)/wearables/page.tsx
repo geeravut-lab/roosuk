@@ -10,7 +10,7 @@ import {
 } from "@/app/actions/wearables";
 import { TrendChart } from "@/components/charts/TrendChart";
 import { SubmitButton } from "@/components/SubmitButton";
-import { PLANS } from "@/config/plans";
+import { planSpec } from "@/lib/billing/specs.server";
 import { requireUser } from "@/lib/auth/server";
 import { tierFor } from "@/lib/billing/entitlement.server";
 import { featureEnabled } from "@/lib/flags/server";
@@ -76,7 +76,7 @@ export default async function WearablesPage({
       >(),
     loadObservations(from),
   ]);
-  const tier = PLANS[tierId].wearables;
+  const tier = (await planSpec(tierId)).wearables;
   const on = new Map(
     (sources.data ?? []).filter((s) => !s.revoked_at).map((s) => [s.source, s]),
   );

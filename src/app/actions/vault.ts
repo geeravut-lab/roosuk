@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { PLANS } from "@/config/plans";
+import { planSpec } from "@/lib/billing/specs.server";
 import { trackEvent } from "@/lib/analytics/server";
 import { requireUser } from "@/lib/auth/server";
 import { resolvePlan } from "@/lib/billing/plan";
@@ -62,7 +62,12 @@ export async function uploadVaultAction(
 
     const billing = await getBillingProfile(user.id);
     const tier = billing ? resolvePlan(billing, new Date()).tier : "free";
-    if (vaultFull(await countVaultDocs(user.id), PLANS[tier].vaultMaxFiles))
+    if (
+      vaultFull(
+        await countVaultDocs(user.id),
+        (await planSpec(tier)).vaultMaxFiles,
+      )
+    )
       return { error: "err_vault_full" };
 
     const id = await storeSourceFile({

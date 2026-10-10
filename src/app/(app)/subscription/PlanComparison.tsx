@@ -2,13 +2,13 @@ import { Check, Minus } from "lucide-react";
 import {
   METERED_FEATURES,
   PLAN_IDS,
-  PLANS,
   quotaFor,
   type PlanId,
   type QuotaOverrides,
 } from "@/config/plans";
 import { startPaymentAction } from "@/app/actions/payments";
 import { quotaText } from "@/lib/billing/format";
+import { resolvePlanSpec } from "@/lib/billing/specs";
 import type { BillingSettings } from "@/lib/billing/settings";
 import { fmt, type Dict } from "@/lib/i18n/dict";
 import { SubmitButton } from "@/components/SubmitButton";
@@ -85,7 +85,7 @@ export function PlanComparison({
   return (
     <ul className="space-y-4">
       {PLAN_IDS.map((id) => {
-        const plan = PLANS[id];
+        const plan = resolvePlanSpec(id, billing);
         const isCurrent = id === current;
         return (
           <li

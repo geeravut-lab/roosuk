@@ -1,7 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { PLANS } from "@/config/plans";
+import { planSpec } from "@/lib/billing/specs.server";
 import { requireUser } from "@/lib/auth/server";
 import { tierFor } from "@/lib/billing/entitlement.server";
 import { AppError } from "@/lib/errors";
@@ -29,7 +29,7 @@ const toErrorKey = (e: unknown): ErrorKey =>
 async function gate(): Promise<{ userId: string; tier: WearableTier }> {
   await assertFeature("wearables");
   const user = await requireUser();
-  const tier = PLANS[await tierFor(user.id)].wearables;
+  const tier = (await planSpec(await tierFor(user.id))).wearables;
   if (tier === "none") throw new AppError("err_wearable_plan");
   return { userId: user.id, tier };
 }

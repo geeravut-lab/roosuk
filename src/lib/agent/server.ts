@@ -1,5 +1,5 @@
 import "server-only";
-import { PLANS } from "@/config/plans";
+import { planSpec } from "@/lib/billing/specs.server";
 import { runAi } from "@/lib/ai/server";
 import { loadChatContext } from "@/lib/ask/server";
 import { tierFor } from "@/lib/billing/entitlement.server";
@@ -83,7 +83,7 @@ async function monthly(c: Ctx, args: unknown): Promise<string> {
 }
 
 async function devices(c: Ctx, args: unknown): Promise<string> {
-  if (PLANS[await tierFor(c.userId)].wearables === "none")
+  if ((await planSpec(await tierFor(c.userId))).wearables === "none")
     return "The person's plan does not store device data.";
   const days = parseDays(args, 14);
   const series = dailySeries(
@@ -177,5 +177,5 @@ export async function runAgent(
 
 /** Whether this person's plan includes the agent. */
 export async function agentAllowed(userId: string): Promise<boolean> {
-  return PLANS[await tierFor(userId)].healthAgent;
+  return (await planSpec(await tierFor(userId))).healthAgent;
 }

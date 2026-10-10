@@ -1,5 +1,4 @@
 import "server-only";
-import { PLANS } from "@/config/plans";
 import { getConfiguredSiteUrl } from "@/lib/env";
 import { dict, isLang, type Lang } from "@/lib/i18n/dict";
 import { addDays, bangkokDate } from "@/lib/health/dates";
@@ -460,7 +459,7 @@ async function expiryNotices(
             t,
             lang,
             t[`planName_${p.plan_tier as "gold" | "premium"}` as const] ??
-              PLANS[p.plan_tier as "gold"].id,
+              p.plan_tier,
             daysLeft as number,
             endsAt,
           );

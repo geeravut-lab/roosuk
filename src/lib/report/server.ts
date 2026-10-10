@@ -1,5 +1,5 @@
 import "server-only";
-import { PLANS } from "@/config/plans";
+import { planSpec } from "@/lib/billing/specs.server";
 import { resolvePlan } from "@/lib/billing/plan";
 import { getBillingProfile } from "@/lib/billing/profile.server";
 import { addDays, bangkokDate } from "@/lib/health/dates";
@@ -26,7 +26,7 @@ export async function allowedMonths(
 ): Promise<string[]> {
   const billing = await getBillingProfile(userId);
   const tier = billing ? resolvePlan(billing, now).tier : "free";
-  const months = PLANS[tier].timelineHistoryMonths;
+  const months = (await planSpec(tier)).timelineHistoryMonths;
   const today = bangkokDate(now);
   const cutoff = months === "unlimited" ? null : addDays(today, -30 * months);
   return recentMonths(today, 12).filter(

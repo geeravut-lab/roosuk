@@ -4,6 +4,7 @@ import { requireUser } from "@/lib/auth/server";
 import { getT } from "@/lib/i18n/server";
 import { createClient } from "@/lib/supabase/server";
 import { AskForm } from "./AskForm";
+import { ScrollToLatest } from "@/components/ScrollToLatest";
 import { SubmitButton } from "@/components/SubmitButton";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -52,7 +53,7 @@ export default async function AskPage() {
         <p className="card">{t.askEmpty}</p>
       ) : (
         <ol className="space-y-3" aria-label={t.askTitle}>
-          {(messages ?? []).map((m) => {
+          {(messages ?? []).map((m, i, all) => {
             const emergency =
               m.flag === "emergency" ||
               m.flag === "medical_emergency" ||
@@ -60,6 +61,7 @@ export default async function AskPage() {
             return (
               <li
                 key={m.id}
+                data-chat-last={i === all.length - 1 ? "" : undefined}
                 className={`card space-y-2 ${
                   m.role === "user"
                     ? "bg-tint-primary ml-6"
@@ -93,6 +95,7 @@ export default async function AskPage() {
         </ol>
       )}
 
+      <ScrollToLatest count={(messages ?? []).length} />
       <AskForm />
 
       <div className="flex items-center justify-between gap-3">

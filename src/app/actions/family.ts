@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { PLANS } from "@/config/plans";
+import { planSpec } from "@/lib/billing/specs.server";
 import { requireUser } from "@/lib/auth/server";
 import { tierFor } from "@/lib/billing/entitlement.server";
 import { AppError } from "@/lib/errors";
@@ -23,7 +23,7 @@ const back = (code?: string, extra = "") =>
 export async function createFamilyInviteAction(): Promise<void> {
   await assertFeature("family");
   const user = await requireUser();
-  const seats = PLANS[await tierFor(user.id)].familyMembers;
+  const seats = (await planSpec(await tierFor(user.id))).familyMembers;
   const { data, error } = await createAdminClient().rpc(
     "create_family_invite",
     {

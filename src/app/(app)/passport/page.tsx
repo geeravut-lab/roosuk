@@ -7,7 +7,7 @@ import {
   revokePassportAction,
 } from "@/app/actions/passport";
 import { SubmitButton } from "@/components/SubmitButton";
-import { PLANS } from "@/config/plans";
+import { planSpec } from "@/lib/billing/specs.server";
 import { requireUser } from "@/lib/auth/server";
 import { tierFor } from "@/lib/billing/entitlement.server";
 import { featureEnabled } from "@/lib/flags/server";
@@ -54,7 +54,7 @@ export default async function PassportPage({
       .returns<Row[]>(),
     featureEnabled("wearables"),
   ]);
-  const allowed = PLANS[tier].healthPassport;
+  const allowed = (await planSpec(tier)).healthPassport;
   const now = new Date();
   const rows = data ?? [];
 

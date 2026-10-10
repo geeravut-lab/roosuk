@@ -6,6 +6,7 @@ import {
   type Pricing,
   type QuotaOverrides,
 } from "@/config/plans";
+import { parsePlanSpecs, type PlanSpecOverrides } from "./specs";
 
 export interface BillingSettings {
   trialDays: number;
@@ -14,6 +15,8 @@ export interface BillingSettings {
   fairUseCapTrial: number;
   fairUseCapPremium: number;
   planOverrides: QuotaOverrides;
+  /** Admin changes to a plan's history window, vault size, passport, agent, wearables, family seats. */
+  planSpecs: PlanSpecOverrides;
 }
 
 export const DEFAULT_BILLING_SETTINGS: BillingSettings = {
@@ -22,6 +25,7 @@ export const DEFAULT_BILLING_SETTINGS: BillingSettings = {
   fairUseCapTrial: 200,
   fairUseCapPremium: 600,
   planOverrides: {},
+  planSpecs: {},
 };
 
 // Each field falls back to its default on null / missing / out-of-range, so a
@@ -67,5 +71,6 @@ export function parseBillingSettings(
     fairUseCapTrial: int(d.fairUseCapTrial).parse(r.fair_use_cap_trial),
     fairUseCapPremium: int(d.fairUseCapPremium).parse(r.fair_use_cap_premium),
     planOverrides: overrides.parse(r.plan_overrides ?? {}) as QuotaOverrides,
+    planSpecs: parsePlanSpecs(r.plan_specs),
   };
 }

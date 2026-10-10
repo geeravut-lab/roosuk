@@ -1,5 +1,4 @@
 import {
-  PLANS,
   quotaFor,
   type MeteredFeature,
   type PlanId,
@@ -185,11 +184,4 @@ export function summarizeUsage(
           : Math.min(100, Math.round((used / quota.limit) * 100)),
     };
   });
-}
-
-export function planHasFeature(
-  tier: PlanId,
-  flag: "healthPassport" | "healthAgent",
-): boolean {
-  return PLANS[tier][flag];
 }

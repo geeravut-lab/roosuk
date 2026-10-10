@@ -16,6 +16,7 @@ import { formatDate } from "@/lib/i18n/format";
 import { getLang, getT } from "@/lib/i18n/server";
 import { createClient } from "@/lib/supabase/server";
 import { AgentForm } from "./AgentForm";
+import { ScrollToLatest } from "@/components/ScrollToLatest";
 
 export async function generateMetadata(): Promise<Metadata> {
   return { title: (await getT()).agentTitle };
@@ -100,7 +101,8 @@ export default async function AgentPage() {
             <p className="card">{t.agentEmpty}</p>
           ) : (
             <ol className="space-y-3" aria-label={t.agentTitle}>
-              {(messages ?? []).map((m) => {
+              {(messages ?? []).map((m, i, all) => {
+                const last = i === all.length - 1;
                 if (m.flag === "tool") {
                   const [tool, ...rest] = m.content.split(": ");
                   const label = t[`agentAction_${tool}` as keyof Dict] as
@@ -108,6 +110,7 @@ export default async function AgentPage() {
                   return (
                     <li
                       key={m.id}
+                      data-chat-last={last ? "" : undefined}
                       className="text-muted flex items-start gap-2 px-2 text-sm"
                     >
                       <Wrench className="mt-0.5 size-4 shrink-0" aria-hidden />
@@ -125,6 +128,7 @@ export default async function AgentPage() {
                 return (
                   <li
                     key={m.id}
+                    data-chat-last={last ? "" : undefined}
                     className={`card space-y-2 ${
                       m.role === "user"
                         ? "bg-tint-primary ml-6"
@@ -158,6 +162,7 @@ export default async function AgentPage() {
             </ol>
           )}
 
+          <ScrollToLatest count={(messages ?? []).length} />
           <AgentForm />
 
           <section className="card space-y-2" aria-labelledby="agent-rem">

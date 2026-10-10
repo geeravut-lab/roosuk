@@ -2152,6 +2152,37 @@ const th = {
   creatorRules:
     "กติกา: ชวนได้เฉพาะคนที่สมัครใหม่ ผู้ถูกชวนต้องเช็กอินตามจำนวนวันที่ตั้งไว้ก่อน รางวัลจึงเข้า ห้ามสัญญาผลลัพธ์เรื่องน้ำหนักหรือรูปร่าง และห้ามอ้างว่ารักษาโรค",
   creatorLink: "Creator toolkit",
+  adminPlansTitle: "แพ็กเกจและราคา",
+  adminPlansHint:
+    "ปรับราคาและสิทธิ์ของ Free-lite, Gold และ Premium ได้ที่นี่ ค่าที่แสดงคือค่าที่ใช้อยู่ตอนนี้ (เริ่มต้นเป็นค่าที่ตั้งไว้ในระบบ) มีผลกับผู้ใช้ทุกคนภายใน 1 นาที ยอดของรายการชำระที่เปิดไว้แล้วไม่เปลี่ยน ราคาใหม่ใช้กับรายการชำระครั้งถัดไป",
+  adminPlansGeneral: "ทั่วไป",
+  adminPlansTrialDays: "จำนวนวันทดลอง Premium",
+  adminPlansCapTrial: "เพดานการใช้ AI ช่วงทดลอง (ครั้ง/เดือน · 0 = ไม่จำกัด)",
+  adminPlansCapPremium:
+    "เพดานการใช้ AI ของ Premium (ครั้ง/เดือน · 0 = ไม่จำกัด)",
+  adminPlansPriceMonthly: "ราคารายเดือน (บาท)",
+  adminPlansPriceYearly: "ราคารายปี (บาท)",
+  adminPlansFreeNote: "ฟรี — แพ็กเกจหลังหมดช่วงทดลอง",
+  adminPlansQuotas: "โควตา AI ต่อรอบ",
+  adminPlansUnlimited: "ไม่จำกัด",
+  adminPlansTimeline: "ดูข้อมูลย้อนหลัง (เดือน)",
+  adminPlansVault: "จำนวนไฟล์ในตู้เอกสาร",
+  adminPlansPassport: "พาสปอร์ตสุขภาพ",
+  adminPlansAgent: "ผู้ช่วยสุขภาพ AI (Agent)",
+  adminPlansWearables: "ข้อมูลอุปกรณ์สวมใส่",
+  adminPlansFamily: "สมาชิกครอบครัวที่เพิ่มได้",
+  adminPlansWear_none: "ไม่มี",
+  adminPlansWear_basic: "พื้นฐาน",
+  adminPlansWear_full: "ครบ",
+  adminPlansDefault: "ค่าเริ่มต้น: {v}",
+  adminPlansSaved: "บันทึกแล้ว มีผลภายใน 1 นาที",
+  adminPlansReset: "คืนค่าเริ่มต้นทั้งหมด",
+  adminPlansResetHint:
+    "ล้างการปรับแต่งทั้งหมดและกลับไปใช้ค่าเริ่มต้นของระบบ (ราคา ช่วงทดลอง เพดาน โควตา และสิทธิ์)",
+  adminPlansResetDone: "คืนค่าเริ่มต้นแล้ว",
+  adminPlansTrialNote: "ช่วงทดลองใช้สิทธิ์ของ Premium",
+  err_plan_value:
+    "ค่าที่กรอกไม่ถูกต้อง ต้องเป็นจำนวนเต็มไม่ติดลบในช่วงที่กำหนด",
 } as const;
 
 export type Dict = { [K in keyof typeof th]: string };
@@ -4372,6 +4403,38 @@ const en = {
   creatorRules:
     "Rules: only new sign-ups count; the invited person must reach the check-in goal before the reward is paid; never promise a result for weight or body shape, and never claim to treat a disease.",
   creatorLink: "Creator toolkit",
+  adminPlansTitle: "Plans and prices",
+  adminPlansHint:
+    "Change the prices and what Free-lite, Gold and Premium include. The values shown are the ones in use now (they start as the defaults built into the system). A change reaches every user within a minute. Payments already opened keep their amount; the new price applies to the next payment.",
+  adminPlansGeneral: "General",
+  adminPlansTrialDays: "Premium trial days",
+  adminPlansCapTrial:
+    "AI fair-use cap during the trial (calls a month · 0 = none)",
+  adminPlansCapPremium:
+    "AI fair-use cap for Premium (calls a month · 0 = none)",
+  adminPlansPriceMonthly: "Monthly price (THB)",
+  adminPlansPriceYearly: "Yearly price (THB)",
+  adminPlansFreeNote: "Free — the plan after the trial ends",
+  adminPlansQuotas: "AI quota per window",
+  adminPlansUnlimited: "Unlimited",
+  adminPlansTimeline: "History window (months)",
+  adminPlansVault: "Vault files",
+  adminPlansPassport: "Health Passport",
+  adminPlansAgent: "AI Health Agent",
+  adminPlansWearables: "Wearable data",
+  adminPlansFamily: "Family members",
+  adminPlansWear_none: "None",
+  adminPlansWear_basic: "Basic",
+  adminPlansWear_full: "Full",
+  adminPlansDefault: "Default: {v}",
+  adminPlansSaved: "Saved. It takes effect within a minute.",
+  adminPlansReset: "Restore all defaults",
+  adminPlansResetHint:
+    "Clears every change and goes back to the system defaults (prices, trial, caps, quotas, entitlements).",
+  adminPlansResetDone: "Defaults restored.",
+  adminPlansTrialNote: "The trial gives Premium's entitlements.",
+  err_plan_value:
+    "That value isn't valid: use a whole number in the allowed range.",
 } satisfies Dict;
 
 export const dict: Record<Lang, Dict> = { th, en };

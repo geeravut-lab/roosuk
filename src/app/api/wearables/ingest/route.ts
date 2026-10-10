@@ -1,5 +1,5 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { PLANS } from "@/config/plans";
+import { planSpec } from "@/lib/billing/specs.server";
 import { tierForAdmin } from "@/lib/billing/entitlement.server";
 import { featureEnabled } from "@/lib/flags/server";
 import { hashToken } from "@/lib/passport/passport";
@@ -48,7 +48,7 @@ export async function POST(request: NextRequest) {
   )
     return json({ error: "bad_request", max: MAX_BATCH }, 400);
 
-  const tier = PLANS[await tierForAdmin(token.user_id)].wearables;
+  const tier = (await planSpec(await tierForAdmin(token.user_id))).wearables;
   if (tier === "none") return json({ error: "plan" }, 403);
 
   const out = await ingestObservations(
