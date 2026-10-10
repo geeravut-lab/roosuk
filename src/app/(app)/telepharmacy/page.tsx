@@ -18,6 +18,7 @@ import {
   loadAccessLog,
   loadAvailability,
   loadPatientConsults,
+  loadPharmacist,
   loadPatientRecords,
   loadTakenSlots,
   loadTeleSettings,
@@ -65,6 +66,7 @@ export default async function TelepharmacyPage({
       : Promise.resolve(true),
     open ? loadAvailability(settings, now) : Promise.resolve(null),
   ]);
+  const isPharmacist = !!(await loadPharmacist(user.id));
 
   // the product the person came from (a shop page), only if it is on sale
   let product: { id: string; name: string } | null = null;
@@ -170,6 +172,14 @@ export default async function TelepharmacyPage({
           <Stethoscope className="size-7" aria-hidden /> {t.teleTitle}
         </h1>
         <p className="text-muted text-sm">{t.teleIntro}</p>
+        {isPharmacist ? (
+          <Link
+            href="/pharmacist"
+            className="text-primary-strong text-sm font-semibold underline"
+          >
+            {t.navPharmacist}
+          </Link>
+        ) : null}
       </div>
 
       <p

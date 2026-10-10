@@ -9,6 +9,8 @@ import {
   Smartphone,
   Target,
   Activity,
+  ShieldCheck,
+  Stethoscope,
   Bot,
   UsersRound,
   ShoppingBag,
@@ -57,6 +59,12 @@ export const NAV: readonly NavItem[] = [
   { href: "/wearables", label: "navWearables", icon: Watch, group: "data" },
   // ตรวจประเมินและปรึกษา
   { href: "/liver", label: "navLiver", icon: Activity, group: "care" },
+  {
+    href: "/telepharmacy",
+    label: "navTelepharmacy",
+    icon: Stethoscope,
+    group: "care",
+  },
   // กิจกรรมและรางวัล
   {
     href: "/challenges",
@@ -89,6 +97,7 @@ export const NAV: readonly NavItem[] = [
     group: "account",
   },
   { href: "/profile", label: "navProfile", icon: UserRound, group: "account" },
+  { href: "/verify", label: "navVerify", icon: ShieldCheck, group: "account" },
   { href: "/install", label: "navInstall", icon: Smartphone, group: "account" },
   { href: "/settings", label: "navSettings", icon: Settings, group: "account" },
 ];
@@ -130,7 +139,9 @@ export type BackLabelKey =
   | "navNotifications"
   | "navVault"
   | "navGoals"
-  | "navLiver";
+  | "navLiver"
+  | "navTelepharmacy"
+  | "navPharmacist";
 
 export interface BackTarget {
   href: string;
@@ -149,6 +160,10 @@ const PARENTS: readonly { pattern: RegExp; to: BackTarget }[] = [
   {
     pattern: /^\/liver\/.+$/,
     to: { href: "/liver", label: "navLiver" },
+  },
+  {
+    pattern: /^\/pharmacist\/consult\/[^/]+$/,
+    to: { href: "/pharmacist", label: "navPharmacist" },
   },
   {
     pattern: /^\/quiz-result\/[^/]+$/,

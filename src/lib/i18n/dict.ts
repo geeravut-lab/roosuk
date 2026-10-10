@@ -3164,6 +3164,12 @@ const th = {
     "บันทึกการให้บริการเภสัชกรรมอาจต้องเก็บตามกฎหมาย ระบบไม่ลบเองอัตโนมัติ การลบต้องให้เจ้าของ/ที่ปรึกษากฎหมายตัดสินก่อน และการลบถูกจดในบันทึกตรวจสอบ",
   adminTelePurgeConfirm: "พิมพ์ DELETE เพื่อยืนยันการลบรายการที่เก่าเกินกำหนด",
   adminTelePurge: "ลบรายการที่เก่าเกินกำหนด",
+  adminGroupQueue: "งานที่รอดำเนินการ",
+  adminGroupMoney: "แพ็กเกจ ราคา และรางวัล",
+  adminGroupShop: "ร้านค้าและพาร์ตเนอร์",
+  adminGroupAi: "AI และเนื้อหา",
+  adminGroupSystem: "ระบบและการวิเคราะห์",
+  adminTeleLicensesOpen: "ใบอนุญาตรอยืนยัน {n}",
 } as const;
 
 export type Dict = { [K in keyof typeof th]: string };
@@ -6454,6 +6460,12 @@ const en = {
   adminTelePurgeConfirm:
     "Type DELETE to confirm deleting everything past the retention period",
   adminTelePurge: "Delete what is past retention",
+  adminGroupQueue: "Waiting for you",
+  adminGroupMoney: "Plans, prices and rewards",
+  adminGroupShop: "Shop and partners",
+  adminGroupAi: "AI and content",
+  adminGroupSystem: "System and analytics",
+  adminTeleLicensesOpen: "{n} licences to verify",
 } satisfies Dict;
 
 export const dict: Record<Lang, Dict> = { th, en };
