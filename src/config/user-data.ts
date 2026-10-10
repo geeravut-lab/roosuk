@@ -202,6 +202,25 @@ export const OWNED_TABLES: readonly OwnedTable[] = [
     onDelete: "erased",
     countable: true,
   },
+  // Liver Health: assessments and their audit trail are append-only records of what the person was told; both go with the account.
+  {
+    table: "liver_assessments",
+    column: "user_id",
+    onDelete: "erased",
+    countable: true,
+  },
+  {
+    table: "liver_audit_log",
+    column: "user_id",
+    onDelete: "erased",
+    countable: true,
+  },
+  {
+    table: "liver_hepatitis_status",
+    column: "user_id",
+    onDelete: "erased",
+    countable: true,
+  },
   {
     table: "monthly_reports",
     column: "user_id",
