@@ -203,6 +203,30 @@ export const OWNED_TABLES: readonly OwnedTable[] = [
     countable: true,
   },
   {
+    table: "weight_logs",
+    column: "user_id",
+    onDelete: "erased",
+    countable: true,
+  },
+  {
+    table: "user_goals",
+    column: "user_id",
+    onDelete: "erased",
+    countable: true,
+  },
+  {
+    table: "goal_programs",
+    column: "user_id",
+    onDelete: "erased",
+    countable: true,
+  },
+  {
+    table: "goal_task_checks",
+    column: "user_id",
+    onDelete: "erased",
+    countable: true,
+  },
+  {
     table: "monthly_reports",
     column: "user_id",
     onDelete: "erased",

@@ -29,6 +29,8 @@ export const EVENTS = [
   "voice_used",
   "ask_sent",
   "checkin_done",
+  "goal_created",
+  "goal_program_made", // detail = ai | template
   "lead_created",
   "share_made", // detail = what was shared: quiz | lab | food
 ] as const;

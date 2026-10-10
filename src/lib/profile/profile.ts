@@ -16,6 +16,7 @@ export const EXERCISE_DAYS = [0, 1, 2, 3, 4, 5, 6, 7] as const;
 
 /** Self-reported conditions. Sensitive: optional, and only ever used to make wording and prompts relevant. */
 export const CONDITION_VALUES = [
+  "gout",
   "diabetes",
   "hypertension",
   "dyslipidemia",

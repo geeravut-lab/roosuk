@@ -13,7 +13,9 @@ import {
 } from "@/components/SourceFileCard";
 import { ShareCard } from "@/components/ShareCard";
 import { requireUser } from "@/lib/auth/server";
+import { ChoiceGroup } from "@/components/ChoiceGroup";
 import { SERVING_CHOICES, mealTotals, parseStoredItems } from "@/lib/food/food";
+import { MEAL_TYPES, defaultMealType, isMealType } from "@/lib/goals/meals";
 import { fmt } from "@/lib/i18n/dict";
 import { getLang, getT } from "@/lib/i18n/server";
 import { createClient } from "@/lib/supabase/server";
@@ -41,13 +43,16 @@ export default async function MealPage({
     getLang(),
     supabase
       .from("meal_logs")
-      .select("id, status, items, source_file:source_files(id, mime)")
+      .select(
+        "id, status, items, meal_type, source_file:source_files(id, mime)",
+      )
       .eq("id", id)
       .eq("user_id", user.id)
       .maybeSingle<{
         id: string;
         status: "draft" | "confirmed";
         items: unknown;
+        meal_type: string | null;
         source_file: SourceFileRef | null;
       }>(),
   ]);
@@ -197,6 +202,21 @@ export default async function MealPage({
             </li>
           ))}
         </ul>
+        <ChoiceGroup
+          id="meal-type"
+          label={t.mealTypeQuestion}
+          name="meal_type"
+          type="radio"
+          options={MEAL_TYPES.map((m) => ({
+            value: m,
+            label: t[`mealType_${m}` as const],
+          }))}
+          selected={[
+            isMealType(meal.meal_type)
+              ? meal.meal_type
+              : defaultMealType(new Date()),
+          ]}
+        />
         {sourceFile}
         {summary}
         <p className="text-muted text-sm">{t.foodEstimateNote}</p>

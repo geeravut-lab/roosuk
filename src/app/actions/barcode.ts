@@ -10,6 +10,7 @@ import { assertFeature } from "@/lib/flags/server";
 import { mealTotals } from "@/lib/food/food";
 import { bangkokDate } from "@/lib/health/dates";
 import type { ErrorKey } from "@/lib/i18n/dict";
+import { isMealType } from "@/lib/goals/meals";
 import { createAdminClient } from "@/lib/supabase/admin";
 
 export interface BarcodeState {
@@ -53,6 +54,9 @@ export async function lookupBarcodeAction(
       .insert({
         user_id: user.id,
         meal_date: bangkokDate(new Date()),
+        meal_type: isMealType(formData.get("meal_type"))
+          ? formData.get("meal_type")
+          : null,
         status: "draft",
         items,
         kcal: totals.kcal,

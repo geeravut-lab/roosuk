@@ -201,6 +201,7 @@ export function AppShell({
         <nav className="flex flex-1 flex-col gap-4">
           {NAV_GROUPS.map((group) => {
             const items = NAV.filter((i) => i.group === group.id);
+            if (items.length === 0) return null;
             return (
               <div key={group.id} className="flex flex-col gap-1">
                 <p className="text-muted px-3 text-xs font-semibold tracking-wide">
@@ -366,10 +367,30 @@ export function AppShell({
                 onScroll={(e) => updateEdges(e.currentTarget)}
                 className="relative flex min-h-0 flex-col gap-1 overflow-y-auto overscroll-contain"
               >
-                {rest.map(renderLink)}
-                {adminLink}
-                {manualLink}
-                {signOut}
+                {NAV_GROUPS.map((group) => {
+                  const items = rest.filter((i) => i.group === group.id);
+                  if (items.length === 0) return null;
+                  return (
+                    <div key={group.id} className="flex flex-col gap-1">
+                      <p className="text-muted px-3 pt-3 text-xs font-semibold tracking-wide">
+                        {t[group.label]}
+                      </p>
+                      {items.map(renderLink)}
+                    </div>
+                  );
+                })}
+                {adminLink ? (
+                  <div className="flex flex-col gap-1">
+                    <p className="text-muted px-3 pt-3 text-xs font-semibold tracking-wide">
+                      {t.navGroupAdmin}
+                    </p>
+                    {adminLink}
+                  </div>
+                ) : null}
+                <div className="border-line mt-2 flex flex-col gap-1 border-t pt-2">
+                  {manualLink}
+                  {signOut}
+                </div>
               </div>
               <ScrollCue direction="up" visible={edges.up} />
               <ScrollCue direction="down" visible={edges.down} />

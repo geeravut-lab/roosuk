@@ -28,6 +28,7 @@ import {
   sourceFileOf,
   storeSourceFile,
 } from "@/lib/files/server";
+import { defaultMealType, isMealType } from "@/lib/goals/meals";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 
@@ -118,6 +119,9 @@ export async function scanFoodAction(
         user_id: user.id,
         source_file_id: fileId,
         meal_date: bangkokDate(new Date()),
+        meal_type: isMealType(formData.get("meal_type"))
+          ? formData.get("meal_type")
+          : null,
         status: "draft",
         items,
         kcal: totals.kcal,
@@ -153,11 +157,11 @@ export async function confirmMealAction(formData: FormData): Promise<void> {
   const db = createAdminClient();
   const { data: meal } = await db
     .from("meal_logs")
-    .select("items")
+    .select("items, meal_type")
     .eq("id", id)
     .eq("user_id", user.id)
     .eq("status", "draft")
-    .maybeSingle<{ items: unknown }>();
+    .maybeSingle<{ items: unknown; meal_type: string | null }>();
   if (!meal) throw new AppError("err_payment_state");
 
   const stored = parseStoredItems(meal.items);
@@ -188,6 +192,11 @@ export async function confirmMealAction(formData: FormData): Promise<void> {
       protein_g: totals.protein_g,
       carbs_g: totals.carbs_g,
       fat_g: totals.fat_g,
+      meal_type: isMealType(formData.get("meal_type"))
+        ? formData.get("meal_type")
+        : isMealType(meal.meal_type)
+          ? meal.meal_type
+          : defaultMealType(new Date()),
     })
     .eq("id", id)
     .eq("user_id", user.id)

@@ -13,7 +13,14 @@ import { Spinner } from "@/components/Spinner";
 
 const initial: ScanState = {};
 
-export function FoodScanForm({ keepMode }: { keepMode: KeepMode }) {
+export function FoodScanForm({
+  keepMode,
+  meal,
+}: {
+  keepMode: KeepMode;
+  /** the diary slot the person came from, if any */
+  meal?: string;
+}) {
   const { t } = useI18n();
   const [state, onSubmit, pending] = useFormAction(scanFoodAction, initial);
   const input = useRef<HTMLInputElement>(null);
@@ -40,6 +47,7 @@ export function FoodScanForm({ keepMode }: { keepMode: KeepMode }) {
 
   return (
     <form method="post" onSubmit={onSubmit} className="space-y-4">
+      {meal ? <input type="hidden" name="meal_type" value={meal} /> : null}
       <input
         ref={input}
         id="photo"

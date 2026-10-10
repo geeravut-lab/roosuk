@@ -5,6 +5,7 @@ import { labPrompt } from "@/lib/lab/lab";
 import { chatSystemPrompt } from "@/lib/ask/context";
 import { reportSystemPrompt } from "@/lib/report/monthly";
 import { computeQuiz, planPrompt } from "@/lib/quiz/quiz";
+import { programSystemPrompt } from "@/lib/goals/program";
 import type { TaskKind } from "./types";
 
 /**
@@ -74,6 +75,12 @@ export function builtinPrompt(task: TaskKind): BuiltinPrompt | null {
         system: reportSystemPrompt("th"),
         input:
           "The month's figures computed by the app: check-in days, average score, streak, meals logged, lab reports, names of out-of-range lab tests (no values).",
+      };
+    case "goal_plan":
+      return {
+        system: programSystemPrompt("th"),
+        input:
+          "The facts: goal and its answers, an age band, the targets decided by code, the last 30 days of food the person logged, 14 days of check-ins and weigh-ins — no name, e-mail or exact age.",
       };
     default:
       return null;

@@ -21,7 +21,7 @@ interface DetectorLike {
  * no download) and the ZXing decoder otherwise (loaded only when the camera is
  * opened). The number is checked again on the server before anything is looked up.
  */
-export function BarcodeForm() {
+export function BarcodeForm({ meal }: { meal?: string }) {
   const { t } = useI18n();
   const [state, onSubmit, pending] = useFormAction(
     lookupBarcodeAction,
@@ -159,6 +159,7 @@ export function BarcodeForm() {
       ) : null}
 
       <form method="post" ref={form} onSubmit={onSubmit} className="space-y-2">
+        {meal ? <input type="hidden" name="meal_type" value={meal} /> : null}
         <label htmlFor="barcode" className="label">
           {t.barcodeNumber}
         </label>

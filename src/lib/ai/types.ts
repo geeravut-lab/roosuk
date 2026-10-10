@@ -21,6 +21,7 @@ export const TASK_KINDS = [
   "prompt_review",
   "voice_transcribe",
   "doctor_brief",
+  "goal_plan",
 ] as const;
 export type TaskKind = (typeof TASK_KINDS)[number];
 

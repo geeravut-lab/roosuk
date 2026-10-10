@@ -7,6 +7,7 @@ import {
   FolderLock,
   IdCard,
   Smartphone,
+  Target,
   Bot,
   UsersRound,
   ShoppingBag,
@@ -24,7 +25,8 @@ import {
 import type { Dict } from "@/lib/i18n/dict";
 
 export type NavLabelKey = Extract<keyof Dict, `nav${string}`>;
-export type NavGroup = "daily" | "account";
+export type NavGroup =
+  "daily" | "data" | "care" | "rewards" | "shop" | "account";
 
 export interface NavItem {
   href: string;
@@ -40,76 +42,37 @@ export interface NavItem {
  * every day, and they become the bottom bar.
  */
 export const NAV: readonly NavItem[] = [
+  // ประจำวัน — what people open every day (the first four are the bottom bar)
   { href: "/today", label: "navToday", icon: House, group: "daily" },
-  { href: "/timeline", label: "navTimeline", icon: ChartLine, group: "daily" },
+  { href: "/goals", label: "navGoals", icon: Target, group: "daily" },
   { href: "/scan", label: "navScan", icon: Camera, group: "daily" },
   { href: "/ask", label: "navAsk", icon: MessageCircleHeart, group: "daily" },
-  {
-    href: "/agent",
-    label: "navAgent",
-    icon: Bot,
-    group: "daily",
-  },
-  {
-    href: "/family",
-    label: "navFamily",
-    icon: UsersRound,
-    group: "account",
-  },
-  {
-    href: "/report",
-    label: "navReport",
-    icon: FileChartColumn,
-    group: "daily",
-  },
+  { href: "/agent", label: "navAgent", icon: Bot, group: "daily" },
+  // ข้อมูลสุขภาพ — what the app keeps about you
+  { href: "/timeline", label: "navTimeline", icon: ChartLine, group: "data" },
+  { href: "/report", label: "navReport", icon: FileChartColumn, group: "data" },
+  { href: "/vault", label: "navVault", icon: FolderLock, group: "data" },
+  { href: "/passport", label: "navPassport", icon: IdCard, group: "data" },
+  { href: "/wearables", label: "navWearables", icon: Watch, group: "data" },
+  // กิจกรรมและรางวัล
   {
     href: "/challenges",
     label: "navChallenges",
     icon: Trophy,
-    group: "daily",
-  },
-  {
-    href: "/vault",
-    label: "navVault",
-    icon: FolderLock,
-    group: "daily",
-  },
-  {
-    href: "/passport",
-    label: "navPassport",
-    icon: IdCard,
-    group: "daily",
-  },
-  {
-    href: "/wearables",
-    label: "navWearables",
-    icon: Watch,
-    group: "daily",
-  },
-  {
-    href: "/shop",
-    label: "navShop",
-    icon: ShoppingBag,
-    group: "account",
-  },
-  {
-    href: "/company",
-    label: "navCompany",
-    icon: Building2,
-    group: "account",
-  },
-  {
-    href: "/rewards",
-    label: "navRewards",
-    icon: Gift,
-    group: "account",
+    group: "rewards",
   },
   {
     href: "/achievements",
     label: "navAchievements",
     icon: Award,
-    group: "account",
+    group: "rewards",
   },
+  { href: "/rewards", label: "navRewards", icon: Gift, group: "rewards" },
+  // ร้านค้าและครอบครัว
+  { href: "/shop", label: "navShop", icon: ShoppingBag, group: "shop" },
+  { href: "/family", label: "navFamily", icon: UsersRound, group: "shop" },
+  { href: "/company", label: "navCompany", icon: Building2, group: "shop" },
+  // บัญชีและตั้งค่า
   {
     href: "/subscription",
     label: "navSubscription",
@@ -122,18 +85,8 @@ export const NAV: readonly NavItem[] = [
     icon: Bell,
     group: "account",
   },
-  {
-    href: "/profile",
-    label: "navProfile",
-    icon: UserRound,
-    group: "account",
-  },
-  {
-    href: "/install",
-    label: "navInstall",
-    icon: Smartphone,
-    group: "account",
-  },
+  { href: "/profile", label: "navProfile", icon: UserRound, group: "account" },
+  { href: "/install", label: "navInstall", icon: Smartphone, group: "account" },
   { href: "/settings", label: "navSettings", icon: Settings, group: "account" },
 ];
 
@@ -147,6 +100,10 @@ export const NAV_GROUPS: readonly {
   label: Extract<keyof Dict, `navGroup${string}`>;
 }[] = [
   { id: "daily", label: "navGroupDaily" },
+  { id: "data", label: "navGroupData" },
+  { id: "care", label: "navGroupCare" },
+  { id: "rewards", label: "navGroupRewards" },
+  { id: "shop", label: "navGroupShop" },
   { id: "account", label: "navGroupAccount" },
 ];
 
@@ -168,7 +125,8 @@ export type BackLabelKey =
   | "navSubscription"
   | "navAdmin"
   | "navNotifications"
-  | "navVault";
+  | "navVault"
+  | "navGoals";
 
 export interface BackTarget {
   href: string;
@@ -179,6 +137,10 @@ const PARENTS: readonly { pattern: RegExp; to: BackTarget }[] = [
   {
     pattern: /^\/scan\/(food|lab|body)(\/[^/]+)?$/,
     to: { href: "/scan", label: "navScan" },
+  },
+  {
+    pattern: /^\/goals\/(new\/[^/]+|[^/]+)$/,
+    to: { href: "/goals", label: "navGoals" },
   },
   {
     pattern: /^\/quiz-result\/[^/]+$/,

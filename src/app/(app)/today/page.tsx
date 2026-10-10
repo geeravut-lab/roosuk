@@ -11,6 +11,9 @@ import { loadInsightNote, loadInsights } from "@/lib/insights/server";
 import { featureEnabled } from "@/lib/flags/server";
 import { errorText } from "@/lib/i18n/dict";
 import { InsightCard } from "./InsightCard";
+import { DiaryCard, GoalsTodayCard, WeekStrip } from "./TodayCards";
+import { WatchCard } from "@/components/WatchCard";
+import { loadGoalProgress, loadMeals, loadWatch } from "@/lib/goals/server";
 import { ACHIEVEMENTS } from "@/lib/achievements/achievements";
 import { awardAchievements } from "@/lib/achievements/server";
 import { maybeQualifyReferral } from "@/lib/rewards/server";
@@ -73,11 +76,22 @@ export default async function TodayPage({ searchParams }: PageProps<"/today">) {
     ? ((await loadInsights(today, rows))[0] ?? null)
     : null;
   const insightNote = insight ? await loadInsightNote(insight) : null;
+  const goalsOn = await featureEnabled("goals");
+  const [goalProgress, todayMeals, watch] = goalsOn
+    ? await Promise.all([
+        loadGoalProgress(today),
+        loadMeals(today, 1),
+        (await featureEnabled("diet_watch")) ? loadWatch(today) : null,
+      ])
+    : [[], [], null];
+  const targetKcal = goalProgress.find((g) => g.kcal !== null)?.kcal ?? null;
   const view = buildHabitView(rows, doneKeys, today);
 
+  const checkedDates = new Set(rows.map((r) => r.checkin_date));
   return (
     <div className="space-y-4">
       <h1 className="text-primary-strong text-2xl font-bold">{t.navToday}</h1>
+      <WeekStrip today={today} lang={lang} checkedDates={checkedDates} />
 
       {plan?.source === "trial" ? (
         <Link
@@ -103,6 +117,22 @@ export default async function TodayPage({ searchParams }: PageProps<"/today">) {
         </p>
       ) : null}
       {view.lowMood ? <LowMoodCard t={t} /> : null}
+      <ScoreCard t={t} score={view.score} />
+      {goalsOn ? <GoalsTodayCard t={t} progress={goalProgress} /> : null}
+      {goalsOn ? (
+        <DiaryCard t={t} meals={todayMeals} targetKcal={targetKcal} />
+      ) : null}
+      <CheckinCard t={t} view={view} />
+      {watch &&
+      watch.conditions.length > 0 &&
+      watch.result.alerts.length > 0 ? (
+        <WatchCard
+          t={t}
+          conditions={watch.conditions}
+          result={watch.result}
+          compact
+        />
+      ) : null}
       {insight ? (
         <InsightCard t={t} lang={lang} insight={insight} note={insightNote} />
       ) : null}
@@ -123,7 +153,23 @@ export default async function TodayPage({ searchParams }: PageProps<"/today">) {
           </span>
         </Link>
       )}
-      <CheckinCard t={t} view={view} />
+      <ActionsCard t={t} view={view} />
+      <StreakCard t={t} lang={lang} view={view} />
+      <Link
+        href="/achievements"
+        className="card hover:bg-tint-primary flex items-center gap-3"
+      >
+        <Award className="text-primary-strong size-5 shrink-0" aria-hidden />
+        <span className="min-w-0 flex-1">
+          <span className="block font-semibold">{t.achievementsCta}</span>
+          <span className="text-muted block text-sm">
+            {fmt(t.achievementsCtaHint, {
+              n: badges ?? 0,
+              total: ACHIEVEMENTS.length,
+            })}
+          </span>
+        </span>
+      </Link>
       <Link
         href="/quiz"
         className="card hover:bg-tint-primary flex items-center gap-3 font-semibold"
@@ -145,24 +191,6 @@ export default async function TodayPage({ searchParams }: PageProps<"/today">) {
         <span className="min-w-0 flex-1">
           <span className="block font-semibold">{t.leadCta}</span>
           <span className="text-muted block text-sm">{t.leadCtaHint}</span>
-        </span>
-      </Link>
-      <ScoreCard t={t} score={view.score} />
-      <ActionsCard t={t} view={view} />
-      <StreakCard t={t} lang={lang} view={view} />
-      <Link
-        href="/achievements"
-        className="card hover:bg-tint-primary flex items-center gap-3"
-      >
-        <Award className="text-primary-strong size-5 shrink-0" aria-hidden />
-        <span className="min-w-0 flex-1">
-          <span className="block font-semibold">{t.achievementsCta}</span>
-          <span className="text-muted block text-sm">
-            {fmt(t.achievementsCtaHint, {
-              n: badges ?? 0,
-              total: ACHIEVEMENTS.length,
-            })}
-          </span>
         </span>
       </Link>
     </div>
