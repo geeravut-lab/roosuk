@@ -23,6 +23,9 @@ export const PROTECTED_PREFIXES = [
   "/quiz-result",
   "/subscription",
   "/consent",
+  "/verify",
+  "/telepharmacy",
+  "/pharmacist",
   "/admin",
 ] as const;
 

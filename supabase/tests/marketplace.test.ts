@@ -348,7 +348,9 @@ describe("products that require a verified identity (e-KYC)", () => {
   let kycProduct = "";
   beforeAll(async () => {
     await actAsOwner(db);
-    await db.exec(`insert into auth.users (id, email) values ('${C}', 'c@x.test')`);
+    await db.exec(
+      `insert into auth.users (id, email) values ('${C}', 'c@x.test')`,
+    );
     kycProduct = (
       await db.query<{ id: string }>(
         `insert into public.shop_products (sku, partner_id, name_th, price_thb, stock, active, requires_kyc) values ('KYC-1', '${partner}', 'ต้องยืนยันตัวตน', 120, 5, true, true) returning id`,
@@ -364,7 +366,10 @@ describe("products that require a verified identity (e-KYC)", () => {
     expect(r.rows[0].n).toBe(0);
     await actAs(db, A);
     expect(
-      await isRejected(db, `update public.shop_products set requires_kyc = false`),
+      await isRejected(
+        db,
+        `update public.shop_products set requires_kyc = false`,
+      ),
     ).toBe(true);
   });
 
@@ -384,7 +389,9 @@ describe("products that require a verified identity (e-KYC)", () => {
     ).toMatchObject({ ok: false, reason: "kyc" });
     expect(await stock(kycProduct)).toBe(before);
     expect(await stock(p2)).toBeNull();
-    const n = await db.query(`select 1 from public.shop_orders where user_id = '${C}'`);
+    const n = await db.query(
+      `select 1 from public.shop_orders where user_id = '${C}'`,
+    );
     expect(n.rows).toHaveLength(0);
   });
 
@@ -412,7 +419,9 @@ describe("products that require a verified identity (e-KYC)", () => {
     expect(ok).toMatchObject({ ok: true });
     expect(await stock(kycProduct)).toBe(3);
     // taken back => not sellable again
-    await db.exec(`update public.ekyc_verifications set status = 'revoked' where id = '${v}'`);
+    await db.exec(
+      `update public.ekyc_verifications set status = 'revoked' where id = '${v}'`,
+    );
     expect(await order(C, [{ id: kycProduct, qty: 1 }])).toMatchObject({
       ok: false,
       reason: "kyc",

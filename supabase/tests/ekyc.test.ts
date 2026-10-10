@@ -24,7 +24,9 @@ const q = async <T>(sql: string) => {
 };
 const attempt = async (user: string, max = 5) =>
   (
-    await q<{ r: string }>(`select public.ekyc_begin_attempt('${user}', ${max}) as r`)
+    await q<{ r: string }>(
+      `select public.ekyc_begin_attempt('${user}', ${max}) as r`,
+    )
   )[0].r;
 const verification = async (user: string, status: string) =>
   (
@@ -34,11 +36,14 @@ const verification = async (user: string, status: string) =>
     )
   )[0].id;
 const verified = async (user: string) =>
-  (await q<{ v: boolean }>(`select public.is_kyc_verified('${user}') as v`))[0].v;
+  (await q<{ v: boolean }>(`select public.is_kyc_verified('${user}') as v`))[0]
+    .v;
 
 describe("settings", () => {
   it("start switched OFF with sane defaults, and only the service role changes them", async () => {
-    const [s] = await q<Record<string, unknown>>(`select * from public.ekyc_settings`);
+    const [s] = await q<Record<string, unknown>>(
+      `select * from public.ekyc_settings`,
+    );
     expect(s).toMatchObject({
       enabled: false,
       thai_id: true,
@@ -48,16 +53,37 @@ describe("settings", () => {
       max_attempts_per_day: 5,
     });
     await actAs(db, U1);
-    expect((await db.query(`select 1 from public.ekyc_settings`)).rows).toHaveLength(1);
-    expect(await isRejected(db, `update public.ekyc_settings set enabled = true`)).toBe(true);
+    expect(
+      (await db.query(`select 1 from public.ekyc_settings`)).rows,
+    ).toHaveLength(1);
+    expect(
+      await isRejected(db, `update public.ekyc_settings set enabled = true`),
+    ).toBe(true);
     await actAs(db, null, "anon");
-    expect(await isRejected(db, `select * from public.ekyc_settings`)).toBe(true);
+    expect(await isRejected(db, `select * from public.ekyc_settings`)).toBe(
+      true,
+    );
   });
   it("keeps thresholds in range", async () => {
     await actAsOwner(db);
-    expect(await isRejected(db, `update public.ekyc_settings set liveness_threshold = 1.5`)).toBe(true);
-    expect(await isRejected(db, `update public.ekyc_settings set face_threshold = 120`)).toBe(true);
-    expect(await isRejected(db, `update public.ekyc_settings set max_attempts_per_day = 0`)).toBe(true);
+    expect(
+      await isRejected(
+        db,
+        `update public.ekyc_settings set liveness_threshold = 1.5`,
+      ),
+    ).toBe(true);
+    expect(
+      await isRejected(
+        db,
+        `update public.ekyc_settings set face_threshold = 120`,
+      ),
+    ).toBe(true);
+    expect(
+      await isRejected(
+        db,
+        `update public.ekyc_settings set max_attempts_per_day = 0`,
+      ),
+    ).toBe(true);
   });
 });
 
@@ -65,11 +91,13 @@ describe("a person cannot verify themselves", () => {
   it("can read only their own results and write nothing", async () => {
     await verification(U1, "passed");
     await actAs(db, U2);
-    expect((await db.query(`select * from public.ekyc_verifications`)).rows).toHaveLength(0);
+    expect(
+      (await db.query(`select * from public.ekyc_verifications`)).rows,
+    ).toHaveLength(0);
     await actAs(db, U1);
-    expect((await db.query(`select status from public.ekyc_verifications`)).rows).toEqual([
-      { status: "passed" },
-    ]);
+    expect(
+      (await db.query(`select status from public.ekyc_verifications`)).rows,
+    ).toEqual([{ status: "passed" }]);
     for (const sql of [
       `insert into public.ekyc_verifications (user_id, doc_type, status) values ('${U1}', 'passport', 'approved')`,
       `update public.ekyc_verifications set status = 'approved'`,
@@ -79,40 +107,62 @@ describe("a person cannot verify themselves", () => {
     ])
       expect(await isRejected(db, sql), sql).toBe(true);
     await actAs(db, null, "anon");
-    expect(await isRejected(db, `select * from public.ekyc_verifications`)).toBe(true);
+    expect(
+      await isRejected(db, `select * from public.ekyc_verifications`),
+    ).toBe(true);
     // nor can a person ask the database whether someone is verified, or start an attempt
     await actAs(db, U2);
-    expect(await isRejected(db, `select public.is_kyc_verified('${U1}')`)).toBe(true);
-    expect(await isRejected(db, `select public.ekyc_begin_attempt('${U2}', 5)`)).toBe(true);
+    expect(await isRejected(db, `select public.is_kyc_verified('${U1}')`)).toBe(
+      true,
+    );
     expect(
-      await isRejected(db, `select public.ekyc_admin_review('${U2}', gen_random_uuid(), true, 'x')`),
+      await isRejected(db, `select public.ekyc_begin_attempt('${U2}', 5)`),
+    ).toBe(true);
+    expect(
+      await isRejected(
+        db,
+        `select public.ekyc_admin_review('${U2}', gen_random_uuid(), true, 'x')`,
+      ),
     ).toBe(true);
   });
   it("is_kyc_verified counts passed and approved only", async () => {
     expect(await verified(U1)).toBe(true);
     await verification(U2, "review");
     expect(await verified(U2)).toBe(false);
-    await q(`update public.ekyc_verifications set status = 'rejected' where user_id = '${U2}'`);
+    await q(
+      `update public.ekyc_verifications set status = 'rejected' where user_id = '${U2}'`,
+    );
     expect(await verified(U2)).toBe(false);
   });
   it("at most one live verification per person", async () => {
     await actAsOwner(db);
-    expect(await isRejected(db, `insert into public.ekyc_verifications (user_id, doc_type, status) values ('${U1}', 'passport', 'approved')`)).toBe(true);
+    expect(
+      await isRejected(
+        db,
+        `insert into public.ekyc_verifications (user_id, doc_type, status) values ('${U1}', 'passport', 'approved')`,
+      ),
+    ).toBe(true);
     // history of failed/revoked ones is fine
     await verification(U1, "revoked");
-    await q(`delete from public.ekyc_verifications where user_id = '${U1}' and status = 'revoked'`);
+    await q(
+      `delete from public.ekyc_verifications where user_id = '${U1}' and status = 'revoked'`,
+    );
   });
 });
 
 describe("ekyc_begin_attempt", () => {
   it("never re-verifies a verified person (and does not count an attempt)", async () => {
     expect(await attempt(U1)).toBe("verified");
-    expect((await q(`select 1 from public.ekyc_attempts where user_id = '${U1}'`))).toHaveLength(0);
+    expect(
+      await q(`select 1 from public.ekyc_attempts where user_id = '${U1}'`),
+    ).toHaveLength(0);
   });
   it("allows the daily limit, then says 'limit'; a fresh day starts again", async () => {
     for (let i = 0; i < 3; i++) expect(await attempt(U3, 3)).toBe("ok");
     expect(await attempt(U3, 3)).toBe("limit");
-    await q(`update public.ekyc_attempts set created_at = now() - interval '25 hours' where user_id = '${U3}'`);
+    await q(
+      `update public.ekyc_attempts set created_at = now() - interval '25 hours' where user_id = '${U3}'`,
+    );
     expect(await attempt(U3, 3)).toBe("ok");
   });
   it("a failure waiting for an admin blocks more attempts until decided", async () => {
@@ -120,7 +170,9 @@ describe("ekyc_begin_attempt", () => {
     await q(`insert into auth.users (id, email) values ('${U4}', 'u4@x.test')`);
     await verification(U4, "review");
     expect(await attempt(U4)).toBe("pending");
-    await q(`update public.ekyc_verifications set status = 'rejected' where user_id = '${U4}'`);
+    await q(
+      `update public.ekyc_verifications set status = 'rejected' where user_id = '${U4}'`,
+    );
     expect(await attempt(U4)).toBe("ok");
   });
 });
@@ -144,12 +196,24 @@ describe("the admin's decisions are audited and only for admins", () => {
       `select action, meta->>'by' as by from public.privacy_audit_log where user_id = '${U5}' and action like 'ekyc_%'`,
     );
     expect(audit).toEqual([{ action: "ekyc_approved", by: ADMIN }]);
-    const [row] = await q<{ status: string; reviewed_by: string; review_note: string }>(
+    const [row] = await q<{
+      status: string;
+      reviewed_by: string;
+      review_note: string;
+    }>(
       `select status, reviewed_by, review_note from public.ekyc_verifications where id = '${id}'`,
     );
-    expect(row).toEqual({ status: "approved", reviewed_by: ADMIN, review_note: "looked fine" });
+    expect(row).toEqual({
+      status: "approved",
+      reviewed_by: ADMIN,
+      review_note: "looked fine",
+    });
     expect(
-      (await q<{ r: string }>(`select public.ekyc_admin_review('${ADMIN}', gen_random_uuid(), true, '') as r`))[0].r,
+      (
+        await q<{ r: string }>(
+          `select public.ekyc_admin_review('${ADMIN}', gen_random_uuid(), true, '') as r`,
+        )
+      )[0].r,
     ).toBe("not_found");
   });
 
@@ -158,21 +222,37 @@ describe("the admin's decisions are audited and only for admins", () => {
     await q(`insert into auth.users (id, email) values ('${U6}', 'u6@x.test')`);
     const id = await verification(U6, "review");
     expect(
-      (await q<{ r: string }>(`select public.ekyc_admin_review('${ADMIN}', '${id}', false, 'blurry') as r`))[0].r,
+      (
+        await q<{ r: string }>(
+          `select public.ekyc_admin_review('${ADMIN}', '${id}', false, 'blurry') as r`,
+        )
+      )[0].r,
     ).toBe("ok");
     expect(await verified(U6)).toBe(false);
   });
 
   it("revoke takes a verification back, only an admin can, and the product gate follows", async () => {
     expect(
-      (await q<{ r: string }>(`select public.ekyc_admin_revoke('${U2}', '${U1}', 'x') as r`))[0].r,
+      (
+        await q<{ r: string }>(
+          `select public.ekyc_admin_revoke('${U2}', '${U1}', 'x') as r`,
+        )
+      )[0].r,
     ).toBe("forbidden");
     expect(
-      (await q<{ r: string }>(`select public.ekyc_admin_revoke('${ADMIN}', '${U1}', 'fraud') as r`))[0].r,
+      (
+        await q<{ r: string }>(
+          `select public.ekyc_admin_revoke('${ADMIN}', '${U1}', 'fraud') as r`,
+        )
+      )[0].r,
     ).toBe("ok");
     expect(await verified(U1)).toBe(false);
     expect(
-      (await q<{ r: string }>(`select public.ekyc_admin_revoke('${ADMIN}', '${U1}', '') as r`))[0].r,
+      (
+        await q<{ r: string }>(
+          `select public.ekyc_admin_revoke('${ADMIN}', '${U1}', '') as r`,
+        )
+      )[0].r,
     ).toBe("not_verified");
     // revoked => the person may verify again
     expect(await attempt(U1)).toBe("ok");
@@ -184,10 +264,18 @@ describe("the admin's decisions are audited and only for admins", () => {
     for (let i = 0; i < 2; i++) await attempt(U7, 2);
     expect(await attempt(U7, 2)).toBe("limit");
     expect(
-      (await q<{ r: string }>(`select public.ekyc_admin_reset('${U2}', '${U7}') as r`))[0].r,
+      (
+        await q<{ r: string }>(
+          `select public.ekyc_admin_reset('${U2}', '${U7}') as r`,
+        )
+      )[0].r,
     ).toBe("forbidden");
     expect(
-      (await q<{ r: string }>(`select public.ekyc_admin_reset('${ADMIN}', '${U7}') as r`))[0].r,
+      (
+        await q<{ r: string }>(
+          `select public.ekyc_admin_reset('${ADMIN}', '${U7}') as r`,
+        )
+      )[0].r,
     ).toBe("ok");
     expect(await attempt(U7, 2)).toBe("ok");
   });
@@ -200,7 +288,13 @@ describe("account deletion", () => {
     await verification(U8, "passed");
     await attempt(U8);
     await q(`delete from auth.users where id = '${U8}'`);
-    expect(await q(`select 1 from public.ekyc_verifications where user_id = '${U8}'`)).toHaveLength(0);
-    expect(await q(`select 1 from public.ekyc_attempts where user_id = '${U8}'`)).toHaveLength(0);
+    expect(
+      await q(
+        `select 1 from public.ekyc_verifications where user_id = '${U8}'`,
+      ),
+    ).toHaveLength(0);
+    expect(
+      await q(`select 1 from public.ekyc_attempts where user_id = '${U8}'`),
+    ).toHaveLength(0);
   });
 });
