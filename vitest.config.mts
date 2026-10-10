@@ -12,6 +12,10 @@ export default defineConfig({
   },
   test: {
     environment: "node",
+    // Every database test boots an in-memory Postgres and applies ALL migrations; with the suite
+    // running in parallel on a small machine that can take longer than the 10 s default.
+    hookTimeout: 60_000,
+    testTimeout: 30_000,
     include: [
       "src/**/*.test.ts",
       "src/**/*.test.tsx",

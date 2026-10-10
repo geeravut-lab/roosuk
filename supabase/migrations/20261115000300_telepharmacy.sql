@@ -967,9 +967,3 @@ end;
 $$;
 revoke all on function public.admin_purge_consults(uuid, timestamptz) from public, anon, authenticated;
 grant execute on function public.admin_purge_consults(uuid, timestamptz) to service_role;
-
--- ── scheduled work: shown on the admin "rules" page, switchable ─────────────
-insert into public.automation_rules (key, title, description, enabled, params, sort_order) values
-  ('consult_sweep', 'ปิดสายปรึกษาเภสัชกรที่ค้าง', 'สายที่รอเกินเวลา การนัดที่ไม่มีใครเริ่ม และสายที่คุยเกินเวลาสูงสุด จะถูกปิดอัตโนมัติ (ระบบยังตรวจซ้ำทุกครั้งที่เปิดคิว)', true, '{}', 18),
-  ('consult_reminders', 'เตือนนัดปรึกษาเภสัชกรและการติดตามการใช้ยา', 'เตือนผู้ใช้ก่อนนัดปรึกษา และเมื่อถึงวันติดตามผลที่เภสัชกรกำหนด (ข้อความไม่ใส่รายละเอียดสุขภาพ) · ตั้งจำนวนนาทีก่อนนัดได้', true, '{"minutes_before": 60}', 19)
-on conflict do nothing;
