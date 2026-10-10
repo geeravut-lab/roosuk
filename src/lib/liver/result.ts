@@ -38,7 +38,7 @@ const REASONS = [
   "liver_history",
   "symptoms_specific",
   "many_factors",
-] as [ReasonCode, ...ReasonCode[]];
+] as unknown as [ReasonCode, ...ReasonCode[]];
 
 export const resultSchema = z.object({
   v: z.literal(1),

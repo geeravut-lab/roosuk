@@ -149,7 +149,11 @@ begin
   insert into public.liver_hepatitis_status (user_id, hep_b, hep_c)
   values (p_user, p_hep_b, p_hep_c)
   on conflict (user_id) do update
-    set hep_b = excluded.hep_b, hep_c = excluded.hep_c
+    set hep_b = excluded.hep_b,
+        hep_c = excluded.hep_c,
+        -- a changed status makes the old test date meaningless
+        hep_b_tested_on = case when public.liver_hepatitis_status.hep_b = excluded.hep_b then public.liver_hepatitis_status.hep_b_tested_on end,
+        hep_c_tested_on = case when public.liver_hepatitis_status.hep_c = excluded.hep_c then public.liver_hepatitis_status.hep_c_tested_on end
     where (public.liver_hepatitis_status.hep_b, public.liver_hepatitis_status.hep_c)
           is distinct from (excluded.hep_b, excluded.hep_c);
 

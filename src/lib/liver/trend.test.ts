@@ -4,6 +4,7 @@ import { assessLiver } from "./engine";
 import type { LiverAnswers } from "./questionnaire";
 import {
   fib4Series,
+  latestFib4,
   latestLabs,
   toPanels,
   trendNotes,
@@ -193,5 +194,15 @@ describe("the doctor brief", () => {
       birthYear: 1980,
     });
     expect(b.trends[0].points.length).toBe(12);
+  });
+});
+
+describe("latestFib4", () => {
+  it("uses the newest day with all three values", () => {
+    const r = latestFib4(toPanels(rows), 1976);
+    expect(r?.date).toBe("2026-09-01");
+    expect(r?.score.status).toBe("ok");
+    expect(latestFib4(toPanels(rows), null)?.score.status).toBe("insufficient");
+    expect(latestFib4([], 1976)).toBeNull();
   });
 });

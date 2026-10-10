@@ -219,6 +219,27 @@ describe("liver_hepatitis_status", () => {
   });
 });
 
+describe("a new assessment and the hepatitis test date", () => {
+  it("keeps the date while the status is unchanged and clears it when the status changes", async () => {
+    await actAsOwner(db);
+    // currently hep_b = vaccinated with a date (set above)
+    await db.query(record(B, 1, "none", "vaccinated", "negative"));
+    await db.exec(
+      `update public.liver_hepatitis_status set hep_b_tested_on = '2026-01-05' where user_id = '${B}'`,
+    );
+    await db.query(record(B, 1, "none", "vaccinated", "negative"));
+    let r = await db.query(
+      `select hep_b_tested_on::text as on from public.liver_hepatitis_status where user_id = '${B}'`,
+    );
+    expect(r.rows).toEqual([{ on: "2026-01-05" }]);
+    await db.query(record(B, 1, "none", "negative", "negative"));
+    r = await db.query(
+      `select hep_b_tested_on::text as on from public.liver_hepatitis_status where user_id = '${B}'`,
+    );
+    expect(r.rows).toEqual([{ on: null }]);
+  });
+});
+
 describe("deleting an account", () => {
   it("erases the assessments, their audit trail and the hepatitis status with it", async () => {
     await actAsOwner(db);

@@ -5,6 +5,7 @@ import type { CheckinRow } from "@/lib/health/checkin";
 import { addDays } from "@/lib/health/dates";
 import { computeHealthScore } from "@/lib/health/score";
 import { computeStreak } from "@/lib/health/streak";
+import { briefSchema, type LiverBrief } from "@/lib/liver/brief";
 import { VAULT_CATEGORIES } from "@/lib/vault/vault";
 
 /**
@@ -19,6 +20,7 @@ export const SECTIONS = [
   "checkins",
   "documents",
   "wearables",
+  "liver",
 ] as const;
 export type Section = (typeof SECTIONS)[number];
 
@@ -134,6 +136,8 @@ export interface PassportSnapshot {
     avgRestingHr: number | null;
     avgSleepMinutes: number | null;
   };
+  /** The Liver Health summary: latest assessment, liver tests, trends, FIB-4, questions for the doctor. */
+  liver?: LiverBrief;
   brief?: PassportBrief;
 }
 
@@ -160,6 +164,8 @@ export interface SnapshotInput {
   checkins: CheckinRow[];
   documents: { title: string; category: string; doc_date: string | null }[];
   wearableDays: WearableDay[];
+  /** Built by the liver loader only when the "liver" section was ticked. */
+  liver?: LiverBrief | null;
 }
 
 const round = (n: number) => Math.round(n);
@@ -250,6 +256,7 @@ export function buildSnapshot(input: SnapshotInput): PassportSnapshot {
       avgSleepMinutes: avgOf(d.map((x) => x.sleepMinutes)),
     };
   }
+  if (want.has("liver") && input.liver) snap.liver = input.liver;
   return snap;
 }
 
@@ -315,6 +322,7 @@ export function parseStoredSnapshot(value: unknown): PassportSnapshot | null {
         })
         .optional()
         .catch(undefined),
+      liver: briefSchema.optional().catch(undefined),
       brief: z
         .object({
           summary: z.string(),
@@ -399,6 +407,14 @@ export function briefPrompt(s: PassportSnapshot): string {
     lines.push(
       `Wearable data, last ${s.wearables.windowDays} days (${s.wearables.days} days with data): average steps ${s.wearables.avgSteps ?? "none"}, average resting heart rate ${s.wearables.avgRestingHr ?? "none"}, average sleep minutes ${s.wearables.avgSleepMinutes ?? "none"}`,
     );
+  if (s.liver) {
+    const r = s.liver.result;
+    lines.push(
+      r
+        ? `Liver screening (rule-based, not a diagnosis): level ${r.level} of 3; FIB-4 ${r.scores.fib4.status === "ok" ? r.scores.fib4.value : "not calculated"}; liver-test trend notes: ${s.liver.trendNotes.map((n) => `${n.marker} ${n.kind}`).join(", ") || "none"}`
+        : "Liver screening: no assessment done",
+    );
+  }
   if (s.documents)
     lines.push(
       `Documents the person keeps: ${s.documents.map((d) => `${d.title} (${d.category})`).join("; ") || "none"}`,

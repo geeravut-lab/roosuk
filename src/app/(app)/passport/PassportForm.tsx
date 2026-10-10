@@ -15,13 +15,24 @@ import { useFormAction } from "@/lib/use-form-action";
 const initial: PassportState = {};
 
 /** Make a link. The result (the link and its QR) is shown once, here, and never again. */
-export function PassportForm({ wearablesOn }: { wearablesOn: boolean }) {
+export function PassportForm({
+  wearablesOn,
+  liverOn,
+  preselect = [],
+}: {
+  wearablesOn: boolean;
+  liverOn: boolean;
+  /** sections ticked from the start, e.g. "liver" when arriving from the liver brief */
+  preselect?: string[];
+}) {
   const { t, lang } = useI18n();
   const [state, onSubmit, pending] = useFormAction(
     createPassportAction,
     initial,
   );
-  const sections = SECTIONS.filter((s) => s !== "wearables" || wearablesOn);
+  const sections = SECTIONS.filter(
+    (s) => (s !== "wearables" || wearablesOn) && (s !== "liver" || liverOn),
+  );
 
   if (state.created) {
     const c = state.created;
@@ -112,7 +123,9 @@ export function PassportForm({ wearablesOn }: { wearablesOn: boolean }) {
               name="sections"
               value={s}
               defaultChecked={
-                s === "profile" || s === "labs" || s === "checkins"
+                preselect.length
+                  ? preselect.includes(s)
+                  : s === "profile" || s === "labs" || s === "checkins"
               }
               className="mt-1 size-5"
             />

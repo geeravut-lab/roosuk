@@ -1,13 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { dict, fmt, type Dict, type Lang } from "@/lib/i18n/dict";
 import { assessLiver, type LabPanel, type LabValue } from "./engine";
-import {
-  HEP_B,
-  HEP_C,
-  RED_FLAGS,
-  SYMPTOMS,
-  type LiverAnswers,
-} from "./questionnaire";
+import { HEP_B, HEP_C, RED_FLAGS, type LiverAnswers } from "./questionnaire";
 import { allResultText, buildResultView } from "./view";
 
 /**

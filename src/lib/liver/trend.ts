@@ -8,7 +8,7 @@ import {
   type LabValue,
   type LiverMarker,
 } from "./engine";
-import { fib4 } from "./scores";
+import { fib4, type ScoreResult } from "./scores";
 
 /** A confirmed Lab Scan value as stored in `lab_results`. */
 export interface LiverLabRow {
@@ -160,4 +160,26 @@ export function trendNotes(rows: readonly LiverLabRow[]): TrendNote[] {
     }
   }
   return notes;
+}
+
+/** FIB-4 on the newest day that has AST, ALT and platelets (age on that day), or null when no day does. */
+export function latestFib4(
+  panels: readonly LabPanel[],
+  birthYear: number | null,
+): { date: string; score: ScoreResult } | null {
+  const sorted = [...panels].sort((a, b) => (a.date < b.date ? 1 : -1));
+  for (const p of sorted) {
+    const { ast, alt, platelets } = p.values;
+    if (!ast || !alt || !platelets) continue;
+    return {
+      date: p.date,
+      score: fib4({
+        age: birthYear === null ? null : Number(p.date.slice(0, 4)) - birthYear,
+        ast: ast.value,
+        alt: alt.value,
+        platelets: platelets.value,
+      }),
+    };
+  }
+  return null;
 }

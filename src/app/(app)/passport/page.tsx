@@ -38,9 +38,9 @@ export default async function PassportPage({
 }: PageProps<"/passport">) {
   if (!(await featureEnabled("health_passport"))) notFound();
   const user = await requireUser();
-  const { error } = await searchParams;
+  const { error, sections: sectionsParam } = await searchParams;
   const supabase = await createClient();
-  const [t, lang, tier, { data }, wearablesOn] = await Promise.all([
+  const [t, lang, tier, { data }, wearablesOn, liverOn] = await Promise.all([
     getT(),
     getLang(),
     tierFor(user.id),
@@ -53,6 +53,7 @@ export default async function PassportPage({
       .limit(50)
       .returns<Row[]>(),
     featureEnabled("wearables"),
+    featureEnabled("liver_check"),
   ]);
   const allowed = PLANS[tier].healthPassport;
   const now = new Date();
@@ -75,7 +76,13 @@ export default async function PassportPage({
       ) : null}
 
       {allowed ? (
-        <PassportForm wearablesOn={wearablesOn} />
+        <PassportForm
+          wearablesOn={wearablesOn}
+          liverOn={liverOn}
+          preselect={
+            sectionsParam === "liver" && liverOn ? ["liver"] : undefined
+          }
+        />
       ) : (
         <section className="card space-y-2" aria-labelledby="pp-plan">
           <h2
