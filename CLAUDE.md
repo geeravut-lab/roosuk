@@ -65,10 +65,19 @@ Teal `#0A8FA3` (primary) · Mint `#2DD4A7` (secondary) · Sky Blue `#1E90FF` (ch
 - **Install as app (PWA):** `public/sw.js` caches only `/offline.html` and one icon — never anything a signed-in person sees. Keep it that way.
 - **Live suite and AI quota:** the sandbox's Gemini key is free-tier (a handful of requests a day). Specs that need a real model skip with a stated reason when the quota is spent; the agent loop itself is unit-tested with a scripted model.
 
+## Goals, liver, telepharmacy (2026-10 additions)
+
+- **Goals** (`src/lib/goals/`, `/goals`): kinds weight | sleep | brain | condition, ≤3 active, fixed program length per kind. Numbers (BMI, TDEE, kcal, macros, water, minutes) are computed by CODE; the model only words the daily tasks, meal ideas and tips, and its JSON goes through `violatesProgramGuardrails` / `normalizeProgram` — failure falls back to `templates.ts` (always safe) and refunds the `goalPlan` quota unit. Weight-goal safety rails live in `assessWeightGoal` / `weightTargets`: blocked under 18, pregnancy, eating-disorder history, underweight; deficit ≤25% of TDEE with kcal floors; gain ≤500/day. No fasting/detox/supplement/promised-kg wording. Weight lives in `weight_logs` for the person's own record. `goal_plan` is deliberately NOT in `EDITABLE_TASKS`.
+- **Food watch** (`watch.ts`, `food-tags.ts`, flag `diet_watch`, rule `diet_watch`): counts tagged dishes in the person's own logged meals against per-condition thresholds (DRAFT, dietitian/doctor review pending). Wording is "worth a look", never a diagnosis or a ban.
+- **Meal diary** : `meal_logs.meal_type` (breakfast/lunch/dinner/snack); logging food is always optional.
+- **Liver module** (`/liver`, flag `liver_check`, `docs/LIVER-MODULE.md`): rule-based screening, no AI; rows via `record_liver_assessment()`; the 🔒 items need hepatologist review before launch.
+- **Plans are editable** at `/admin/plans`: only differences from `src/config/plans.ts` are stored (`platform_settings.plan_specs`); read plan specs through `planSpec()` / `resolvePlanSpec()`, never `PLANS[...]` directly.
+- **Menu**: `src/config/nav.ts` is the one list; groups daily | data | care | rewards | shop | account; bottom bar = Today, Goals, Scan, Ask, More.
+
 ## Health guardrails (non-negotiable)
 
 - AI never diagnoses. It summarizes, explains trends and helps users prepare for a doctor; doctors decide.
 - Every AI health answer carries a disclaimer; low-confidence or risky cases hand off to a human.
 - PDPA: explicit, separate consent for daily logs, photos, wearables and family sharing; support data export/deletion.
 - Log AI conversations for audit.
-- Gamification rewards consistency, never body shape or weight targets.
+- Gamification rewards consistency only: scores, streaks, badges, challenges and credit never reward weight, body shape or calories. A weight/diet goal exists ONLY as an opt-in the user chose (`/goals`) and is bounded by code-enforced safety rails (`src/lib/goals/weight.ts`) — see "Goals, liver, telepharmacy".

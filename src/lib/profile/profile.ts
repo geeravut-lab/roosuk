@@ -1,8 +1,9 @@
 import { z } from "zod";
 
 /**
- * Health Profile: what a user tells us once. No weight, height or BMI on
- * purpose (nothing here may become a body-shape target), no medications.
+ * Health Profile: what a user tells us once. No medications. Weight and height are
+ * only ever collected inside a goal the person chose (src/lib/goals) — they never feed
+ * a score, badge, streak or reward.
  */
 export const SEX_VALUES = ["female", "male", "other", "unspecified"] as const;
 export const SMOKING_VALUES = ["never", "former", "current"] as const;
