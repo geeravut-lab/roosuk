@@ -301,6 +301,7 @@ describe("settings, rules and ticks", () => {
       "monthly_report_ready",
       "checkup_reminder",
       "agent_reminders",
+      "diet_watch",
       "trial_ending",
       "plan_expiring",
       "queue_expire",

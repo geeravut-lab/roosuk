@@ -8,6 +8,7 @@ import {
   IdCard,
   Smartphone,
   Target,
+  Activity,
   Bot,
   UsersRound,
   ShoppingBag,
@@ -54,6 +55,8 @@ export const NAV: readonly NavItem[] = [
   { href: "/vault", label: "navVault", icon: FolderLock, group: "data" },
   { href: "/passport", label: "navPassport", icon: IdCard, group: "data" },
   { href: "/wearables", label: "navWearables", icon: Watch, group: "data" },
+  // ตรวจประเมินและปรึกษา
+  { href: "/liver", label: "navLiver", icon: Activity, group: "care" },
   // กิจกรรมและรางวัล
   {
     href: "/challenges",
@@ -126,7 +129,8 @@ export type BackLabelKey =
   | "navAdmin"
   | "navNotifications"
   | "navVault"
-  | "navGoals";
+  | "navGoals"
+  | "navLiver";
 
 export interface BackTarget {
   href: string;
@@ -141,6 +145,10 @@ const PARENTS: readonly { pattern: RegExp; to: BackTarget }[] = [
   {
     pattern: /^\/goals\/(new\/[^/]+|[^/]+)$/,
     to: { href: "/goals", label: "navGoals" },
+  },
+  {
+    pattern: /^\/liver\/.+$/,
+    to: { href: "/liver", label: "navLiver" },
   },
   {
     pattern: /^\/quiz-result\/[^/]+$/,

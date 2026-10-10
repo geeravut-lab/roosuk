@@ -18,6 +18,7 @@ import {
   agentReminderNotice,
   checkinReminderNotice,
   checkupReminderNotice,
+  dietWatchNotice,
   monthlyReportReadyNotice,
   planExpiringNotice,
   streakLastCallNotice,
@@ -37,6 +38,8 @@ import {
   streakLastCall,
   type RuleSet,
 } from "./rules";
+import { evaluateWatch, watchedConditions, weekKey } from "@/lib/goals/watch";
+import type { LoggedMeal } from "@/lib/goals/foodtags";
 import { featureEnabled } from "@/lib/flags/server";
 import { MIN_CHECKIN_DAYS, monthBounds } from "@/lib/report/monthly";
 import { parseStoredLabItems } from "@/lib/lab/lab";
@@ -408,6 +411,68 @@ async function checkupReminders(c: TickCtx): Promise<number> {
   return n;
 }
 
+/** Once a week: tell people with a watched condition when their own logged meals crossed a limit. */
+async function dietWatchNotices(c: TickCtx): Promise<number> {
+  if (!(await featureEnabled("diet_watch"))) return 0;
+  const ids = await reminderUserIds(c.onlyUsers);
+  if (ids.length === 0) return 0;
+  const db = createAdminClient();
+  const [{ data: profiles }, { data: goals }, { data: meals }] =
+    await Promise.all([
+      db
+        .from("health_profiles")
+        .select("user_id, conditions")
+        .in("user_id", ids)
+        .returns<{ user_id: string; conditions: string[] | null }[]>(),
+      db
+        .from("user_goals")
+        .select("user_id, params")
+        .in("user_id", ids)
+        .eq("kind", "condition")
+        .eq("status", "active")
+        .returns<{ user_id: string; params: { condition?: string } }[]>(),
+      db
+        .from("meal_logs")
+        .select("user_id, meal_date, items")
+        .in("user_id", ids)
+        .eq("status", "confirmed")
+        .gte("meal_date", addDays(c.today, -29))
+        .lte("meal_date", c.today)
+        .limit(CANDIDATE_LIMIT * 40)
+        .returns<
+          { user_id: string; meal_date: string; items: LoggedMeal["items"] }[]
+        >(),
+    ]);
+  const conds = new Map<string, string[]>();
+  for (const p of profiles ?? []) conds.set(p.user_id, p.conditions ?? []);
+  const goalConds = new Map<string, { kind: string; params: unknown }[]>();
+  for (const g of goals ?? [])
+    (
+      goalConds.get(g.user_id) ?? goalConds.set(g.user_id, []).get(g.user_id)!
+    ).push({ kind: "condition", params: g.params });
+  const mealsBy = new Map<string, LoggedMeal[]>();
+  for (const m of meals ?? [])
+    (mealsBy.get(m.user_id) ?? mealsBy.set(m.user_id, []).get(m.user_id)!).push(
+      { meal_date: m.meal_date, items: Array.isArray(m.items) ? m.items : [] },
+    );
+  const week = weekKey(c.today);
+  let n = 0;
+  for (const id of ids) {
+    if (c.overBudget()) break;
+    const watched = watchedConditions(
+      conds.get(id) ?? [],
+      goalConds.get(id) ?? [],
+    );
+    if (watched.length === 0) continue;
+    const result = evaluateWatch(watched, mealsBy.get(id) ?? [], c.today);
+    if (result.alerts.length === 0) continue;
+    const { t } = await dictFor(id);
+    const names = [...new Set(result.alerts.map((a) => a.condition))];
+    if (await notifyUser(id, dietWatchNotice(t, names, week))) n++;
+  }
+  return n;
+}
+
 async function expiryNotices(
   c: TickCtx,
   rule: "trial_ending" | "plan_expiring",
@@ -660,6 +725,7 @@ export async function runTick(
     ["monthly_report_ready", () => monthlyReportNotices(ctx)],
     ["checkup_reminder", () => checkupReminders(ctx)],
     ["agent_reminders", () => agentReminders(ctx)],
+    ["diet_watch", () => dietWatchNotices(ctx)],
     ["trial_ending", () => expiryNotices(ctx, "trial_ending")],
     ["plan_expiring", () => expiryNotices(ctx, "plan_expiring")],
     ["queue_expire", () => expireQueue(ctx)],

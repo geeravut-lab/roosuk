@@ -126,3 +126,15 @@ export function weekKey(today: string): string {
   d.setUTCDate(d.getUTCDate() - day);
   return d.toISOString().slice(0, 10);
 }
+
+/** The conditions the watch looks for: what the profile says plus any "manage a condition" goal. */
+export function watchedConditions(
+  profileConditions: readonly string[],
+  goals: readonly { kind: string; params: unknown }[],
+): string[] {
+  const set = new Set(profileConditions);
+  for (const g of goals)
+    if (g.kind === "condition")
+      set.add((g.params as { condition: string }).condition);
+  return [...set].filter((c) => WATCHED_CONDITIONS.includes(c));
+}

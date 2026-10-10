@@ -2704,6 +2704,9 @@ const th = {
   passportSection_liver: "สุขภาพตับ",
   passportSectionHint_liver:
     "ผลประเมินล่าสุด ค่าตรวจที่เกี่ยวกับตับ แนวโน้ม FIB-4 และคำถามที่ควรถามแพทย์",
+  notifWatchTitle: "สัปดาห์นี้มีเมนูที่ควรสังเกต",
+  notifWatchBody:
+    "จากอาหารที่คุณบันทึก 7 วันล่าสุด ({cond}) เปิดดูข้อสังเกตและปรับนิสัยได้ — ไม่ใช่การวินิจฉัย",
 } as const;
 
 export type Dict = { [K in keyof typeof th]: string };
@@ -5508,6 +5511,9 @@ const en = {
   passportSection_liver: "Liver health",
   passportSectionHint_liver:
     "Latest assessment, liver-related tests, FIB-4 trend and questions to ask",
+  notifWatchTitle: "A few dishes worth a look this week",
+  notifWatchBody:
+    "From the meals you logged in the last 7 days ({cond}) — open it to see the notes. It is not a diagnosis.",
 } satisfies Dict;
 
 export const dict: Record<Lang, Dict> = { th, en };

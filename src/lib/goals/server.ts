@@ -22,7 +22,7 @@ import {
   type ProgramTargets,
 } from "./program";
 import { templateProgram } from "./templates";
-import { evaluateWatch, WATCHED_CONDITIONS } from "./watch";
+import { evaluateWatch, watchedConditions } from "./watch";
 import { weightTrend } from "./weight";
 
 export interface GoalRow {
@@ -221,18 +221,6 @@ export async function loadCheckinSummary(
     avgNutrition: avg("nutrition"),
     avgActivityBand: avg("activity_band"),
   };
-}
-
-/** The conditions the watch looks for: what the profile says plus any "manage a condition" goal. */
-export function watchedConditions(
-  profileConditions: readonly string[],
-  goals: readonly Pick<GoalRow, "kind" | "params">[],
-): string[] {
-  const set = new Set(profileConditions);
-  for (const g of goals)
-    if (g.kind === "condition")
-      set.add((g.params as { condition: string }).condition);
-  return [...set].filter((c) => WATCHED_CONDITIONS.includes(c));
 }
 
 export interface GeneratedProgram {

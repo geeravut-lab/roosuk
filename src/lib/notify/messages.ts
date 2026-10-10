@@ -274,6 +274,25 @@ export function checkupReminderNotice(
   };
 }
 
+/** Weekly: the logged meals of the last 7 days hit a watch limit for the person's condition. */
+export function dietWatchNotice(
+  t: Dict,
+  conditions: readonly string[],
+  week: string,
+): Notice {
+  const names = conditions
+    .map((c) => (t as Record<string, string>)[`condition_${c}`] ?? c)
+    .join(", ");
+  return {
+    kind: "diet_watch",
+    category: "reminder",
+    title: t.notifWatchTitle,
+    body: noticeBody(fmt(t.notifWatchBody, { cond: names })),
+    href: "/goals",
+    dedupeKey: `diet_watch:${week}`,
+  };
+}
+
 /** Credit earned: for an invited friend who started showing up, or a finished challenge. */
 export function rewardEarnedNotice(
   t: Dict,

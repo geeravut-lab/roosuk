@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { dict } from "@/lib/i18n/dict";
 import {
   checkupReminderNotice,
+  dietWatchNotice,
   monthlyReportReadyNotice,
   streakLastCallNotice,
 } from "./messages";
@@ -149,5 +150,16 @@ describe("the new notices", () => {
     );
     expect(dict.th.notifRecheckBody).toContain("ไม่ใช่การวินิจฉัย");
     expect(dict.en.notifRecheckBody).toContain("not a diagnosis");
+  });
+});
+
+describe("dietWatchNotice", () => {
+  it("names the conditions, links to goals and dedupes per week", () => {
+    const n = dietWatchNotice(dict.th, ["gout", "diabetes"], "2026-10-05");
+    expect(n.kind).toBe("diet_watch");
+    expect(n.href).toBe("/goals");
+    expect(n.dedupeKey).toBe("diet_watch:2026-10-05");
+    expect(n.body).toContain("เกาต์");
+    expect(n.body).toContain("เบาหวาน");
   });
 });
