@@ -10,6 +10,12 @@
  * range is shown next to ours so the user can compare, and nothing here is a
  * diagnosis: a value outside a range is a reason to talk to a doctor.
  *
+ * 🔒 Liver tests (ALT, AST, ALP, GGT, bilirubin, albumin, platelets, INR) feed
+ * the Liver Health module (src/lib/liver). Their ranges are unisex DRAFTS and
+ * need a hepatologist's review before launch — sex-specific upper limits of ALT
+ * (about 29–33 U/L men, 19–25 U/L women in AASLD guidance) are tighter than the
+ * 40 U/L used here.
+ *
  * Bounds are inclusive; `null` = open. `watch` is the wider band around
  * `normal`: outside `watch` is "abnormal".
  */
@@ -27,6 +33,8 @@ export interface Biomarker {
   aliases: readonly string[];
   /** Other units a report may use → factor that converts them to `unit`. */
   conversions?: readonly { unit: string; factor: number }[];
+  /** A ratio with no unit (INR): a blank or "ratio" unit on the report is accepted as-is. */
+  unitless?: boolean;
 }
 
 const b = (m: Biomarker): Biomarker => m;
@@ -46,6 +54,10 @@ export const BIOMARKERS: readonly Biomarker[] = [
       "fasting blood sugar",
       "fasting plasma glucose",
       "glucose",
+      "glucose fasting",
+      "fasting blood glucose",
+      "fbg",
+      "blood sugar fasting",
       "น้ำตาลในเลือด",
       "น้ำตาลหลังอดอาหาร",
     ],
@@ -64,6 +76,8 @@ export const BIOMARKERS: readonly Biomarker[] = [
       "a1c",
       "hemoglobin a1c",
       "glycated hemoglobin",
+      "glycosylated hemoglobin",
+      "hemoglobin a1c (hba1c)",
       "น้ำตาลเฉลี่ยสะสม",
     ],
   }),
@@ -149,7 +163,19 @@ export const BIOMARKERS: readonly Biomarker[] = [
     unit: "U/L",
     normal: [null, 40],
     watch: [null, 80],
-    aliases: ["alt", "sgpt", "gpt", "alanine aminotransferase"],
+    aliases: [
+      "alt",
+      "sgpt",
+      "gpt",
+      "alanine aminotransferase",
+      "alanine transaminase",
+      "alt/sgpt",
+      "sgpt/alt",
+      "alt sgpt",
+      "sgpt alt",
+      "เอแอลที",
+      "เอสจีพีที",
+    ],
   }),
   b({
     key: "ast",
@@ -158,7 +184,19 @@ export const BIOMARKERS: readonly Biomarker[] = [
     unit: "U/L",
     normal: [null, 40],
     watch: [null, 80],
-    aliases: ["ast", "sgot", "got", "aspartate aminotransferase"],
+    aliases: [
+      "ast",
+      "sgot",
+      "got",
+      "aspartate aminotransferase",
+      "aspartate transaminase",
+      "ast/sgot",
+      "sgot/ast",
+      "ast sgot",
+      "sgot ast",
+      "เอเอสที",
+      "เอสจีโอที",
+    ],
   }),
   b({
     key: "alp",
@@ -167,7 +205,14 @@ export const BIOMARKERS: readonly Biomarker[] = [
     unit: "U/L",
     normal: [40, 130],
     watch: [30, 200],
-    aliases: ["alp", "alkaline phosphatase"],
+    aliases: [
+      "alp",
+      "alkaline phosphatase",
+      "alk phos",
+      "alk phosphatase",
+      "alk. phosphatase",
+      "alkp",
+    ],
   }),
   b({
     key: "total_bilirubin",
@@ -176,7 +221,17 @@ export const BIOMARKERS: readonly Biomarker[] = [
     unit: "mg/dL",
     normal: [0.1, 1.2],
     watch: [0, 2],
-    aliases: ["total bilirubin", "bilirubin total", "t. bilirubin"],
+    aliases: [
+      "total bilirubin",
+      "bilirubin total",
+      "bilirubin, total",
+      "t. bilirubin",
+      "t bilirubin",
+      "t-bilirubin",
+      "tbil",
+      "t-bil",
+      "total bili",
+    ],
     conversions: [{ unit: "umol/l", factor: 0.0585 }],
   }),
   b({
@@ -234,7 +289,14 @@ export const BIOMARKERS: readonly Biomarker[] = [
     unit: "K/uL",
     normal: [150, 450],
     watch: [120, 500],
-    aliases: ["platelet", "platelets", "plt", "platelet count", "เกล็ดเลือด"],
+    aliases: [
+      "platelet",
+      "platelets",
+      "plt",
+      "plt count",
+      "platelet count",
+      "เกล็ดเลือด",
+    ],
     conversions: [
       { unit: "/ul", factor: 0.001 },
       { unit: "cells/ul", factor: 0.001 },
@@ -451,7 +513,7 @@ export const BIOMARKERS: readonly Biomarker[] = [
     unit: "g/dL",
     normal: [3.5, 5.2],
     watch: [3.2, 5.5],
-    aliases: ["albumin", "alb", "อัลบูมิน"],
+    aliases: ["albumin", "alb", "serum albumin", "อัลบูมิน"],
     conversions: [{ unit: "g/l", factor: 0.1 }],
   }),
   b({
@@ -481,7 +543,18 @@ export const BIOMARKERS: readonly Biomarker[] = [
     unit: "mg/dL",
     normal: [null, 0.3],
     watch: [null, 0.5],
-    aliases: ["direct bilirubin", "bilirubin direct", "d-bil", "dbil"],
+    aliases: [
+      "direct bilirubin",
+      "bilirubin direct",
+      "bilirubin, direct",
+      "d. bilirubin",
+      "d bilirubin",
+      "d-bilirubin",
+      "d-bil",
+      "dbil",
+      "direct bili",
+      "conjugated bilirubin",
+    ],
     conversions: [{ unit: "umol/l", factor: 0.0585 }],
   }),
   b({
@@ -491,7 +564,17 @@ export const BIOMARKERS: readonly Biomarker[] = [
     unit: "U/L",
     normal: [null, 60],
     watch: [null, 100],
-    aliases: ["ggt", "gamma gt", "gamma-gt", "gamma glutamyl transferase"],
+    aliases: [
+      "ggt",
+      "ggtp",
+      "gamma gt",
+      "gamma-gt",
+      "γ-gt",
+      "gamma glutamyl transferase",
+      "gamma-glutamyl transferase",
+      "gamma glutamyl transpeptidase",
+      "gamma-glutamyl transpeptidase",
+    ],
   }),
   b({
     key: "calcium",
@@ -606,6 +689,27 @@ export const BIOMARKERS: readonly Biomarker[] = [
     aliases: ["free t4", "ft4", "free thyroxine", "t4 free"],
     conversions: [{ unit: "pmol/l", factor: 0.0777 }],
   }),
+
+  // 🔒 DRAFT (needs hepatologist review). Range is for people NOT on warfarin:
+  // someone on anticoagulants is meant to have a higher INR, which is a call for
+  // their doctor, not for this table.
+  b({
+    key: "inr",
+    th: "ค่าการแข็งตัวของเลือด (INR)",
+    en: "INR",
+    unit: "ratio",
+    normal: [0.8, 1.2],
+    watch: [0.7, 1.5],
+    aliases: [
+      "inr",
+      "pt inr",
+      "pt/inr",
+      "inr (pt)",
+      "international normalized ratio",
+      "international normalised ratio",
+    ],
+    unitless: true,
+  }),
 ];
 
 /**
@@ -664,5 +768,16 @@ export function biomarkerByKey(
 
 /** Resolve a printed name to a catalog key — exact alias only, so "Glucose, 2-hr PP" never gets fasting ranges. */
 export function biomarkerKeyForName(name: string): string | null {
-  return alias.get(normalizeName(name)) ?? null;
+  const exact = alias.get(normalizeName(name));
+  if (exact) return exact;
+  // "ALT (SGPT)", "SGOT/AST": the name is several spellings of the SAME test. Every
+  // piece must be a known name and all must agree — "Glucose (2-hr PP)" has a piece
+  // we do not know, so it stays unmatched and never borrows fasting ranges.
+  const parts = name
+    .split(/[()/,]/)
+    .map(normalizeName)
+    .filter((p) => p.length > 0);
+  if (parts.length < 2) return null;
+  const keys = new Set(parts.map((p) => alias.get(p) ?? null));
+  return keys.size === 1 && !keys.has(null) ? [...keys][0] : null;
 }

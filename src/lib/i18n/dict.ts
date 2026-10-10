@@ -2414,6 +2414,296 @@ const th = {
   navGroupCare: "ตรวจประเมินและปรึกษา",
   navGroupRewards: "กิจกรรมและรางวัล",
   navGroupShop: "ร้านค้าและครอบครัว",
+  // ── liver health module
+  flag_liver_check: "สุขภาพตับ (ตรวจความเสี่ยงเบื้องต้น)",
+  err_liver_invalid: "กรุณาตอบให้ครบทุกข้อและตรวจตัวเลขอีกครั้ง",
+  err_liver_limit: "วันนี้ตรวจครบจำนวนครั้งที่กำหนดแล้ว ลองใหม่พรุ่งนี้",
+  err_liver_not_found: "ไม่พบผลการประเมินนี้",
+  navLiver: "สุขภาพตับ",
+  liverTitle: "สุขภาพตับ",
+  liverIntro:
+    "คัดกรองความเสี่ยงเบื้องต้น ติดตามค่าตรวจเลือด และเตรียมข้อมูลไปพบแพทย์ นี่ไม่ใช่การวินิจฉัยโรค",
+  liverDisclaimer:
+    "นี่เป็นการประเมินความเสี่ยงเบื้องต้นจากข้อมูลที่คุณให้เท่านั้น ไม่ใช่การวินิจฉัยโรค โปรดปรึกษาแพทย์เพื่อตรวจและรักษาที่เหมาะสม",
+  liverNotRuledOut:
+    "ผลที่ไม่พบสัญญาณใด ไม่ได้ยืนยันว่าตับอยู่ในสภาพดี เพราะปัญหาของตับหลายอย่างไม่มีอาการหรือค่าเลือดผิดปกติในระยะแรก",
+  liverDraftNote:
+    "ช่วงค่าอ้างอิงและเกณฑ์ที่ใช้ในส่วนสุขภาพตับเป็นฉบับร่าง รอแพทย์โรคตับทบทวนก่อนเปิดใช้จริง",
+  liverCall1669: "โทร 1669 (เจ็บป่วยฉุกเฉิน)",
+  liverStatusTitle: "ผลประเมินล่าสุด",
+  liverStatusNone: "ยังไม่เคยตรวจความเสี่ยงตับเบื้องต้น ใช้เวลาประมาณ 3 นาที",
+  liverStatusOn: "ประเมินเมื่อ {date}",
+  liverCheckCta: "ตรวจความเสี่ยงตับเบื้องต้น",
+  liverCheckAgain: "ตรวจอีกครั้ง",
+  liverSeeResult: "ดูผลฉบับเต็ม",
+  liverLabsTitle: "ค่าตรวจเลือดล่าสุดที่เกี่ยวกับตับ",
+  liverLabsNone:
+    "ยังไม่มีผลตรวจเลือดที่เกี่ยวกับตับ สแกนผลแล็บเพื่อเริ่มติดตาม",
+  liverLabsScan: "สแกนผลแล็บ",
+  liverLabsOn: "วันที่ {date}",
+  liverFib4Row: "FIB-4 (คัดกรองความเสี่ยงพังผืด)",
+  liverTrendTitle: "แนวโน้มค่าที่เกี่ยวกับตับ",
+  liverTrendNone: "ต้องมีผลตรวจอย่างน้อย 2 ครั้งจึงจะเห็นแนวโน้ม",
+  liverTrendPick: "เลือกรายการตรวจ",
+  liverTrendNote:
+    "พบการเปลี่ยนแปลงของค่าที่เกี่ยวข้องกับตับ ควรนำข้อมูลไปปรึกษาแพทย์",
+  liverTrendRising: "{marker}: ค่าสูงขึ้นจากการตรวจหลายครั้ง",
+  liverTrendFalling: "{marker}: ค่าต่ำลงจากการตรวจหลายครั้ง",
+  liverTrendPersistent: "{marker}: อยู่นอกช่วงอ้างอิงติดต่อกันหลายครั้ง",
+  liverFib4TrendTitle: "แนวโน้ม FIB-4",
+  liverFib4TrendHint:
+    "คำนวณทุกวันที่มีค่า AST ALT และเกล็ดเลือดครบ โดยใช้อายุ ณ วันนั้น",
+  liverHepCardTitle: "ไวรัสตับอักเสบบี/ซี",
+  liverHepCardBody: "บันทึกว่าเคยตรวจหรือไม่ และผลที่คุณทราบ",
+  liverHepCardCta: "บันทึกสถานะ",
+  liverBriefCardTitle: "เตรียมตัวก่อนพบแพทย์",
+  liverBriefCardBody:
+    "สรุปผลประเมิน ค่าตรวจ แนวโน้ม และคำถามที่ควรถามแพทย์ไว้ในหน้าเดียว",
+  liverBriefCardCta: "เปิดสรุปสำหรับแพทย์",
+  liverHistoryTitle: "ประวัติการประเมิน",
+  liverHistoryRow: "{date} · {level}",
+  liverHistoryNote:
+    "ประวัติการประเมินเก็บถาวรเพื่อการตรวจสอบย้อนหลัง ลบได้พร้อมบัญชีที่ ข้อมูลของฉัน",
+  liverLevelShort_0: "ระดับ 0 ยังไม่พบสัญญาณ",
+  liverLevelShort_1: "ระดับ 1 มีปัจจัยเสี่ยง",
+  liverLevelShort_2: "ระดับ 2 ควรพบแพทย์",
+  liverLevelShort_3: "ระดับ 3 เร่งด่วน",
+  liverLevel_0_title: "ยังไม่พบสัญญาณที่ต้องดำเนินการเร่งด่วน",
+  liverLevel_0_body:
+    "จากข้อมูลที่คุณให้และผลตรวจที่มี ยังไม่พบสัญญาณที่ต้องรีบดำเนินการ",
+  liverLevel_0_cta: "ติดตามสุขภาพตามปกติและตรวจสุขภาพประจำปี",
+  liverLevel_1_title: "มีปัจจัยเสี่ยงที่ควรติดตาม",
+  liverLevel_1_body:
+    "พบปัจจัยบางอย่างที่เกี่ยวข้องกับสุขภาพตับ ยังไม่ใช่สัญญาณเร่งด่วน แต่ควรติดตามอย่างสม่ำเสมอ",
+  liverLevel_1_cta: "ติดตามสุขภาพตับ และพิจารณาตรวจตามคำแนะนำของแพทย์",
+  liverLevel_2_title: "ควรพบแพทย์เพื่อประเมินเพิ่มเติม",
+  liverLevel_2_body:
+    "ข้อมูลของคุณมีบางอย่างที่ควรให้แพทย์ดูต่อ (ดูเหตุผลด้านล่าง) ผลนี้ไม่ได้ระบุว่ามีโรคใดโรคหนึ่ง แพทย์เท่านั้นที่ตัดสินได้",
+  liverLevel_2_cta: "แนะนำให้พบแพทย์เพื่อตรวจประเมินเพิ่มเติม",
+  liverUrgent_soon_title: "ควรได้รับการประเมินโดยเร็ว",
+  liverUrgent_soon_body:
+    "ผลตรวจบางรายการอยู่ในระดับที่ไม่ควรรอ (ดูเหตุผลด้านล่าง) ผลนี้ไม่ได้ระบุว่ามีโรคใดโรคหนึ่ง แต่ควรให้แพทย์ดูโดยเร็ว",
+  liverUrgent_soon_cta:
+    "พบแพทย์โดยเร็วที่สุด และโทร 1669 หากมีอาการตามรายการฉุกเฉิน",
+  liverUrgent_emergency_title: "อาการที่เลือกอาจต้องได้รับการดูแลฉุกเฉิน",
+  liverUrgent_emergency_body: "อย่ารอผลประเมินหรือนัดหมายล่วงหน้า",
+  liverUrgent_emergency_cta: "โทร 1669 หรือไปโรงพยาบาลที่ใกล้ที่สุดทันที",
+  liverReasonsTitle: "เหตุผลที่ได้ระดับนี้",
+  liverReason_rf_jaundice: "คุณเลือกอาการตาหรือตัวเหลืองชัดเจน",
+  liverReason_rf_ruq_pain: "คุณเลือกอาการปวดท้องด้านขวาบนรุนแรง",
+  liverReason_rf_gi_bleed: "คุณเลือกอาการอาเจียนเป็นเลือดหรือถ่ายอุจจาระสีดำ",
+  liverReason_rf_ascites_breathless:
+    "คุณเลือกอาการท้องบวมขึ้นเร็วร่วมกับหายใจลำบาก",
+  liverReason_rf_confusion: "คุณเลือกอาการสับสนหรือง่วงซึมผิดปกติ",
+  liverReason_lab_severe:
+    "ผลตรวจเลือดบางรายการสูงหรือต่ำมากจนไม่ควรรอ: {markers}",
+  liverReason_lab_out_of_range:
+    "ผลตรวจเลือดที่เกี่ยวกับตับอยู่นอกช่วงอ้างอิง: {markers}",
+  liverReason_fib4_intermediate:
+    "ค่า FIB-4 อยู่ในช่วงที่แพทย์มักพิจารณาประเมินเพิ่ม",
+  liverReason_fib4_high: "ค่า FIB-4 สูงกว่าช่วงที่แพทย์มักพิจารณาประเมินเพิ่ม",
+  liverReason_apri_high: "ค่า APRI อยู่ในช่วงที่แพทย์มักพิจารณาประเมินเพิ่ม",
+  liverReason_nfs_high: "คะแนน NFS อยู่ในช่วงที่แพทย์มักพิจารณาประเมินเพิ่ม",
+  liverReason_hep_positive: "คุณบันทึกว่าผลตรวจไวรัสตับอักเสบบีหรือซีเป็นบวก",
+  liverReason_liver_history: "คุณเคยได้รับแจ้งว่าค่าตับผิดปกติหรือมีโรคตับ",
+  liverReason_symptoms_specific:
+    "คุณมีอาการที่ควรให้แพทย์ฟัง เช่น ปัสสาวะเข้ม/อุจจาระซีด คันตามตัว หรือน้ำหนักลดโดยไม่ตั้งใจ",
+  liverReason_many_factors: "มีปัจจัยเสี่ยงหลายอย่างพร้อมกัน",
+  liverFactorsTitle: "ปัจจัยที่พบ",
+  liverFactor_body_size: "ดัชนีมวลกายหรือรอบเอวสูงกว่าเกณฑ์ของคนเอเชีย",
+  liverFactor_diabetes: "เบาหวาน",
+  liverFactor_hypertension: "ความดันโลหิตสูง",
+  liverFactor_dyslipidemia: "ไขมันในเลือดผิดปกติ",
+  liverFactor_metabolic_labs:
+    "ผลตรวจเลือดด้านน้ำตาลหรือไขมันอยู่นอกช่วงอ้างอิง",
+  liverFactor_told_fatty_liver: "เคยได้รับแจ้งว่ามีไขมันในตับ",
+  liverFactor_alcohol_daily: "ดื่มแอลกอฮอล์เกือบทุกวัน",
+  liverFactor_family_history: "มีโรคตับหรือมะเร็งตับในครอบครัว",
+  liverFactor_meds_herbs:
+    "ใช้ยา สมุนไพร หรืออาหารเสริมเป็นประจำ (บันทึกไว้ให้แพทย์ทบทวน)",
+  liverFactor_hep_b_cohort: "เกิดก่อนปี 2535 และยังไม่เคยตรวจไวรัสตับอักเสบบี",
+  liverFactor_fli_high: "ดัชนีไขมันในตับ (FLI) อยู่ในช่วงสูง",
+  liverFactor_symptoms: "มีอาการเรื้อรังที่เลือกไว้",
+  liverScoresTitle: "ดัชนีคัดกรอง",
+  liverScoresHint:
+    "ดัชนีเหล่านี้ใช้คัดกรองว่าใครควรได้รับการประเมินเพิ่ม ไม่ใช่การวินิจฉัย และคำนวณด้วยสูตรในโค้ด ไม่ใช่ AI",
+  liverScoreOn: "จากผลตรวจวันที่ {date}",
+  liverScore_fib4_name: "FIB-4",
+  liverScore_fib4_what:
+    "ใช้อายุ AST ALT และเกล็ดเลือด คัดกรองความเสี่ยงพังผืดขั้นสูงในตับ",
+  liverScore_apri_name: "APRI",
+  liverScore_apri_what: "ใช้ AST และเกล็ดเลือด เป็นตัวช่วยเสริมของ FIB-4",
+  liverScore_nfs_name: "NFS",
+  liverScore_nfs_what:
+    "ใช้อายุ BMI น้ำตาล AST ALT เกล็ดเลือด และอัลบูมิน เหมาะกับผู้ที่มีปัจจัยเสี่ยงด้านเมตาบอลิก",
+  liverScore_fli_name: "FLI",
+  liverScore_fli_what:
+    "ใช้ไตรกลีเซอไรด์ GGT BMI และรอบเอว ประมาณโอกาสที่ตับมีไขมันสะสม",
+  liverBand_fib4_low: "ความเสี่ยงค่อนข้างต่ำ ติดตามตามปกติ",
+  liverBand_fib4_intermediate: "ควรติดตามเพิ่มและพบแพทย์",
+  liverBand_fib4_high: "ความเสี่ยงสูงกว่า แนะนำพบแพทย์โดยเร็ว",
+  liverBand_apri_low: "ค่อนข้างต่ำ",
+  liverBand_apri_intermediate: "อยู่ช่วงกลาง ควรติดตาม",
+  liverBand_apri_high: "สูงกว่า แนะนำพบแพทย์",
+  liverBand_nfs_low: "ค่อนข้างต่ำ",
+  liverBand_nfs_intermediate: "อยู่ช่วงกลาง ควรติดตาม",
+  liverBand_nfs_high: "สูงกว่า แนะนำพบแพทย์",
+  liverBand_fli_low: "โอกาสค่อนข้างต่ำ",
+  liverBand_fli_intermediate: "โอกาสปานกลาง",
+  liverBand_fli_high: "โอกาสสูงกว่า ควรปรึกษาแพทย์",
+  liverScoreInsufficient: "ข้อมูลยังไม่พอจะคำนวณ ขาด: {missing}",
+  liverScoreInvalid:
+    "ค่าที่ใช้ดูไม่สมเหตุสมผล ({fields}) ตรวจหน่วยและค่าที่สแกนมาอีกครั้ง",
+  liverFib4Over65: "อายุ 65 ปีขึ้นไป ใช้เกณฑ์ต่ำที่ 2.0",
+  liverFib4Under35: "อายุต่ำกว่า 35 ปี ค่านี้เชื่อถือได้น้อยลง",
+  liverInput_age: "อายุ (ปีเกิด)",
+  liverInput_bmi: "ส่วนสูงและน้ำหนัก",
+  liverInput_waist: "รอบเอว",
+  liverInput_glucoseOrDiabetes: "ข้อมูลเบาหวานหรือน้ำตาล",
+  liverInput_same_day: "ผลตรวจที่เก็บในวันเดียวกัน",
+  liverGapsTitle: "ข้อมูลที่ยังขาด",
+  liverGap_no_labs:
+    "ยังไม่มีผลตรวจเลือดในระบบ สแกนผลแล็บเพื่อให้ประเมินได้ละเอียดขึ้น",
+  liverGap_labs_too_old:
+    "ผลตรวจเลือดที่มีเก่ากว่า 1 ปี จึงไม่ถูกนำมาใช้ประเมิน",
+  liverGap_labs_stale:
+    "ผลตรวจเลือดล่าสุดเก่ากว่า 6 เดือน ควรถามแพทย์ว่าควรตรวจซ้ำเมื่อไร",
+  liverGap_fib4_missing:
+    "ยังคำนวณ FIB-4 ไม่ได้ เพราะขาด AST ALT หรือเกล็ดเลือดของวันเดียวกัน",
+  liverGap_hep_untested: "ยังไม่ทราบผลตรวจไวรัสตับอักเสบบีหรือซี",
+  liverGap_no_age: "ไม่มีปีเกิด จึงคำนวณดัชนีที่ใช้อายุไม่ได้",
+  liverQuestionsTitle: "คำถามที่ควรถามแพทย์",
+  liverQ_ultrasound: "ควรตรวจอัลตราซาวนด์ช่องท้องดูตับหรือไม่",
+  liverQ_elastography: "ควรตรวจวัดความยืดหยุ่นของตับ (FibroScan) หรือไม่",
+  liverQ_hepatitis_tests: "ควรตรวจไวรัสตับอักเสบบีและซีหรือไม่",
+  liverQ_hepatitis_vaccine: "ควรฉีดวัคซีนไวรัสตับอักเสบบีหรือไม่",
+  liverQ_repeat_labs: "ควรตรวจเลือดดูค่าตับซ้ำเมื่อไร",
+  liverQ_medicines_review:
+    "ยา สมุนไพร และอาหารเสริมที่ใช้อยู่ ต้องให้แพทย์หรือเภสัชกรทบทวนหรือไม่",
+  liverQ_alcohol_talk:
+    "การดื่มแอลกอฮอล์ของฉันเกี่ยวข้องกับสุขภาพตับอย่างไร และควรทำอย่างไร",
+  liverQ_metabolic_review:
+    "โรคประจำตัวและค่าน้ำตาล ไขมัน ที่ฉันมี ส่งผลต่อตับหรือไม่ และควรติดตามอย่างไร",
+  liverQ_symptoms_review: "อาการที่ฉันเลือกไว้ควรตรวจอะไรเพิ่มหรือไม่",
+  liverQ_family_screening:
+    "ประวัติโรคตับในครอบครัวทำให้ควรตรวจอะไรเพิ่มหรือไม่",
+  liverResultTitle: "ผลการประเมินความเสี่ยงตับเบื้องต้น",
+  liverResultNotFound: "ไม่พบผลการประเมินนี้",
+  liverBackToLiver: "กลับไปหน้าสุขภาพตับ",
+  liverPrepare: "เตรียมตัวก่อนพบแพทย์",
+  liverEngineNote: "คำนวณด้วยกฎในโค้ด เวอร์ชัน {engine} (ฉบับร่าง)",
+  liverHepTitle: "สถานะไวรัสตับอักเสบบี/ซี",
+  liverHepIntro:
+    "บันทึกผลตรวจที่คุณทราบ เป็นเพียงการบันทึกข้อมูลของคุณเอง ไม่ใช่การวินิจฉัย และไม่แทนผลตรวจจากสถานพยาบาล",
+  liverHepB: "ไวรัสตับอักเสบบี",
+  liverHepC: "ไวรัสตับอักเสบซี",
+  liverHepB_unknown: "ไม่ทราบ / จำไม่ได้",
+  liverHepB_never_tested: "ยังไม่เคยตรวจ",
+  liverHepB_negative: "เคยตรวจ ผลเป็นลบ",
+  liverHepB_positive: "เคยตรวจ ผลเป็นบวก",
+  liverHepB_vaccinated: "ฉีดวัคซีนแล้ว",
+  liverHepC_unknown: "ไม่ทราบ / จำไม่ได้",
+  liverHepC_never_tested: "ยังไม่เคยตรวจ",
+  liverHepC_negative: "เคยตรวจ ผลเป็นลบ",
+  liverHepC_positive: "เคยตรวจ ผลเป็นบวก",
+  liverHepTestedOn: "วันที่ตรวจ (ถ้าจำได้)",
+  liverHepSave: "บันทึก",
+  liverHepSaved: "บันทึกแล้ว",
+  liverHepPositiveNote:
+    "ถ้าผลเป็นบวก แพทย์เป็นผู้ประเมินและให้คำแนะนำ ควรนัดพบแพทย์ที่ติดตามเรื่องนี้ และไม่ควรเปลี่ยนแปลงยาด้วยตนเอง",
+  liverHepUntestedNote:
+    "ผู้ติดเชื้อไวรัสตับอักเสบจำนวนมากไม่มีอาการในระยะแรก การตรวจเลือดเป็นวิธีเดียวที่จะทราบ ถามแพทย์ว่าควรตรวจหรือไม่",
+  liverCheckTitle: "ตรวจความเสี่ยงตับเบื้องต้น",
+  liverCheckIntro:
+    "ตอบคำถามสั้น ๆ ราว 15 ข้อ ใช้เวลาประมาณ 3 นาที ผลที่ได้เป็นการคัดกรองและแนะนำขั้นต่อไป ไม่ใช่การวินิจฉัย",
+  liverStepOf: "ส่วนที่ {n} จาก {total}",
+  liverNext: "ถัดไป",
+  liverBack: "ย้อนกลับ",
+  liverSubmit: "ดูผลการประเมิน",
+  liverSubmitting: "กำลังประเมิน…",
+  liverSubmitUrgent: "บันทึกและดูคำแนะนำ",
+  liverStep_flags: "อาการที่ต้องระวัง",
+  liverStep_body: "ข้อมูลร่างกาย",
+  liverStep_health: "โรคประจำตัวและประวัติ",
+  liverStep_virus: "ไวรัสตับอักเสบ",
+  liverStep_life: "ชีวิตประจำวัน",
+  liverStep_symptoms: "อาการเรื้อรัง",
+  liverQ_flags: "ตอนนี้คุณมีอาการเหล่านี้ข้อใดบ้าง",
+  liverFlag_jaundice: "ตาหรือตัวเหลืองชัดเจน",
+  liverFlag_ruq_pain: "ปวดท้องด้านขวาบนรุนแรง",
+  liverFlag_gi_bleed: "อาเจียนเป็นเลือด หรือถ่ายอุจจาระสีดำ",
+  liverFlag_ascites_breathless: "ท้องบวมขึ้นเร็วร่วมกับหายใจลำบาก",
+  liverFlag_confusion: "สับสน หรือง่วงซึมผิดปกติ",
+  liverFlag_none: "ไม่มีอาการเหล่านี้",
+  liverQ_height: "ส่วนสูง (ซม.)",
+  liverQ_weight: "น้ำหนัก (กก.)",
+  liverQ_waist: "รอบเอว (ซม.) ถ้ามี",
+  liverBodyHint:
+    "ใช้คำนวณดัชนีมวลกายเพื่อดูปัจจัยเสี่ยงเท่านั้น ไม่ใช่เป้าหมายน้ำหนัก เว้นว่างได้ถ้าไม่สะดวก",
+  liverQ_birthYear: "ปีเกิด (ค.ศ.)",
+  liverQ_sex: "เพศ",
+  liverSex_female: "หญิง",
+  liverSex_male: "ชาย",
+  liverSexHint: "ใช้ดูเกณฑ์รอบเอวเท่านั้น",
+  liverQ_diabetes: "เป็นเบาหวาน หรือเคยได้รับแจ้งว่าน้ำตาลสูงหรือไม่",
+  liverQ_hypertension: "ความดันโลหิตสูงหรือไม่",
+  liverQ_dyslipidemia: "ไขมันในเลือดสูงหรือผิดปกติหรือไม่",
+  liverQ_history: "เคยได้รับแจ้งเรื่องต่อไปนี้หรือไม่",
+  liverHistory_told_fatty_liver: "มีไขมันในตับ",
+  liverHistory_abnormal_liver_tests: "ค่าตับในเลือดผิดปกติ",
+  liverHistory_liver_disease: "มีโรคตับ",
+  liverHistory_none: "ไม่เคยได้รับแจ้ง",
+  liverQ_family:
+    "ในครอบครัวสายตรง มีใครเคยได้รับการรักษาโรคตับหรือมะเร็งตับหรือไม่",
+  liverTri_yes: "ใช่",
+  liverTri_no: "ไม่ใช่",
+  liverTri_unsure: "ไม่แน่ใจ",
+  liverPrefilled: "เติมให้จากโปรไฟล์สุขภาพของคุณ แก้ได้",
+  liverQ_hepB: "ไวรัสตับอักเสบบี",
+  liverQ_hepC: "ไวรัสตับอักเสบซี",
+  liverVirusHint: "เลือกตามที่คุณทราบ การบันทึกนี้ไม่ใช่การวินิจฉัย",
+  liverQ_alcohol: "คุณดื่มแอลกอฮอล์บ่อยแค่ไหน",
+  liverQ_meds: "ใช้ยา สมุนไพร หรืออาหารเสริมเป็นประจำหรือไม่",
+  liverMedsHint:
+    "ตอบเพียงใช่หรือไม่ ไม่ต้องบอกชื่อ เราจะไม่แนะนำให้เริ่ม หยุด หรือเปลี่ยนยา ให้แพทย์หรือเภสัชกรเป็นผู้ทบทวน",
+  liverQ_symptoms: "มีอาการเรื้อรังเหล่านี้บ้างหรือไม่",
+  liverSymptom_dark_urine_pale_stool: "ปัสสาวะสีเข้ม หรืออุจจาระสีซีด",
+  liverSymptom_itching: "คันตามตัวโดยไม่มีผื่น",
+  liverSymptom_weight_loss: "น้ำหนักลดโดยไม่ได้ตั้งใจ",
+  liverSymptom_fatigue: "อ่อนเพลียเรื้อรัง",
+  liverSymptom_ruq_discomfort: "แน่นหรืออึดอัดบริเวณชายโครงขวา ท้องอืด",
+  liverSymptom_appetite_loss: "เบื่ออาหาร",
+  liverSymptom_none: "ไม่มีอาการเหล่านี้",
+  liverFlagsAlertTitle: "อาการนี้ไม่ควรรอ",
+  liverFlagsAlertBody:
+    "โทร 1669 หรือไปโรงพยาบาลที่ใกล้ที่สุดทันที เราจะข้ามคำถามที่เหลือ คุณบันทึกผลนี้ไว้ได้ด้านล่าง",
+  liverNeedLabs: "ยังไม่มีผลตรวจเลือด การสแกนผลแล็บจะทำให้ผลประเมินละเอียดขึ้น",
+  liverYearsHint: "ใช้คำนวณ FIB-4 ที่ต้องใช้อายุ",
+  liverBriefTitle: "เตรียมตัวก่อนพบแพทย์: สุขภาพตับ",
+  liverBriefIntro:
+    "สรุปจากข้อมูลที่คุณบันทึกไว้ ใช้เปิดให้แพทย์ดูหรือพิมพ์ไปได้ ไม่ใช่การวินิจฉัย",
+  liverBriefNoAssessment:
+    "ยังไม่เคยทำแบบประเมิน สรุปนี้แสดงเฉพาะผลตรวจเลือดที่มี",
+  liverBriefAssessment: "ผลประเมินล่าสุด",
+  liverBriefLabs: "ค่าตรวจเลือดที่เกี่ยวกับตับ",
+  liverBriefTrends: "แนวโน้ม",
+  liverBriefReported: "สิ่งที่ฉันบันทึกไว้",
+  liverBriefSymptoms: "อาการเรื้อรัง",
+  liverBriefMeds: "ยา สมุนไพร อาหารเสริม (ใช้เป็นประจำหรือไม่)",
+  liverBriefAlcohol: "แอลกอฮอล์",
+  liverBriefHistory: "เคยได้รับแจ้ง",
+  liverBriefFamily: "โรคตับในครอบครัว",
+  liverBriefHep: "ไวรัสตับอักเสบที่ฉันบันทึกไว้",
+  liverBriefNone: "ไม่มี",
+  liverBriefShare: "ส่งให้แพทย์ผ่านลิงก์ (พาสปอร์ตสุขภาพ)",
+  liverBriefShareHint:
+    "สร้างลิงก์ที่มีวันหมดอายุ โดยเลือกหัวข้อ “สุขภาพตับ” ไว้ให้แล้ว",
+  liverBriefPrint: "พิมพ์",
+  liverBriefDisclaimerShort:
+    "สรุปนี้เป็นข้อมูลที่ผู้ใช้บันทึกและการคัดกรองเบื้องต้น ไม่ใช่การวินิจฉัย",
+  passportSection_liver: "สุขภาพตับ",
+  passportSectionHint_liver:
+    "ผลประเมินล่าสุด ค่าตรวจที่เกี่ยวกับตับ แนวโน้ม FIB-4 และคำถามที่ควรถามแพทย์",
 } as const;
 
 export type Dict = { [K in keyof typeof th]: string };
@@ -4906,6 +5196,318 @@ const en = {
   navGroupCare: "Check-ups and advice",
   navGroupRewards: "Rewards and activities",
   navGroupShop: "Shop and family",
+  // ── liver health module
+  flag_liver_check: "Liver health (risk screening)",
+  err_liver_invalid: "Please answer every question and check the numbers.",
+  err_liver_limit:
+    "You have reached today's limit of checks. Try again tomorrow.",
+  err_liver_not_found: "That assessment was not found.",
+  navLiver: "Liver health",
+  liverTitle: "Liver health",
+  liverIntro:
+    "Early risk screening, a view of your liver blood tests over time, and a summary to take to your doctor. This is not a diagnosis.",
+  liverDisclaimer:
+    "This is a preliminary risk assessment based only on the information you gave. It is not a diagnosis. Please consult a doctor for proper examination and care.",
+  liverNotRuledOut:
+    "Finding no signs does not confirm that the liver is in good condition: many liver problems cause no symptoms or blood-test changes at first.",
+  liverDraftNote:
+    "The reference ranges and cut-offs in the liver section are drafts awaiting review by a liver specialist before launch.",
+  liverCall1669: "Call 1669 (medical emergency)",
+  liverStatusTitle: "Latest assessment",
+  liverStatusNone:
+    "You have not done the liver risk check yet. It takes about 3 minutes.",
+  liverStatusOn: "Assessed on {date}",
+  liverCheckCta: "Check my liver risk",
+  liverCheckAgain: "Check again",
+  liverSeeResult: "See the full result",
+  liverLabsTitle: "Latest liver-related blood tests",
+  liverLabsNone:
+    "No liver-related blood tests yet. Scan a lab report to start tracking.",
+  liverLabsScan: "Scan a lab report",
+  liverLabsOn: "{date}",
+  liverFib4Row: "FIB-4 (fibrosis risk screen)",
+  liverTrendTitle: "Liver-related trends",
+  liverTrendNone: "At least two results are needed to show a trend.",
+  liverTrendPick: "Choose a test",
+  liverTrendNote:
+    "A change was found in liver-related values. Consider taking this to your doctor.",
+  liverTrendRising: "{marker}: rising across several results",
+  liverTrendFalling: "{marker}: falling across several results",
+  liverTrendPersistent:
+    "{marker}: outside the reference range on consecutive results",
+  liverFib4TrendTitle: "FIB-4 over time",
+  liverFib4TrendHint:
+    "Calculated on every day that has AST, ALT and platelet results, using your age on that day.",
+  liverHepCardTitle: "Hepatitis B / C",
+  liverHepCardBody:
+    "Record whether you have been tested and the result you know.",
+  liverHepCardCta: "Record status",
+  liverBriefCardTitle: "Prepare for my liver check-up",
+  liverBriefCardBody:
+    "One page with your assessment, test values, trends and questions to ask your doctor.",
+  liverBriefCardCta: "Open the doctor summary",
+  liverHistoryTitle: "Assessment history",
+  liverHistoryRow: "{date} · {level}",
+  liverHistoryNote:
+    "Assessments are kept permanently for audit. They are removed with your account under My data.",
+  liverLevelShort_0: "Level 0 · no current concern",
+  liverLevelShort_1: "Level 1 · risk factors",
+  liverLevelShort_2: "Level 2 · needs follow-up",
+  liverLevelShort_3: "Level 3 · urgent",
+  liverLevel_0_title: "No urgent signs found for now",
+  liverLevel_0_body:
+    "Based on what you told us and the results on file, nothing needing prompt action was found.",
+  liverLevel_0_cta: "Carry on with routine care and your yearly check-up.",
+  liverLevel_1_title: "Some risk factors to keep an eye on",
+  liverLevel_1_body:
+    "Some factors linked to liver health were found. This is not urgent, but worth following regularly.",
+  liverLevel_1_cta:
+    "Keep following your liver health and consider tests as your doctor advises.",
+  liverLevel_2_title: "Worth seeing a doctor for a closer look",
+  liverLevel_2_body:
+    "Something in your information is worth a doctor's look (reasons below). This does not name any condition: only a doctor can decide.",
+  liverLevel_2_cta: "We recommend seeing a doctor for further assessment.",
+  liverUrgent_soon_title: "Should be assessed soon",
+  liverUrgent_soon_body:
+    "Some results are at a level that should not wait (reasons below). This does not name any condition, but a doctor should look at it soon.",
+  liverUrgent_soon_cta:
+    "See a doctor as soon as possible, and call 1669 if you have any of the emergency symptoms.",
+  liverUrgent_emergency_title:
+    "The symptoms you selected may need emergency care",
+  liverUrgent_emergency_body:
+    "Do not wait for an appointment or for more results.",
+  liverUrgent_emergency_cta:
+    "Call 1669 or go to the nearest hospital right away.",
+  liverReasonsTitle: "Why this level",
+  liverReason_rf_jaundice: "You selected clearly yellow eyes or skin.",
+  liverReason_rf_ruq_pain:
+    "You selected severe pain in the upper right abdomen.",
+  liverReason_rf_gi_bleed: "You selected vomiting blood or black stools.",
+  liverReason_rf_ascites_breathless:
+    "You selected a quickly swelling abdomen with trouble breathing.",
+  liverReason_rf_confusion: "You selected confusion or unusual drowsiness.",
+  liverReason_lab_severe:
+    "Some blood results are so high or low that they should not wait: {markers}",
+  liverReason_lab_out_of_range:
+    "Liver-related blood results outside the reference range: {markers}",
+  liverReason_fib4_intermediate:
+    "The FIB-4 value is in the range where doctors usually look further.",
+  liverReason_fib4_high:
+    "The FIB-4 value is above the range where doctors usually look further.",
+  liverReason_apri_high:
+    "The APRI value is in the range where doctors usually look further.",
+  liverReason_nfs_high:
+    "The NFS score is in the range where doctors usually look further.",
+  liverReason_hep_positive: "You recorded a positive hepatitis B or C test.",
+  liverReason_liver_history:
+    "You said you were told before that your liver tests were abnormal, or about a liver condition.",
+  liverReason_symptoms_specific:
+    "You have a symptom worth telling a doctor about, such as dark urine or pale stool, itching, or unintended weight loss.",
+  liverReason_many_factors: "Several risk factors are present together.",
+  liverFactorsTitle: "Factors noted",
+  liverFactor_body_size:
+    "Body mass index or waist above the Asian-adult threshold",
+  liverFactor_diabetes: "Diabetes",
+  liverFactor_hypertension: "High blood pressure",
+  liverFactor_dyslipidemia: "Abnormal blood fats",
+  liverFactor_metabolic_labs:
+    "Sugar or blood-fat results outside the reference range",
+  liverFactor_told_fatty_liver: "Previously told of fat in the liver",
+  liverFactor_alcohol_daily: "Alcohol almost daily",
+  liverFactor_family_history: "Liver disease or liver cancer in the family",
+  liverFactor_meds_herbs:
+    "Regular medicines, herbs or supplements (noted for your doctor to review)",
+  liverFactor_hep_b_cohort: "Born before 1992 and never tested for hepatitis B",
+  liverFactor_fli_high: "Fatty Liver Index in the higher range",
+  liverFactor_symptoms: "Chronic symptoms selected",
+  liverScoresTitle: "Screening indices",
+  liverScoresHint:
+    "These indices only help decide who should be looked at more closely. They are not a diagnosis, and they are calculated by formula in code, not by AI.",
+  liverScoreOn: "From results of {date}",
+  liverScore_fib4_name: "FIB-4",
+  liverScore_fib4_what:
+    "Uses age, AST, ALT and platelets to screen for the risk of advanced liver scarring.",
+  liverScore_apri_name: "APRI",
+  liverScore_apri_what:
+    "Uses AST and platelets as a second look alongside FIB-4.",
+  liverScore_nfs_name: "NFS",
+  liverScore_nfs_what:
+    "Uses age, BMI, sugar, AST, ALT, platelets and albumin; meant for people with metabolic risk factors.",
+  liverScore_fli_name: "FLI",
+  liverScore_fli_what:
+    "Uses triglycerides, GGT, BMI and waist to estimate the chance of extra fat in the liver.",
+  liverBand_fib4_low: "Relatively low · routine follow-up",
+  liverBand_fib4_intermediate: "Worth following up and seeing a doctor",
+  liverBand_fib4_high: "Higher · we recommend seeing a doctor soon",
+  liverBand_apri_low: "Relatively low",
+  liverBand_apri_intermediate: "In the middle range · worth following up",
+  liverBand_apri_high: "Higher · we recommend seeing a doctor",
+  liverBand_nfs_low: "Relatively low",
+  liverBand_nfs_intermediate: "In the middle range · worth following up",
+  liverBand_nfs_high: "Higher · we recommend seeing a doctor",
+  liverBand_fli_low: "Relatively low chance",
+  liverBand_fli_intermediate: "Moderate chance",
+  liverBand_fli_high: "Higher chance · worth discussing with a doctor",
+  liverScoreInsufficient: "Not enough data to calculate. Missing: {missing}",
+  liverScoreInvalid:
+    "A value looks implausible ({fields}). Check the unit and the scanned value.",
+  liverFib4Over65: "From age 65 the lower cut-off is 2.0.",
+  liverFib4Under35: "Under 35 this value is less reliable.",
+  liverInput_age: "age (birth year)",
+  liverInput_bmi: "height and weight",
+  liverInput_waist: "waist",
+  liverInput_glucoseOrDiabetes: "diabetes or sugar information",
+  liverInput_same_day: "results taken on the same day",
+  liverGapsTitle: "What is missing",
+  liverGap_no_labs:
+    "No blood results on file. Scan a lab report for a more detailed assessment.",
+  liverGap_labs_too_old:
+    "Your blood results are older than a year, so they were not used.",
+  liverGap_labs_stale:
+    "Your latest blood results are over 6 months old. Ask your doctor when to repeat them.",
+  liverGap_fib4_missing:
+    "FIB-4 cannot be calculated yet: AST, ALT and platelets from the same day are needed.",
+  liverGap_hep_untested: "Hepatitis B or C test status is not known yet.",
+  liverGap_no_age: "No birth year, so age-based indices cannot be calculated.",
+  liverQuestionsTitle: "Questions to ask your doctor",
+  liverQ_ultrasound:
+    "Should I have an abdominal ultrasound to look at the liver?",
+  liverQ_elastography: "Should I have a liver stiffness scan (FibroScan)?",
+  liverQ_hepatitis_tests: "Should I be tested for hepatitis B and C?",
+  liverQ_hepatitis_vaccine: "Should I have the hepatitis B vaccine?",
+  liverQ_repeat_labs: "When should the liver blood tests be repeated?",
+  liverQ_medicines_review:
+    "Should a doctor or pharmacist review the medicines, herbs and supplements I take?",
+  liverQ_alcohol_talk:
+    "How does my alcohol use relate to my liver health, and what should I do?",
+  liverQ_metabolic_review:
+    "Do my existing conditions and my sugar and blood-fat results affect the liver, and how should I follow them?",
+  liverQ_symptoms_review:
+    "Do the symptoms I selected call for any further tests?",
+  liverQ_family_screening:
+    "Does my family history of liver disease mean I should have any extra tests?",
+  liverResultTitle: "Liver risk screening result",
+  liverResultNotFound: "This assessment was not found.",
+  liverBackToLiver: "Back to liver health",
+  liverPrepare: "Prepare for my liver check-up",
+  liverEngineNote: "Calculated by rules in code, version {engine} (draft)",
+  liverHepTitle: "Hepatitis B / C status",
+  liverHepIntro:
+    "Record the test results you know. This is only a note of what you tell us; it is not a diagnosis and does not replace a clinic's results.",
+  liverHepB: "Hepatitis B",
+  liverHepC: "Hepatitis C",
+  liverHepB_unknown: "Don't know",
+  liverHepB_never_tested: "Never tested",
+  liverHepB_negative: "Tested, negative",
+  liverHepB_positive: "Tested, positive",
+  liverHepB_vaccinated: "Vaccinated",
+  liverHepC_unknown: "Don't know",
+  liverHepC_never_tested: "Never tested",
+  liverHepC_negative: "Tested, negative",
+  liverHepC_positive: "Tested, positive",
+  liverHepTestedOn: "Date of the test (if you remember)",
+  liverHepSave: "Save",
+  liverHepSaved: "Saved",
+  liverHepPositiveNote:
+    "If a result is positive, a doctor assesses and advises. Keep up with the doctor who follows this, and do not change any medicine on your own.",
+  liverHepUntestedNote:
+    "Many people with hepatitis have no symptoms at first and only a blood test shows it. Ask a doctor whether you should be tested.",
+  liverCheckTitle: "Liver risk check",
+  liverCheckIntro:
+    "About fifteen short questions, around 3 minutes. The result is a screening and a suggested next step, not a diagnosis.",
+  liverStepOf: "Part {n} of {total}",
+  liverNext: "Next",
+  liverBack: "Back",
+  liverSubmit: "See my result",
+  liverSubmitting: "Assessing…",
+  liverSubmitUrgent: "Save and see the advice",
+  liverStep_flags: "Warning symptoms",
+  liverStep_body: "About you",
+  liverStep_health: "Conditions and history",
+  liverStep_virus: "Hepatitis",
+  liverStep_life: "Daily life",
+  liverStep_symptoms: "Ongoing symptoms",
+  liverQ_flags: "Do you have any of these right now?",
+  liverFlag_jaundice: "Clearly yellow eyes or skin",
+  liverFlag_ruq_pain: "Severe pain in the upper right abdomen",
+  liverFlag_gi_bleed: "Vomiting blood, or black stools",
+  liverFlag_ascites_breathless:
+    "Quickly swelling abdomen with trouble breathing",
+  liverFlag_confusion: "Confusion or unusual drowsiness",
+  liverFlag_none: "None of these",
+  liverQ_height: "Height (cm)",
+  liverQ_weight: "Weight (kg)",
+  liverQ_waist: "Waist (cm), if you have it",
+  liverBodyHint:
+    "Used only to work out a risk factor, never as a weight target. Leave blank if you prefer.",
+  liverQ_birthYear: "Year of birth (CE)",
+  liverQ_sex: "Sex",
+  liverSex_female: "Female",
+  liverSex_male: "Male",
+  liverSexHint: "Used only for the waist threshold.",
+  liverQ_diabetes:
+    "Do you have diabetes, or were you told your blood sugar is high?",
+  liverQ_hypertension: "Do you have high blood pressure?",
+  liverQ_dyslipidemia: "Do you have high or abnormal blood fats?",
+  liverQ_history: "Have you ever been told any of these?",
+  liverHistory_told_fatty_liver: "Fat in the liver",
+  liverHistory_abnormal_liver_tests: "Abnormal liver blood tests",
+  liverHistory_liver_disease: "A liver condition",
+  liverHistory_none: "None of these",
+  liverQ_family:
+    "Does anyone in your close family have liver disease or liver cancer?",
+  liverTri_yes: "Yes",
+  liverTri_no: "No",
+  liverTri_unsure: "Not sure",
+  liverPrefilled: "Filled in from your health profile. You can change it.",
+  liverQ_hepB: "Hepatitis B",
+  liverQ_hepC: "Hepatitis C",
+  liverVirusHint:
+    "Choose what you know. This is only a record, not a diagnosis.",
+  liverQ_alcohol: "How often do you drink alcohol?",
+  liverQ_meds: "Do you regularly take medicines, herbs or supplements?",
+  liverMedsHint:
+    "Just yes or no, no names needed. We never advise starting, stopping or changing a medicine: a doctor or pharmacist reviews that.",
+  liverQ_symptoms: "Do you have any of these ongoing symptoms?",
+  liverSymptom_dark_urine_pale_stool: "Dark urine or pale stool",
+  liverSymptom_itching: "Itching all over without a rash",
+  liverSymptom_weight_loss: "Unintended weight loss",
+  liverSymptom_fatigue: "Long-lasting tiredness",
+  liverSymptom_ruq_discomfort:
+    "Fullness or discomfort under the right ribs, bloating",
+  liverSymptom_appetite_loss: "Loss of appetite",
+  liverSymptom_none: "None of these",
+  liverFlagsAlertTitle: "This should not wait",
+  liverFlagsAlertBody:
+    "Call 1669 or go to the nearest hospital right away. We skip the remaining questions; you can save this note below.",
+  liverNeedLabs:
+    "No blood results yet. Scanning a lab report makes the assessment more detailed.",
+  liverYearsHint: "Needed to calculate FIB-4, which uses age.",
+  liverBriefTitle: "Preparing for my liver check-up",
+  liverBriefIntro:
+    "A summary of what you recorded, to show or print for your doctor. It is not a diagnosis.",
+  liverBriefNoAssessment:
+    "No assessment done yet. This summary shows only the blood results on file.",
+  liverBriefAssessment: "Latest assessment",
+  liverBriefLabs: "Liver-related blood tests",
+  liverBriefTrends: "Trends",
+  liverBriefReported: "What I recorded",
+  liverBriefSymptoms: "Ongoing symptoms",
+  liverBriefMeds: "Medicines, herbs, supplements (regular use)",
+  liverBriefAlcohol: "Alcohol",
+  liverBriefHistory: "Previously told",
+  liverBriefFamily: "Liver disease in the family",
+  liverBriefHep: "Hepatitis status I recorded",
+  liverBriefNone: "None",
+  liverBriefShare: "Share with a doctor by link (Health passport)",
+  liverBriefShareHint:
+    "Creates a link with an expiry; the “Liver health” section is already ticked.",
+  liverBriefPrint: "Print",
+  liverBriefDisclaimerShort:
+    "This summary is user-recorded information and a preliminary screen, not a diagnosis.",
+  passportSection_liver: "Liver health",
+  passportSectionHint_liver:
+    "Latest assessment, liver-related tests, FIB-4 trend and questions to ask",
 } satisfies Dict;
 
 export const dict: Record<Lang, Dict> = { th, en };

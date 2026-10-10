@@ -55,6 +55,8 @@ export async function createPassportAction(
     const parsed = parsePassportForm(formData);
     if (!parsed.ok) return { error: parsed.error };
     const req = parsed.value;
+    // the liver section is a feature of its own: switched off, it cannot be shared either
+    if (req.sections.includes("liver")) await assertFeature("liver_check");
 
     const db = createAdminClient();
     const { count } = await db

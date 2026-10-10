@@ -1,6 +1,7 @@
 import { fmt, type Dict, type Lang } from "@/lib/i18n/dict";
 import { formatDate } from "@/lib/i18n/format";
 import type { PassportSnapshot } from "@/lib/passport/passport";
+import { BriefView } from "./liver/BriefView";
 import { LabStatusChip } from "./LabStatusChip";
 
 const minutesToHours = (m: number) =>
@@ -252,6 +253,15 @@ export function PassportView({
               }
             />
           </dl>
+        </section>
+      ) : null}
+
+      {s.liver ? (
+        <section className="space-y-2" aria-labelledby="pp-liver">
+          <h2 id="pp-liver" className="font-semibold">
+            {t.passportSection_liver}
+          </h2>
+          <BriefView t={t} lang={lang} brief={s.liver} today={s.generatedOn} />
         </section>
       ) : null}
 
