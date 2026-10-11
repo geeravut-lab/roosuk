@@ -45,7 +45,6 @@ export function validBrandName(raw: unknown): string | null {
   if (typeof raw !== "string") return null;
   const v = raw.normalize("NFC").replace(/\s+/g, " ").trim();
   if (v.length < 1 || v.length > MAX_NAME_CHARS) return null;
-  // eslint-disable-next-line no-control-regex
   if (/[<>\u0000-\u001f\u007f]/.test(v)) return null;
   return v;
 }
