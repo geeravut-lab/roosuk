@@ -72,6 +72,8 @@ Teal `#0A8FA3` (primary) · Mint `#2DD4A7` (secondary) · Sky Blue `#1E90FF` (ch
 - **Meal diary** : `meal_logs.meal_type` (breakfast/lunch/dinner/snack); logging food is always optional.
 - **Liver module** (`/liver`, flag `liver_check`, `docs/LIVER-MODULE.md`): rule-based screening, no AI; rows via `record_liver_assessment()`; the 🔒 items need hepatologist review before launch.
 - **Plans are editable** at `/admin/plans`: only differences from `src/config/plans.ts` are stored (`platform_settings.plan_specs`); read plan specs through `planSpec()` / `resolvePlanSpec()`, never `PLANS[...]` directly.
+- **Feature switches reach the menu**: a `NavItem` with `flags` is greyed out and not clickable when all its flags are off (`disabledNavHrefs`, passed by `(app)/layout.tsx`); the page itself must `notFound()` when its flag is off (never throw `assertFeature` from a page — that is for server actions).
+- **Branding** (`/admin/branding`, `src/lib/brand/`): the app name, logo and tab icon are admin-set. Never hard-code "รู้สุข"/"RooSuk" in UI text outside `dict.ts` (the name in the dictionary is swapped by `applyBrandNames` via `getT()`/`brandedDict()`); show the logo through `LogoMark` (`/brand/logo`). Settings are cached per server instance for 30 s, so a change shows within about a minute.
 - **Menu**: `src/config/nav.ts` is the one list; groups daily | data | care | rewards | shop | account; bottom bar = Today, Goals, Scan, Ask, More.
 
 ## Health guardrails (non-negotiable)
