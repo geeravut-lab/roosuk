@@ -43,6 +43,8 @@ interface AppShellProps {
   displayName: string;
   /** Unread in-app notifications (0 = none). */
   unreadCount?: number;
+  /** Menu hrefs whose feature the admin switched off: shown greyed out, not clickable. */
+  disabledHrefs?: readonly string[];
 }
 
 const linkBase =
@@ -61,8 +63,10 @@ export function AppShell({
   manualUrl,
   displayName,
   unreadCount = 0,
+  disabledHrefs = [],
 }: AppShellProps) {
   const { t } = useI18n();
+  const isOff = (href: string) => disabledHrefs.includes(href);
   const rawPath = usePathname();
   // /preview/* mirrors real pages for the layout tests; treat it like the page it mirrors.
   const pathname = rawPath.replace(/^\/preview(?=\/)/, "");
@@ -118,6 +122,19 @@ export function AppShell({
   const renderLink = (item: NavItem) => {
     const active = isActivePath(pathname, item.href);
     const Icon = item.icon;
+    if (isOff(item.href))
+      return (
+        <span
+          key={item.href}
+          aria-disabled="true"
+          data-nav-off=""
+          className={`${linkBase} text-muted cursor-not-allowed opacity-60 select-none`}
+        >
+          <Icon className="size-5 shrink-0" aria-hidden />
+          <span className="truncate">{t[item.label]}</span>
+          <span className="sr-only"> ({t.navDisabled})</span>
+        </span>
+      );
     return (
       <Link
         key={item.href}
@@ -278,6 +295,33 @@ export function AppShell({
           {primary.map((item, index) => {
             const active = isActivePath(pathname, item.href);
             const Icon = item.icon;
+            if (isOff(item.href)) {
+              const centre = index === CENTER_SLOT;
+              return (
+                <li
+                  key={item.href}
+                  className={centre ? "flex justify-center" : undefined}
+                >
+                  <span
+                    aria-disabled="true"
+                    data-nav-off=""
+                    className={`text-muted flex cursor-not-allowed flex-col items-center gap-0.5 text-xs font-medium opacity-60 select-none ${
+                      centre ? "-mt-5 pb-1.5" : "h-16 justify-center"
+                    }`}
+                  >
+                    {centre ? (
+                      <span className="bg-line ring-surface flex size-14 items-center justify-center rounded-full ring-4">
+                        <Icon className="size-7" aria-hidden />
+                      </span>
+                    ) : (
+                      <Icon className="size-6" aria-hidden />
+                    )}
+                    {t[item.label]}
+                    <span className="sr-only"> ({t.navDisabled})</span>
+                  </span>
+                </li>
+              );
+            }
             if (index === CENTER_SLOT) {
               return (
                 <li key={item.href} className="flex justify-center">

@@ -7,6 +7,7 @@ import { getBillingProfile } from "@/lib/billing/profile.server";
 import { startTrialIfEligible } from "@/lib/billing/trial.server";
 import { isConsentCurrent } from "@/lib/consent/consent";
 import { getLatestConsent } from "@/lib/consent/server";
+import { disabledNavHrefs } from "@/config/nav";
 import { loadPlatformSettings } from "@/lib/settings/server";
 import { createClient } from "@/lib/supabase/server";
 
@@ -58,6 +59,7 @@ export default async function AppLayout({
       manualUrl={settings.manualUrl}
       displayName={displayName}
       unreadCount={unread ?? 0}
+      disabledHrefs={disabledNavHrefs(settings.featureFlags)}
     >
       {children}
     </AppShell>

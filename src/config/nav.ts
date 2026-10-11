@@ -26,6 +26,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import type { Dict } from "@/lib/i18n/dict";
+import { isEnabled, type FeatureFlag, type FlagMap } from "@/lib/flags/flags";
 
 export type NavLabelKey = Extract<keyof Dict, `nav${string}`>;
 export type NavGroup =
@@ -36,6 +37,8 @@ export interface NavItem {
   label: NavLabelKey;
   icon: LucideIcon;
   group: NavGroup;
+  /** Feature switches behind this page: the entry is greyed out when ALL of them are off. */
+  flags?: readonly FeatureFlag[];
 }
 
 /**
@@ -47,23 +50,72 @@ export interface NavItem {
 export const NAV: readonly NavItem[] = [
   // ประจำวัน — what people open every day (the first four are the bottom bar)
   { href: "/today", label: "navToday", icon: House, group: "daily" },
-  { href: "/goals", label: "navGoals", icon: Target, group: "daily" },
-  { href: "/scan", label: "navScan", icon: Camera, group: "daily" },
+  {
+    href: "/goals",
+    label: "navGoals",
+    icon: Target,
+    group: "daily",
+    flags: ["goals"],
+  },
+  {
+    href: "/scan",
+    label: "navScan",
+    icon: Camera,
+    group: "daily",
+    flags: ["food_scan", "lab_scan", "body_scan"],
+  },
   { href: "/ask", label: "navAsk", icon: MessageCircleHeart, group: "daily" },
-  { href: "/agent", label: "navAgent", icon: Bot, group: "daily" },
+  {
+    href: "/agent",
+    label: "navAgent",
+    icon: Bot,
+    group: "daily",
+    flags: ["health_agent"],
+  },
   // ข้อมูลสุขภาพ — what the app keeps about you
   { href: "/timeline", label: "navTimeline", icon: ChartLine, group: "data" },
-  { href: "/report", label: "navReport", icon: FileChartColumn, group: "data" },
-  { href: "/vault", label: "navVault", icon: FolderLock, group: "data" },
-  { href: "/passport", label: "navPassport", icon: IdCard, group: "data" },
-  { href: "/wearables", label: "navWearables", icon: Watch, group: "data" },
+  {
+    href: "/report",
+    label: "navReport",
+    icon: FileChartColumn,
+    group: "data",
+    flags: ["monthly_report"],
+  },
+  {
+    href: "/vault",
+    label: "navVault",
+    icon: FolderLock,
+    group: "data",
+    flags: ["health_vault"],
+  },
+  {
+    href: "/passport",
+    label: "navPassport",
+    icon: IdCard,
+    group: "data",
+    flags: ["health_passport"],
+  },
+  {
+    href: "/wearables",
+    label: "navWearables",
+    icon: Watch,
+    group: "data",
+    flags: ["wearables"],
+  },
   // ตรวจประเมินและปรึกษา
-  { href: "/liver", label: "navLiver", icon: Activity, group: "care" },
+  {
+    href: "/liver",
+    label: "navLiver",
+    icon: Activity,
+    group: "care",
+    flags: ["liver_check"],
+  },
   {
     href: "/telepharmacy",
     label: "navTelepharmacy",
     icon: Stethoscope,
     group: "care",
+    flags: ["telepharmacy"],
   },
   // กิจกรรมและรางวัล
   {
@@ -80,9 +132,27 @@ export const NAV: readonly NavItem[] = [
   },
   { href: "/rewards", label: "navRewards", icon: Gift, group: "rewards" },
   // ร้านค้าและครอบครัว
-  { href: "/shop", label: "navShop", icon: ShoppingBag, group: "shop" },
-  { href: "/family", label: "navFamily", icon: UsersRound, group: "shop" },
-  { href: "/company", label: "navCompany", icon: Building2, group: "shop" },
+  {
+    href: "/shop",
+    label: "navShop",
+    icon: ShoppingBag,
+    group: "shop",
+    flags: ["marketplace"],
+  },
+  {
+    href: "/family",
+    label: "navFamily",
+    icon: UsersRound,
+    group: "shop",
+    flags: ["family"],
+  },
+  {
+    href: "/company",
+    label: "navCompany",
+    icon: Building2,
+    group: "shop",
+    flags: ["corporate"],
+  },
   // บัญชีและตั้งค่า
   {
     href: "/subscription",
@@ -97,10 +167,23 @@ export const NAV: readonly NavItem[] = [
     group: "account",
   },
   { href: "/profile", label: "navProfile", icon: UserRound, group: "account" },
-  { href: "/verify", label: "navVerify", icon: ShieldCheck, group: "account" },
+  {
+    href: "/verify",
+    label: "navVerify",
+    icon: ShieldCheck,
+    group: "account",
+    flags: ["ekyc"],
+  },
   { href: "/install", label: "navInstall", icon: Smartphone, group: "account" },
   { href: "/settings", label: "navSettings", icon: Settings, group: "account" },
 ];
+
+/** Hrefs of the menu entries whose feature switches are all off — shown greyed out and not clickable. */
+export function disabledNavHrefs(flags: FlagMap): string[] {
+  return NAV.filter(
+    (i) => i.flags && i.flags.every((f) => !isEnabled(flags, f)),
+  ).map((i) => i.href);
+}
 
 /** Bottom bar = first four items + a "More" button. */
 export const PRIMARY_NAV_COUNT = 4;

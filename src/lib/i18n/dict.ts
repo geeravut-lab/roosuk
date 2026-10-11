@@ -3170,6 +3170,7 @@ const th = {
   adminGroupAi: "AI และเนื้อหา",
   adminGroupSystem: "ระบบและการวิเคราะห์",
   adminTeleLicensesOpen: "ใบอนุญาตรอยืนยัน {n}",
+  navDisabled: "ปิดใช้งานชั่วคราว",
 } as const;
 
 export type Dict = { [K in keyof typeof th]: string };
@@ -6466,6 +6467,7 @@ const en = {
   adminGroupAi: "AI and content",
   adminGroupSystem: "System and analytics",
   adminTeleLicensesOpen: "{n} licences to verify",
+  navDisabled: "Temporarily unavailable",
 } satisfies Dict;
 
 export const dict: Record<Lang, Dict> = { th, en };

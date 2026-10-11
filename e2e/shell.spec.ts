@@ -132,6 +132,25 @@ test.describe("mobile layout (390×844)", () => {
     await expect(down).toHaveAttribute("data-visible", "true");
   });
 
+  test("a switched-off feature is greyed out and cannot be pressed", async ({
+    page,
+  }) => {
+    await page.goto(`${PREVIEW}?off=/goals,/scan,/liver`);
+    const bar = page.getByRole("navigation", { name: "เมนูด้านล่าง" });
+    // bottom bar: no link, a disabled placeholder with the same label
+    await expect(bar.getByRole("link", { name: "เป้าหมาย" })).toHaveCount(0);
+    await expect(bar.getByRole("link", { name: "สแกน" })).toHaveCount(0);
+    const goals = bar.locator("[data-nav-off]", { hasText: "เป้าหมาย" });
+    await expect(goals).toHaveAttribute("aria-disabled", "true");
+    await expect(bar.getByRole("link", { name: "วันนี้" })).toBeVisible();
+    // More sheet: same for the entries behind it
+    await page.getByRole("button", { name: "เพิ่มเติม" }).click();
+    const sheet = page.getByRole("dialog", { name: "เมนูทั้งหมด" });
+    await expect(sheet.getByRole("link", { name: "สุขภาพตับ" })).toHaveCount(0);
+    await expect(sheet.locator("[data-nav-off]")).toHaveCount(1);
+    await expect(sheet.getByRole("link", { name: "ตั้งค่า" })).toBeVisible();
+  });
+
   test("language switch works from the header", async ({ page }) => {
     await page.goto(PREVIEW);
     await page
@@ -182,6 +201,17 @@ test.describe("desktop layout (1280×800)", () => {
     await expect(
       aside.getByRole("link", { name: "คู่มือการใช้งาน" }),
     ).toBeVisible();
+  });
+
+  test("a switched-off feature is greyed out in the sidebar", async ({
+    page,
+  }) => {
+    await page.goto(`${PREVIEW}?off=/goals,/liver`);
+    const aside = page.getByRole("complementary");
+    await expect(aside.getByRole("link", { name: "เป้าหมาย" })).toHaveCount(0);
+    await expect(aside.getByRole("link", { name: "สุขภาพตับ" })).toHaveCount(0);
+    await expect(aside.locator("[data-nav-off]")).toHaveCount(2);
+    await expect(aside.getByRole("link", { name: "วันนี้" })).toBeVisible();
   });
 
   test("content column is capped so lines stay readable", async ({ page }) => {
