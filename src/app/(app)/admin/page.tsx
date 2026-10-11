@@ -16,6 +16,7 @@ import {
   Stethoscope,
   Tags,
   Timer,
+  Palette,
   ToggleLeft,
   type LucideIcon,
 } from "lucide-react";
@@ -135,6 +136,7 @@ export default async function AdminHome({ searchParams }: PageProps<"/admin">) {
           icon: ChartColumn,
           title: t.adminAnalyticsTitle,
         },
+        { href: "/admin/branding", icon: Palette, title: t.adminBrandTitle },
         { href: "/admin/rules", icon: Timer, title: t.adminRulesTitle },
         { href: "/admin/flags", icon: ToggleLeft, title: t.adminFlagsTitle },
       ],

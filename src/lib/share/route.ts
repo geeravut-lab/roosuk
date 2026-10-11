@@ -2,14 +2,14 @@ import "server-only";
 import type { NextRequest } from "next/server";
 import { trackEvent } from "@/lib/analytics/server";
 import { getConfiguredSiteUrl } from "@/lib/env";
-import { dict, isLang, type Dict } from "@/lib/i18n/dict";
-import { getT } from "@/lib/i18n/server";
+import { isLang, type Dict } from "@/lib/i18n/dict";
+import { brandedDict, getT } from "@/lib/i18n/server";
 import { siteHost } from "./share";
 
 /** Language for a card: an explicit ?lang=, else the visitor's cookie. */
 export async function cardDict(req: NextRequest): Promise<Dict> {
   const lang = req.nextUrl.searchParams.get("lang");
-  return isLang(lang) ? dict[lang] : getT();
+  return isLang(lang) ? brandedDict(lang) : getT();
 }
 
 export const cardHost = () => siteHost(getConfiguredSiteUrl());

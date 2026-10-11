@@ -1,4 +1,5 @@
 import "server-only";
+import { DEFAULT_BRAND, parseBrand, type Brand } from "@/lib/brand/brand";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { normalizeFlags, type FlagMap } from "@/lib/flags/flags";
 import { isValidPromptpayId } from "@/lib/billing/promptpay";
@@ -26,6 +27,8 @@ export interface PlatformSettings {
   paywallMode: PaywallMode;
   /** shipping fee and the free-shipping line of the marketplace */
   shop: ShopSettings;
+  /** app name (Thai/English), logo and tab icon set by the admin */
+  brand: Brand;
 }
 
 const DEFAULTS: PlatformSettings = {
@@ -36,6 +39,7 @@ const DEFAULTS: PlatformSettings = {
   rewards: DEFAULT_REWARD_SETTINGS,
   paywallMode: "ab",
   shop: DEFAULT_SHOP_SETTINGS,
+  brand: DEFAULT_BRAND,
 };
 
 const nonNegInt = (v: unknown, fallback: number): number => {
@@ -77,6 +81,7 @@ export async function loadPlatformSettings(): Promise<PlatformSettings> {
         billing: parseBillingSettings(data),
         rewards: parseRewardSettings(data),
         paywallMode: isPaywallMode(data?.paywall_ab) ? data.paywall_ab : "ab",
+        brand: parseBrand(data?.brand),
         shop: {
           shippingThb: nonNegInt(
             data?.shop_shipping_thb,

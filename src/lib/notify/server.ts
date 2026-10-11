@@ -1,6 +1,7 @@
 import "server-only";
 import { getConfiguredSiteUrl } from "@/lib/env";
-import { dict, isLang, type Lang } from "@/lib/i18n/dict";
+import { isLang, type Dict, type Lang } from "@/lib/i18n/dict";
+import { brandedDict } from "@/lib/i18n/server";
 import { addDays, bangkokDate } from "@/lib/health/dates";
 import { computeStreak } from "@/lib/health/streak";
 import { sweepOrphanFiles } from "@/lib/files/server";
@@ -63,7 +64,7 @@ async function userLang(userId: string): Promise<Lang> {
 /** Notice text in the recipient's own language. */
 export async function dictFor(userId: string) {
   const lang = await userLang(userId);
-  return { lang, t: dict[lang] };
+  return { lang, t: await brandedDict(lang) };
 }
 
 export async function notifyUser(
@@ -136,7 +137,7 @@ export async function notifyUser(
 
 /** Every admin except whoever caused the event. */
 export async function notifyAdmins(
-  build: (t: (typeof dict)[Lang], lang: Lang) => Notice,
+  build: (t: Dict, lang: Lang) => Notice,
   exceptUserId?: string,
 ): Promise<number> {
   try {

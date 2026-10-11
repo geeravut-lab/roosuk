@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
+import { notFound } from "next/navigation";
 import Link from "next/link";
 import { ChevronRight } from "lucide-react";
 import { WatchCard } from "@/components/WatchCard";
 import { requireUser } from "@/lib/auth/server";
-import { assertFeature, featureEnabled } from "@/lib/flags/server";
+import { featureEnabled } from "@/lib/flags/server";
 import { bangkokDate } from "@/lib/health/dates";
 import { daysBetween } from "@/lib/health/dates";
 import { fmt, type Dict } from "@/lib/i18n/dict";
@@ -17,7 +18,7 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function GoalsPage() {
-  await assertFeature("goals");
+  if (!(await featureEnabled("goals"))) notFound();
   await requireUser();
   const t = await getT();
   const today = bangkokDate(new Date());

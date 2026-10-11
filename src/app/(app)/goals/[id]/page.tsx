@@ -8,7 +8,7 @@ import {
 } from "@/app/actions/goals";
 import { SubmitButton } from "@/components/SubmitButton";
 import { requireUser } from "@/lib/auth/server";
-import { assertFeature } from "@/lib/flags/server";
+import { featureEnabled } from "@/lib/flags/server";
 import { addDays, bangkokDate, daysBetween } from "@/lib/health/dates";
 import { fmt, type Dict } from "@/lib/i18n/dict";
 import { getT } from "@/lib/i18n/server";
@@ -31,7 +31,7 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function GoalPage({ params }: PageProps<"/goals/[id]">) {
-  await assertFeature("goals");
+  if (!(await featureEnabled("goals"))) notFound();
   await requireUser();
   const { id } = await params;
   if (!/^[0-9a-f-]{36}$/i.test(id)) notFound();

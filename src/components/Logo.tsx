@@ -1,8 +1,9 @@
 import Image from "next/image";
 
 /**
- * Heart mark from the RooSuk logo (transparent PNG generated from
- * docs/RooSuk Logo.jpg by scripts/make-brand-assets.mjs).
+ * The app's logo. By default the heart mark from the RooSuk logo (transparent PNG generated
+ * from docs/RooSuk Logo.jpg by scripts/make-brand-assets.mjs); the admin can replace it
+ * at /admin/branding.
  */
 export function LogoMark({
   size = 36,
@@ -13,11 +14,15 @@ export function LogoMark({
 }) {
   return (
     <Image
-      src="/brand/logo-mark.png"
+      // /brand/logo is the admin's logo when one is set, else it sends the browser to the built-in mark
+      src="/brand/logo"
       alt=""
       width={size}
       height={size}
       priority={priority}
+      unoptimized
+      className="object-contain"
+      style={{ width: size, height: size }}
     />
   );
 }

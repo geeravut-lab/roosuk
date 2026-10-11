@@ -1,9 +1,14 @@
 import type { MetadataRoute } from "next";
+import { loadBrand } from "@/lib/brand/server";
 
-export default function manifest(): MetadataRoute.Manifest {
+export default async function manifest(): Promise<MetadataRoute.Manifest> {
+  const brand = await loadBrand();
+  const custom = brand.favicon
+    ? `/brand/favicon?v=${brand.favicon.version}`
+    : null;
   return {
-    name: "รู้สุข RooSuk",
-    short_name: "รู้สุข",
+    name: `${brand.nameTh} ${brand.nameEn}`,
+    short_name: brand.nameTh,
     description: "AI ที่รู้จักสุขภาพของคุณ",
     lang: "th",
     id: "/today",
@@ -30,15 +35,21 @@ export default function manifest(): MetadataRoute.Manifest {
         ],
       },
     ],
-    icons: [
-      { src: "/icons/icon-192.png", sizes: "192x192", type: "image/png" },
-      { src: "/icons/icon-512.png", sizes: "512x512", type: "image/png" },
-      {
-        src: "/icons/icon-maskable-512.png",
-        sizes: "512x512",
-        type: "image/png",
-        purpose: "maskable",
-      },
-    ],
+    // The admin's tab icon is a square PNG (192–1024 px), so it serves as both install sizes.
+    icons: custom
+      ? [
+          { src: custom, sizes: "192x192", type: "image/png" },
+          { src: custom, sizes: "512x512", type: "image/png" },
+        ]
+      : [
+          { src: "/icons/icon-192.png", sizes: "192x192", type: "image/png" },
+          { src: "/icons/icon-512.png", sizes: "512x512", type: "image/png" },
+          {
+            src: "/icons/icon-maskable-512.png",
+            sizes: "512x512",
+            type: "image/png",
+            purpose: "maskable",
+          },
+        ],
   };
 }

@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { requireUser } from "@/lib/auth/server";
-import { assertFeature } from "@/lib/flags/server";
+import { featureEnabled } from "@/lib/flags/server";
 import { getT } from "@/lib/i18n/server";
 import { isGoalKind } from "@/lib/goals/kinds";
 import { loadGoalProfile } from "@/lib/goals/server";
@@ -23,7 +23,7 @@ export async function generateMetadata({
 export default async function NewGoalPage({
   params,
 }: PageProps<"/goals/new/[kind]">) {
-  await assertFeature("goals");
+  if (!(await featureEnabled("goals"))) notFound();
   await requireUser();
   const { kind } = await params;
   if (!isGoalKind(kind)) notFound();

@@ -1026,7 +1026,7 @@ const th = {
   eventName_share_made: "แชร์การ์ด",
   adminAnalyticsHint: "ดูการใช้งานของผู้ใช้โดยรวม",
   adminFlagsHint:
-    "ปิดสวิตช์แล้วฟีเจอร์จะหยุดทำงานจริงที่ฝั่งเซิร์ฟเวอร์ มีผลภายใน 1 นาที",
+    "ปิดสวิตช์แล้วฟีเจอร์จะหยุดทำงานจริงที่ฝั่งเซิร์ฟเวอร์ และเมนูของฟีเจอร์นั้นจะเป็นสีเทากดไม่ได้ มีผลภายใน 1 นาที",
   adminFlagOn: "เปิดอยู่",
   adminFlagOff: "ปิดอยู่",
   adminFlagToggleOn: "เปิด",
@@ -3171,6 +3171,32 @@ const th = {
   adminGroupSystem: "ระบบและการวิเคราะห์",
   adminTeleLicensesOpen: "ใบอนุญาตรอยืนยัน {n}",
   navDisabled: "ปิดใช้งานชั่วคราว",
+  adminBrandTitle: "ชื่อและโลโก้แอป",
+  adminBrandHint:
+    "ตั้งชื่อแอป (ไทย/อังกฤษ) โลโก้ที่แสดงในแอปและหน้าเข้าสู่ระบบ และไอคอนบนแท็บเบราว์เซอร์ (favicon) การเปลี่ยนจะเห็นผลภายใน 1–2 นาที",
+  adminBrandNameTh: "ชื่อแอป (ไทย)",
+  adminBrandNameEn: "ชื่อแอป (อังกฤษ)",
+  adminBrandNameHint:
+    "ไม่เกิน 40 ตัวอักษร ชื่อนี้จะแทนที่ชื่อเดิมทุกที่ในแอป ข้อความแจ้งเตือน และไอคอนติดตั้ง",
+  adminBrandLogo: "โลโก้",
+  adminBrandLogoHint:
+    "PNG, JPEG หรือ WebP ไม่เกิน 1 MB — แนะนำภาพสี่เหลี่ยมจัตุรัสพื้นโปร่งใส แสดงที่หน้าเข้าสู่ระบบ เมนู และหน้าแรก",
+  adminBrandFavicon: "ไอคอนแท็บเบราว์เซอร์ (favicon)",
+  adminBrandFaviconHint:
+    "PNG สี่เหลี่ยมจัตุรัส ขนาด 192–1024 px ไม่เกิน 512 KB — ใช้เป็นไอคอนติดตั้งบนมือถือด้วย",
+  adminBrandCurrent: "กำลังใช้",
+  adminBrandDefault: "ค่าเริ่มต้น (รู้สุข)",
+  adminBrandRemove: "กลับไปใช้ภาพเดิม",
+  adminBrandSave: "บันทึก",
+  adminBrandSaved: "บันทึกแล้ว — จะเห็นผลภายใน 1–2 นาที",
+  err_brand_name: "ชื่อต้องยาว 1–40 ตัวอักษร และห้ามมี < >",
+  err_brand_logo_type: "โลโก้ต้องเป็น PNG, JPEG หรือ WebP",
+  err_brand_logo_big: "โลโก้ใหญ่เกิน 1 MB",
+  err_brand_favicon_type: "ไอคอนแท็บต้องเป็นไฟล์ PNG",
+  err_brand_favicon_big: "ไอคอนแท็บใหญ่เกิน 512 KB",
+  err_brand_favicon_square: "ไอคอนแท็บต้องเป็นสี่เหลี่ยมจัตุรัส (กว้าง = สูง)",
+  err_brand_favicon_small: "ไอคอนแท็บต้องกว้างอย่างน้อย 192 px",
+  err_brand_favicon_large: "ไอคอนแท็บต้องไม่เกิน 1024 px",
 } as const;
 
 export type Dict = { [K in keyof typeof th]: string };
@@ -4216,7 +4242,7 @@ const en = {
   eventName_share_made: "Shared a card",
   adminAnalyticsHint: "How people use the app overall",
   adminFlagsHint:
-    "Turning a switch off stops the feature on the server, not just in the UI. Takes effect within 1 minute.",
+    "Turning a switch off stops the feature on the server, not just in the UI, and greys out its menu entry so it cannot be opened. Takes effect within 1 minute.",
   adminFlagOn: "On",
   adminFlagOff: "Off",
   adminFlagToggleOn: "Turn on",
@@ -6468,6 +6494,32 @@ const en = {
   adminGroupSystem: "System and analytics",
   adminTeleLicensesOpen: "{n} licences to verify",
   navDisabled: "Temporarily unavailable",
+  adminBrandTitle: "App name and logo",
+  adminBrandHint:
+    "Set the app name (Thai/English), the logo shown in the app and on the sign-in page, and the browser-tab icon (favicon). Changes appear within a minute or two.",
+  adminBrandNameTh: "App name (Thai)",
+  adminBrandNameEn: "App name (English)",
+  adminBrandNameHint:
+    "Up to 40 characters. It replaces the original name everywhere in the app, in notifications and on the install icon.",
+  adminBrandLogo: "Logo",
+  adminBrandLogoHint:
+    "PNG, JPEG or WebP, up to 1 MB — a square image on a transparent background works best. Shown on the sign-in page, the menu and the home page.",
+  adminBrandFavicon: "Browser-tab icon (favicon)",
+  adminBrandFaviconHint:
+    "A square PNG, 192–1024 px, up to 512 KB — it is also the install icon on phones.",
+  adminBrandCurrent: "Current",
+  adminBrandDefault: "Built-in (RooSuk)",
+  adminBrandRemove: "Go back to the built-in picture",
+  adminBrandSave: "Save",
+  adminBrandSaved: "Saved — it shows within a minute or two.",
+  err_brand_name: "A name must be 1–40 characters and cannot contain < >.",
+  err_brand_logo_type: "The logo must be a PNG, JPEG or WebP.",
+  err_brand_logo_big: "The logo is over 1 MB.",
+  err_brand_favicon_type: "The tab icon must be a PNG file.",
+  err_brand_favicon_big: "The tab icon is over 512 KB.",
+  err_brand_favicon_square: "The tab icon must be square (width = height).",
+  err_brand_favicon_small: "The tab icon must be at least 192 px wide.",
+  err_brand_favicon_large: "The tab icon must be at most 1024 px wide.",
 } satisfies Dict;
 
 export const dict: Record<Lang, Dict> = { th, en };

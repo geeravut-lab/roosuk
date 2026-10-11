@@ -305,3 +305,28 @@ describe("plan_specs (admin-edited plan details)", () => {
     ).toBe(true);
   });
 });
+
+describe("brand (admin-set app name and pictures)", () => {
+  it("is an empty object by default, must stay an object, and users cannot write it", async () => {
+    await actAsOwner(db);
+    const row = (
+      await db.query<{ brand: unknown }>(
+        "select brand from public.platform_settings",
+      )
+    ).rows[0];
+    expect(row.brand).toEqual({});
+    expect(
+      await isRejected(
+        db,
+        "update public.platform_settings set brand = '[]'::jsonb",
+      ),
+    ).toBe(true);
+    await actAs(db, alice);
+    expect(
+      await isRejected(
+        db,
+        `update public.platform_settings set brand = '{"name_en":"X"}'::jsonb`,
+      ),
+    ).toBe(true);
+  });
+});
